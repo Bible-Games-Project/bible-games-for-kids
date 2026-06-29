@@ -26,8 +26,8 @@ interface Props {
 }
 
 const ASPECT = 896 / 1152; // image width / height
-// Tab depth as fraction of the smaller piece side
-const TAB_RATIO = 0.22;
+// Tab depth as fraction of the smaller piece side — smaller = subtler tabs
+const TAB_RATIO = 0.16;
 
 // ---------- Audio ----------
 const playDing = () => {
@@ -80,35 +80,101 @@ const playWin = () => {
 };
 
 // ---------- Jigsaw edge generation ----------
-// Edge sign convention: +1 = bulge outward (tab); -1 = bulge inward (socket); 0 = flat (board border).
-// Edge segments are built relative; each edge function returns SVG path commands.
+// Each shared boundary stores a shape descriptor; both adjacent pieces draw the same
+// physical curve, just with opposite "outward" sign so tabs and sockets interlock.
+//
+// Shape parameters (per edge, jittered for variation):
+//   sign  : +1 bulge in +x / +y direction, -1 in -x / -y, 0 = flat border
+//   neck  : half-width of the neck as fraction of edge length L (~0.10..0.13)
+//   over  : how far past the neck the bulb overshoots, fraction of L (~0.08..0.13)
+//   depth : tab depth multiplier (~0.92..1.05)
+//   shift : bulb center offset along the edge from midpoint (~ -0.04..+0.04)
+interface EdgeShape {
+  sign: number;
+  neck: number;
+  over: number;
+  depth: number;
+  shift: number;
+}
 
-const edgeRight = (L: number, T: number, s: number) => {
-  if (s === 0) return `l ${L} 0`;
-  const y = -s * T; // outward = -y
-  return `l ${L * 0.25} 0 c ${-L * 0.05} ${y * 1.8} ${L * 0.55} ${y * 1.8} ${L * 0.5} 0 l ${L * 0.25} 0`;
+const FLAT: EdgeShape = { sign: 0, neck: 0, over: 0, depth: 0, shift: 0 };
+
+const randEdge = (): EdgeShape => ({
+  sign: Math.random() < 0.5 ? -1 : 1,
+  neck: 0.10 + Math.random() * 0.035,
+  over: 0.085 + Math.random() * 0.05,
+  depth: 0.92 + Math.random() * 0.14,
+  shift: (Math.random() - 0.5) * 0.07,
+});
+
+// Edge moving along +x, "outward" = -y.
+// We draw: straight pre-line, single cubic bulb (control points overshoot past
+// the neck endpoints to create the classic narrow-neck / wide-bulb silhouette),
+// straight post-line.
+const edgeRight = (L: number, T: number, e: EdgeShape) => {
+  if (e.sign === 0) return `l ${L} 0`;
+  const cx = L * (0.5 + e.shift);
+  const preEnd = cx - L * e.neck;
+  const postStart = cx + L * e.neck;
+  const span = postStart - preEnd;
+  // Cubic peak ≈ 0.75 * control y, so scale control to land at desired depth.
+  const cpY = (-e.sign * T * e.depth) / 0.75;
+  return (
+    `l ${preEnd} 0 ` +
+    `c ${-L * e.over} ${cpY} ${span + L * e.over} ${cpY} ${span} 0 ` +
+    `l ${L - postStart} 0`
+  );
 };
-const edgeDown = (L: number, T: number, s: number) => {
-  if (s === 0) return `l 0 ${L}`;
-  const x = s * T; // outward = +x
-  return `l 0 ${L * 0.25} c ${x * 1.8} ${-L * 0.05} ${x * 1.8} ${L * 0.55} 0 ${L * 0.5} l 0 ${L * 0.25}`;
+
+const edgeDown = (L: number, T: number, e: EdgeShape) => {
+  if (e.sign === 0) return `l 0 ${L}`;
+  const cy = L * (0.5 + e.shift);
+  const preEnd = cy - L * e.neck;
+  const postStart = cy + L * e.neck;
+  const span = postStart - preEnd;
+  const cpX = (e.sign * T * e.depth) / 0.75;
+  return (
+    `l 0 ${preEnd} ` +
+    `c ${cpX} ${-L * e.over} ${cpX} ${span + L * e.over} 0 ${span} ` +
+    `l 0 ${L - postStart}`
+  );
 };
-const edgeLeft = (L: number, T: number, s: number) => {
-  if (s === 0) return `l ${-L} 0`;
-  const y = s * T; // outward (going -x, outward = +y)
-  return `l ${-L * 0.25} 0 c ${L * 0.05} ${y * 1.8} ${-L * 0.55} ${y * 1.8} ${-L * 0.5} 0 l ${-L * 0.25} 0`;
+
+// edgeLeft traces the physical edge backwards relative to edgeRight, so the
+// "shift" sign is flipped to keep the bulb at the same physical position.
+const edgeLeft = (L: number, T: number, e: EdgeShape) => {
+  if (e.sign === 0) return `l ${-L} 0`;
+  const cx = L * (0.5 - e.shift);
+  const preEnd = cx - L * e.neck;
+  const postStart = cx + L * e.neck;
+  const span = postStart - preEnd;
+  const cpY = (e.sign * T * e.depth) / 0.75;
+  return (
+    `l ${-preEnd} 0 ` +
+    `c ${L * e.over} ${cpY} ${-(span + L * e.over)} ${cpY} ${-span} 0 ` +
+    `l ${-(L - postStart)} 0`
+  );
 };
-const edgeUp = (L: number, T: number, s: number) => {
-  if (s === 0) return `l 0 ${-L}`;
-  const x = -s * T; // outward (going -y, outward = -x)
-  return `l 0 ${-L * 0.25} c ${x * 1.8} ${L * 0.05} ${x * 1.8} ${-L * 0.55} 0 ${-L * 0.5} l 0 ${-L * 0.25}`;
+
+const edgeUp = (L: number, T: number, e: EdgeShape) => {
+  if (e.sign === 0) return `l 0 ${-L}`;
+  const cy = L * (0.5 - e.shift);
+  const preEnd = cy - L * e.neck;
+  const postStart = cy + L * e.neck;
+  const span = postStart - preEnd;
+  const cpX = (-e.sign * T * e.depth) / 0.75;
+  return (
+    `l 0 ${-preEnd} ` +
+    `c ${cpX} ${L * e.over} ${cpX} ${-(span + L * e.over)} 0 ${-span} ` +
+    `l 0 ${-(L - postStart)}`
+  );
 };
 
 const buildPiecePath = (
   W: number,
   H: number,
   T: number,
-  edges: { top: number; right: number; bottom: number; left: number },
+  edges: { top: EdgeShape; right: EdgeShape; bottom: EdgeShape; left: EdgeShape },
 ) =>
   [
     `M ${T} ${T}`,
@@ -134,29 +200,31 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     return arr.sort(() => Math.random() - 0.5);
   });
 
-  // Edges between cells. +1 / -1. Stable for this puzzle instance.
+  // One EdgeShape per shared boundary. Adjacent pieces read the same descriptor
+  // and only flip the sign so their tab+socket interlock perfectly.
   const edgeData = useMemo(() => {
-    const rand = () => (Math.random() < 0.5 ? -1 : 1);
-    const eH: number[][] = []; // rows-1 rows × cols cols
+    const eH: EdgeShape[][] = [];
     for (let r = 0; r < puzzle.rows - 1; r++) {
-      const row: number[] = [];
-      for (let c = 0; c < puzzle.cols; c++) row.push(rand());
+      const row: EdgeShape[] = [];
+      for (let c = 0; c < puzzle.cols; c++) row.push(randEdge());
       eH.push(row);
     }
-    const eV: number[][] = []; // rows rows × cols-1 cols
+    const eV: EdgeShape[][] = [];
     for (let r = 0; r < puzzle.rows; r++) {
-      const row: number[] = [];
-      for (let c = 0; c < puzzle.cols - 1; c++) row.push(rand());
+      const row: EdgeShape[] = [];
+      for (let c = 0; c < puzzle.cols - 1; c++) row.push(randEdge());
       eV.push(row);
     }
     return { eH, eV };
   }, [puzzle.id, puzzle.rows, puzzle.cols]);
 
+  const flipSign = (e: EdgeShape): EdgeShape => ({ ...e, sign: -e.sign });
+
   const edgesFor = (r: number, c: number) => ({
-    top: r === 0 ? 0 : -edgeData.eH[r - 1][c],
-    bottom: r === puzzle.rows - 1 ? 0 : edgeData.eH[r][c],
-    left: c === 0 ? 0 : -edgeData.eV[r][c - 1],
-    right: c === puzzle.cols - 1 ? 0 : edgeData.eV[r][c],
+    top: r === 0 ? FLAT : flipSign(edgeData.eH[r - 1][c]),
+    bottom: r === puzzle.rows - 1 ? FLAT : edgeData.eH[r][c],
+    left: c === 0 ? FLAT : flipSign(edgeData.eV[r][c - 1]),
+    right: c === puzzle.cols - 1 ? FLAT : edgeData.eV[r][c],
   });
 
   const [drag, setDrag] = useState<DragState | null>(null);
