@@ -27,7 +27,7 @@ interface Props {
 
 const ASPECT = 896 / 1152; // image width / height
 // Tab depth as fraction of the smaller piece side — smaller = subtler tabs
-const TAB_RATIO = 0.16;
+const TAB_RATIO = 0.15;
 
 // ---------- Audio ----------
 const playDing = () => {
@@ -80,93 +80,124 @@ const playWin = () => {
 };
 
 // ---------- Jigsaw edge generation ----------
-// Each shared boundary stores a shape descriptor; both adjacent pieces draw the same
-// physical curve, just with opposite "outward" sign so tabs and sockets interlock.
+// Each shared boundary stores one EdgeShape; the two adjacent pieces draw the
+// SAME physical curve — one piece traverses it forward (edgeRight / edgeDown),
+// the neighbor traverses it backward (edgeLeft / edgeUp). The only difference
+// is the `sign`, which is flipped so one side bulges out (tab) and the other
+// curves in (socket). All shape parameters are split into left/right halves
+// so each bulb can be subtly asymmetric while still interlocking perfectly.
 //
-// Shape parameters (per edge, jittered for variation):
-//   sign  : +1 bulge in +x / +y direction, -1 in -x / -y, 0 = flat border
-//   neck  : half-width of the neck as fraction of edge length L (~0.10..0.13)
-//   over  : how far past the neck the bulb overshoots, fraction of L (~0.08..0.13)
-//   depth : tab depth multiplier (~0.92..1.05)
-//   shift : bulb center offset along the edge from midpoint (~ -0.04..+0.04)
+//   sign        : +1 / -1 bulge direction, 0 = flat border
+//   shift       : bulb center offset along the edge from midpoint (~ -0.05..+0.05)
+//   neckL/neckR : neck half-widths on each side of the bulb center (fraction of L)
+//   overL/overR : how far the cubic control points overshoot past the neck (fraction of L)
+//   depthL/depthR : cubic control-point depth multipliers on each side of the bulb
 interface EdgeShape {
   sign: number;
-  neck: number;
-  over: number;
-  depth: number;
   shift: number;
+  neckL: number;
+  neckR: number;
+  overL: number;
+  overR: number;
+  depthL: number;
+  depthR: number;
 }
 
-const FLAT: EdgeShape = { sign: 0, neck: 0, over: 0, depth: 0, shift: 0 };
+const FLAT: EdgeShape = {
+  sign: 0, shift: 0, neckL: 0, neckR: 0, overL: 0, overR: 0, depthL: 0, depthR: 0,
+};
 
-const randEdge = (): EdgeShape => ({
-  sign: Math.random() < 0.5 ? -1 : 1,
-  neck: 0.10 + Math.random() * 0.035,
-  over: 0.085 + Math.random() * 0.05,
-  depth: 0.92 + Math.random() * 0.14,
-  shift: (Math.random() - 0.5) * 0.07,
-});
+const jitter = (base: number, spread: number) => base + (Math.random() - 0.5) * spread;
 
-// Edge moving along +x, "outward" = -y.
-// We draw: straight pre-line, single cubic bulb (control points overshoot past
-// the neck endpoints to create the classic narrow-neck / wide-bulb silhouette),
-// straight post-line.
+const randEdge = (): EdgeShape => {
+  // Pick a base "character" so different boundaries vary noticeably:
+  // some bulbs are narrow & tall, others wider & shorter.
+  const character = Math.random();
+  const baseNeck = 0.085 + character * 0.045;          // 0.085..0.13
+  const baseOver = 0.06 + (1 - character) * 0.08;      // 0.06..0.14  (narrower neck → wider overshoot)
+  const baseDepth = 0.92 + Math.random() * 0.18;       // 0.92..1.10
+  return {
+    sign: Math.random() < 0.5 ? -1 : 1,
+    shift: (Math.random() - 0.5) * 0.09,
+    neckL: jitter(baseNeck, 0.03),
+    neckR: jitter(baseNeck, 0.03),
+    overL: Math.max(0.025, jitter(baseOver, 0.05)),
+    overR: Math.max(0.025, jitter(baseOver, 0.05)),
+    depthL: Math.max(0.7, jitter(baseDepth, 0.14)),
+    depthR: Math.max(0.7, jitter(baseDepth, 0.14)),
+  };
+};
+
+// Cubic peak sits at ~0.75 of control-point depth, so divide to land on target.
+const PEAK = 0.75;
+
+// Traverses the edge in the +x direction; "outward" = -y * sign.
 const edgeRight = (L: number, T: number, e: EdgeShape) => {
   if (e.sign === 0) return `l ${L} 0`;
   const cx = L * (0.5 + e.shift);
-  const preEnd = cx - L * e.neck;
-  const postStart = cx + L * e.neck;
+  const preEnd = cx - L * e.neckL;
+  const postStart = cx + L * e.neckR;
   const span = postStart - preEnd;
-  // Cubic peak ≈ 0.75 * control y, so scale control to land at desired depth.
-  const cpY = (-e.sign * T * e.depth) / 0.75;
+  const cpYL = (-e.sign * T * e.depthL) / PEAK;
+  const cpYR = (-e.sign * T * e.depthR) / PEAK;
   return (
     `l ${preEnd} 0 ` +
-    `c ${-L * e.over} ${cpY} ${span + L * e.over} ${cpY} ${span} 0 ` +
+    `c ${-L * e.overL} ${cpYL} ${span + L * e.overR} ${cpYR} ${span} 0 ` +
     `l ${L - postStart} 0`
   );
 };
 
+// Same physical curve as edgeRight, traversed in the -x direction.
+// The pre/post sections and the cubic control points are swapped so the curve
+// is identical to its neighbour's edgeRight output (with opposite sign).
+const edgeLeft = (L: number, T: number, e: EdgeShape) => {
+  if (e.sign === 0) return `l ${-L} 0`;
+  const cx = L * (0.5 + e.shift);
+  const preEnd = cx - L * e.neckL;
+  const postStart = cx + L * e.neckR;
+  const span = postStart - preEnd;
+  // When traversing backward, outward (-y in the right frame) flips to +y here,
+  // because we want to draw the very same physical curve. Sign of cpY stays as
+  // in edgeRight relative to the canonical frame, which means we negate it.
+  const cpYL = (e.sign * T * e.depthL) / PEAK;
+  const cpYR = (e.sign * T * e.depthR) / PEAK;
+  return (
+    `l ${-(L - postStart)} 0 ` +
+    // Reversed cubic: from postStart back to preEnd, controls swapped (R then L).
+    `c ${L * e.overR} ${cpYR} ${-(span + L * e.overL)} ${cpYL} ${-span} 0 ` +
+    `l ${-preEnd} 0`
+  );
+};
+
+// Same as edgeRight but rotated 90° clockwise: traverses +y, outward = +x * sign.
 const edgeDown = (L: number, T: number, e: EdgeShape) => {
   if (e.sign === 0) return `l 0 ${L}`;
   const cy = L * (0.5 + e.shift);
-  const preEnd = cy - L * e.neck;
-  const postStart = cy + L * e.neck;
+  const preEnd = cy - L * e.neckL;
+  const postStart = cy + L * e.neckR;
   const span = postStart - preEnd;
-  const cpX = (e.sign * T * e.depth) / 0.75;
+  const cpXL = (e.sign * T * e.depthL) / PEAK;
+  const cpXR = (e.sign * T * e.depthR) / PEAK;
   return (
     `l 0 ${preEnd} ` +
-    `c ${cpX} ${-L * e.over} ${cpX} ${span + L * e.over} 0 ${span} ` +
+    `c ${cpXL} ${-L * e.overL} ${cpXR} ${span + L * e.overR} 0 ${span} ` +
     `l 0 ${L - postStart}`
   );
 };
 
-// edgeLeft traces the physical edge backwards relative to edgeRight, so the
-// "shift" sign is flipped to keep the bulb at the same physical position.
-const edgeLeft = (L: number, T: number, e: EdgeShape) => {
-  if (e.sign === 0) return `l ${-L} 0`;
-  const cx = L * (0.5 - e.shift);
-  const preEnd = cx - L * e.neck;
-  const postStart = cx + L * e.neck;
-  const span = postStart - preEnd;
-  const cpY = (e.sign * T * e.depth) / 0.75;
-  return (
-    `l ${-preEnd} 0 ` +
-    `c ${L * e.over} ${cpY} ${-(span + L * e.over)} ${cpY} ${-span} 0 ` +
-    `l ${-(L - postStart)} 0`
-  );
-};
-
+// Reverse of edgeDown.
 const edgeUp = (L: number, T: number, e: EdgeShape) => {
   if (e.sign === 0) return `l 0 ${-L}`;
-  const cy = L * (0.5 - e.shift);
-  const preEnd = cy - L * e.neck;
-  const postStart = cy + L * e.neck;
+  const cy = L * (0.5 + e.shift);
+  const preEnd = cy - L * e.neckL;
+  const postStart = cy + L * e.neckR;
   const span = postStart - preEnd;
-  const cpX = (-e.sign * T * e.depth) / 0.75;
+  const cpXL = (-e.sign * T * e.depthL) / PEAK;
+  const cpXR = (-e.sign * T * e.depthR) / PEAK;
   return (
-    `l 0 ${-preEnd} ` +
-    `c ${cpX} ${L * e.over} ${cpX} ${-(span + L * e.over)} 0 ${-span} ` +
-    `l 0 ${-(L - postStart)}`
+    `l 0 ${-(L - postStart)} ` +
+    `c ${cpXR} ${L * e.overR} ${cpXL} ${-(span + L * e.overL)} 0 ${-span} ` +
+    `l 0 ${-preEnd}`
   );
 };
 
