@@ -113,18 +113,21 @@ const randEdge = (): EdgeShape => {
   // Pick a base "character" so different boundaries vary noticeably:
   // some bulbs are narrow & tall, others wider & shorter.
   const character = Math.random();
-  const baseNeck = 0.085 + character * 0.045;          // 0.085..0.13
-  const baseOver = 0.06 + (1 - character) * 0.08;      // 0.06..0.14  (narrower neck → wider overshoot)
-  const baseDepth = 0.92 + Math.random() * 0.18;       // 0.92..1.10
+  const baseNeck = 0.075 + character * 0.06;           // 0.075..0.135
+  const baseOver = 0.055 + (1 - character) * 0.095;    // 0.055..0.15  (narrower neck → wider overshoot)
+  const baseDepth = 0.88 + Math.random() * 0.26;       // 0.88..1.14
+  // Subtle off-center placement of the bulb along the edge. Both pieces sharing
+  // this boundary read the same shift, so tabs/sockets still align perfectly.
+  const shift = (Math.random() - 0.5) * 0.26;          // ±0.13
   return {
     sign: Math.random() < 0.5 ? -1 : 1,
-    shift: (Math.random() - 0.5) * 0.09,
-    neckL: jitter(baseNeck, 0.03),
-    neckR: jitter(baseNeck, 0.03),
-    overL: Math.max(0.025, jitter(baseOver, 0.05)),
-    overR: Math.max(0.025, jitter(baseOver, 0.05)),
-    depthL: Math.max(0.7, jitter(baseDepth, 0.14)),
-    depthR: Math.max(0.7, jitter(baseDepth, 0.14)),
+    shift,
+    neckL: jitter(baseNeck, 0.045),
+    neckR: jitter(baseNeck, 0.045),
+    overL: Math.max(0.025, jitter(baseOver, 0.07)),
+    overR: Math.max(0.025, jitter(baseOver, 0.07)),
+    depthL: Math.max(0.65, jitter(baseDepth, 0.2)),
+    depthR: Math.max(0.65, jitter(baseDepth, 0.2)),
   };
 };
 
