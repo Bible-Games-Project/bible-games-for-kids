@@ -26,8 +26,8 @@ interface Props {
 }
 
 const ASPECT = 896 / 1152; // image width / height
-// Tab depth as fraction of the smaller piece side
-const TAB_RATIO = 0.22;
+// Tab depth as fraction of the smaller piece side — smaller = subtler tabs
+const TAB_RATIO = 0.16;
 
 // ---------- Audio ----------
 const playDing = () => {
