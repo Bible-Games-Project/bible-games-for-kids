@@ -26,8 +26,10 @@ interface Props {
 }
 
 const ASPECT = 896 / 1152; // image width / height
+// Tab depth as fraction of the smaller piece side
+const TAB_RATIO = 0.22;
 
-// Tiny audio "ding" using WebAudio. No assets needed.
+// ---------- Audio ----------
 const playDing = () => {
   try {
     const AC = window.AudioContext || (window as any).webkitAudioContext;
@@ -77,10 +79,49 @@ const playWin = () => {
   }
 };
 
+// ---------- Jigsaw edge generation ----------
+// Edge sign convention: +1 = bulge outward (tab); -1 = bulge inward (socket); 0 = flat (board border).
+// Edge segments are built relative; each edge function returns SVG path commands.
+
+const edgeRight = (L: number, T: number, s: number) => {
+  if (s === 0) return `l ${L} 0`;
+  const y = -s * T; // outward = -y
+  return `l ${L * 0.25} 0 c ${-L * 0.05} ${y * 1.8} ${L * 0.55} ${y * 1.8} ${L * 0.5} 0 l ${L * 0.25} 0`;
+};
+const edgeDown = (L: number, T: number, s: number) => {
+  if (s === 0) return `l 0 ${L}`;
+  const x = s * T; // outward = +x
+  return `l 0 ${L * 0.25} c ${x * 1.8} ${-L * 0.05} ${x * 1.8} ${L * 0.55} 0 ${L * 0.5} l 0 ${L * 0.25}`;
+};
+const edgeLeft = (L: number, T: number, s: number) => {
+  if (s === 0) return `l ${-L} 0`;
+  const y = s * T; // outward (going -x, outward = +y)
+  return `l ${-L * 0.25} 0 c ${L * 0.05} ${y * 1.8} ${-L * 0.55} ${y * 1.8} ${-L * 0.5} 0 l ${-L * 0.25} 0`;
+};
+const edgeUp = (L: number, T: number, s: number) => {
+  if (s === 0) return `l 0 ${-L}`;
+  const x = -s * T; // outward (going -y, outward = -x)
+  return `l 0 ${-L * 0.25} c ${x * 1.8} ${L * 0.05} ${x * 1.8} ${-L * 0.55} 0 ${-L * 0.5} l 0 ${-L * 0.25}`;
+};
+
+const buildPiecePath = (
+  W: number,
+  H: number,
+  T: number,
+  edges: { top: number; right: number; bottom: number; left: number },
+) =>
+  [
+    `M ${T} ${T}`,
+    edgeRight(W, T, edges.top),
+    edgeDown(H, T, edges.right),
+    edgeLeft(W, T, edges.bottom),
+    edgeUp(H, T, edges.left),
+    "Z",
+  ].join(" ");
+
 export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
   const total = pieceCount(puzzle);
   const boardRef = useRef<HTMLDivElement>(null);
-  const trayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [pieces, setPieces] = useState<Piece[]>(() => {
@@ -90,8 +131,32 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
         arr.push({ id: r * puzzle.cols + c, row: r, col: c, placed: false });
       }
     }
-    // shuffle order for tray
     return arr.sort(() => Math.random() - 0.5);
+  });
+
+  // Edges between cells. +1 / -1. Stable for this puzzle instance.
+  const edgeData = useMemo(() => {
+    const rand = () => (Math.random() < 0.5 ? -1 : 1);
+    const eH: number[][] = []; // rows-1 rows × cols cols
+    for (let r = 0; r < puzzle.rows - 1; r++) {
+      const row: number[] = [];
+      for (let c = 0; c < puzzle.cols; c++) row.push(rand());
+      eH.push(row);
+    }
+    const eV: number[][] = []; // rows rows × cols-1 cols
+    for (let r = 0; r < puzzle.rows; r++) {
+      const row: number[] = [];
+      for (let c = 0; c < puzzle.cols - 1; c++) row.push(rand());
+      eV.push(row);
+    }
+    return { eH, eV };
+  }, [puzzle.id, puzzle.rows, puzzle.cols]);
+
+  const edgesFor = (r: number, c: number) => ({
+    top: r === 0 ? 0 : -edgeData.eH[r - 1][c],
+    bottom: r === puzzle.rows - 1 ? 0 : edgeData.eH[r][c],
+    left: c === 0 ? 0 : -edgeData.eV[r][c - 1],
+    right: c === puzzle.cols - 1 ? 0 : edgeData.eV[r][c],
   });
 
   const [drag, setDrag] = useState<DragState | null>(null);
@@ -103,18 +168,15 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
   const [stars, setStars] = useState(0);
   const [elapsed, setElapsed] = useState(0);
 
-  // Measure board
   useEffect(() => {
     const measure = () => {
       const container = containerRef.current;
       if (!container) return;
-      // available width and height for the board
       const padding = 16;
       const trayH = window.innerWidth < 640 ? 130 : 150;
       const headerH = 64;
       const availH = window.innerHeight - headerH - trayH - padding * 3;
       const availW = container.clientWidth - padding * 2;
-      // fit by aspect (portrait)
       let w = availW;
       let h = w / ASPECT;
       if (h > availH) {
@@ -128,7 +190,6 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // Timer
   useEffect(() => {
     if (done) return;
     const i = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
@@ -137,13 +198,14 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
 
   const pieceW = boardSize.w / puzzle.cols;
   const pieceH = boardSize.h / puzzle.rows;
+  const tab = Math.min(pieceW, pieceH) * TAB_RATIO;
+  const paddedW = pieceW + 2 * tab;
+  const paddedH = pieceH + 2 * tab;
 
-  // Tray pieces (unplaced), in shuffled order
   const trayPieces = useMemo(() => pieces.filter((p) => !p.placed), [pieces]);
   const placedCount = total - trayPieces.length;
 
-  // Tray piece display size
-  const trayPieceSize = window.innerWidth < 640 ? 84 : 96;
+  const trayPieceSize = window.innerWidth < 640 ? 88 : 100;
 
   // Pointer handlers
   useEffect(() => {
@@ -157,15 +219,19 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
       if (!d) return;
       const board = boardRef.current?.getBoundingClientRect();
       const piece = pieces.find((p) => p.id === d.pieceId);
-      if (board && piece) {
-        // Position the piece's top-left as if dropped:
-        const dropX = e.clientX - d.offsetX;
-        const dropY = e.clientY - d.offsetY;
+      if (board && piece && boardSize.w > 0) {
+        // Convert pointer offset back to padded-box scale
+        const ratio = d.fromTray ? paddedW / trayPieceSize : 1;
+        const paddedLeft = e.clientX - d.offsetX * ratio;
+        const paddedTop = e.clientY - d.offsetY * ratio;
+        // Inner rect top-left in screen space
+        const innerLeft = paddedLeft + tab;
+        const innerTop = paddedTop + tab;
         const targetX = board.left + piece.col * pieceW;
         const targetY = board.top + piece.row * pieceH;
-        const dx = dropX - targetX;
-        const dy = dropY - targetY;
-        const snap = Math.min(pieceW, pieceH) * 0.45;
+        const dx = innerLeft - targetX;
+        const dy = innerTop - targetY;
+        const snap = Math.min(pieceW, pieceH) * 0.5;
         if (Math.abs(dx) < snap && Math.abs(dy) < snap) {
           setPieces((prev) => prev.map((p) => (p.id === piece.id ? { ...p, placed: true } : p)));
           playDing();
@@ -181,9 +247,8 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
       window.removeEventListener("pointerup", up);
       window.removeEventListener("pointercancel", up);
     };
-  }, [drag, pieces, pieceW, pieceH]);
+  }, [drag, pieces, pieceW, pieceH, tab, paddedW, trayPieceSize, boardSize.w]);
 
-  // Completion
   useEffect(() => {
     if (done) return;
     if (placedCount === total && total > 0) {
@@ -220,7 +285,51 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     setTimeout(() => setHint(null), 2000);
   };
 
-  const bgSize = `${boardSize.w}px ${boardSize.h}px`;
+  // Renders one piece as an SVG. The piece's inner rect occupies (tab,tab) .. (tab+pieceW, tab+pieceH).
+  // The image is positioned so that the piece's source region appears under the inner rect.
+  const renderPieceSvg = (
+    p: Piece,
+    width: number,
+    height: number,
+    opts?: { dim?: boolean },
+  ) => {
+    const edges = edgesFor(p.row, p.col);
+    const d = buildPiecePath(pieceW, pieceH, tab, edges);
+    const clipId = `clip-${puzzle.id}-${p.id}`;
+    // image position so piece source region sits at (tab, tab)
+    const imgX = tab - p.col * pieceW;
+    const imgY = tab - p.row * pieceH;
+    return (
+      <svg
+        width={width}
+        height={height}
+        viewBox={`0 0 ${paddedW} ${paddedH}`}
+        style={{ overflow: "visible", display: "block", pointerEvents: "none" }}
+      >
+        <defs>
+          <clipPath id={clipId}>
+            <path d={d} />
+          </clipPath>
+        </defs>
+        <g clipPath={`url(#${clipId})`}>
+          <image
+            href={puzzle.image}
+            x={imgX}
+            y={imgY}
+            width={boardSize.w}
+            height={boardSize.h}
+            preserveAspectRatio="none"
+          />
+          {opts?.dim && (
+            <rect x={0} y={0} width={paddedW} height={paddedH} fill="oklch(0.97 0.015 80 / 0.5)" />
+          )}
+        </g>
+        {/* Soft outline */}
+        <path d={d} fill="none" stroke="oklch(0.35 0.04 60 / 0.35)" strokeWidth={1} />
+        <path d={d} fill="none" stroke="oklch(1 0 0 / 0.45)" strokeWidth={0.6} strokeDasharray="2 3" />
+      </svg>
+    );
+  };
 
   return (
     <div ref={containerRef} className="flex h-[100dvh] flex-col bg-background">
@@ -251,81 +360,62 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
       <div className="flex flex-1 items-center justify-center px-4">
         <div
           ref={boardRef}
-          className="relative overflow-hidden rounded-2xl bg-[oklch(0.94_0.02_75)] shadow-[var(--shadow-soft)]"
+          className="relative overflow-visible rounded-2xl bg-[oklch(0.94_0.02_75)] shadow-[var(--shadow-soft)]"
           style={{
             width: boardSize.w,
             height: boardSize.h,
-            backgroundImage: `linear-gradient(oklch(0.97 0.015 80 / 0.6), oklch(0.97 0.015 80 / 0.6)), url(${puzzle.image})`,
-            backgroundSize: `cover, ${bgSize}`,
-            backgroundPosition: "center, center",
+            backgroundImage: `linear-gradient(oklch(0.97 0.015 80 / 0.75), oklch(0.97 0.015 80 / 0.75)), url(${puzzle.image})`,
+            backgroundSize: `cover, ${boardSize.w}px ${boardSize.h}px`,
+            backgroundPosition: "center, top left",
           }}
         >
-          {/* Grid lines (subtle) */}
-          <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-30">
-            {Array.from({ length: puzzle.cols - 1 }).map((_, i) => (
-              <line
-                key={`v${i}`}
-                x1={(i + 1) * pieceW}
-                y1={0}
-                x2={(i + 1) * pieceW}
-                y2={boardSize.h}
-                stroke="oklch(0.8 0.04 60)"
-                strokeWidth="1"
-              />
-            ))}
-            {Array.from({ length: puzzle.rows - 1 }).map((_, i) => (
-              <line
-                key={`h${i}`}
-                x1={0}
-                y1={(i + 1) * pieceH}
-                x2={boardSize.w}
-                y2={(i + 1) * pieceH}
-                stroke="oklch(0.8 0.04 60)"
-                strokeWidth="1"
-              />
-            ))}
-          </svg>
-
           {/* Hint highlight */}
-          {hint !== null && (() => {
+          {hint !== null && boardSize.w > 0 && (() => {
             const hp = pieces.find((p) => p.id === hint);
             if (!hp) return null;
             return (
               <div
-                className="pointer-events-none absolute rounded-md"
+                className="pointer-events-none absolute"
                 style={{
-                  left: hp.col * pieceW,
-                  top: hp.row * pieceH,
-                  width: pieceW,
-                  height: pieceH,
-                  boxShadow: "0 0 0 3px oklch(0.82 0.13 85), 0 0 24px oklch(0.82 0.13 85 / 0.6)",
+                  left: hp.col * pieceW - tab,
+                  top: hp.row * pieceH - tab,
+                  width: paddedW,
+                  height: paddedH,
+                  filter: "drop-shadow(0 0 14px oklch(0.85 0.14 85 / 0.9))",
                   animation: "pulse 1.2s ease-in-out infinite",
                 }}
-              />
+              >
+                {renderPieceSvg(hp, paddedW, paddedH, { dim: true })}
+              </div>
             );
           })()}
 
           {/* Placed pieces */}
-          {pieces.filter((p) => p.placed).map((p) => (
-            <div
-              key={p.id}
-              className="absolute"
-              style={{
-                left: p.col * pieceW,
-                top: p.row * pieceH,
-                width: pieceW,
-                height: pieceH,
-                backgroundImage: `url(${puzzle.image})`,
-                backgroundSize: bgSize,
-                backgroundPosition: `-${p.col * pieceW}px -${p.row * pieceH}px`,
-              }}
-            />
-          ))}
+          {boardSize.w > 0 &&
+            pieces
+              .filter((p) => p.placed)
+              .map((p) => (
+                <div
+                  key={p.id}
+                  className="absolute"
+                  style={{
+                    left: p.col * pieceW - tab,
+                    top: p.row * pieceH - tab,
+                    width: paddedW,
+                    height: paddedH,
+                  }}
+                >
+                  {renderPieceSvg(p, paddedW, paddedH)}
+                </div>
+              ))}
 
           {/* Completion overlay */}
           {done && (
-            <div className="absolute inset-0 flex animate-fade-in flex-col items-center justify-center bg-[oklch(0.97_0.015_80/0.85)] p-6 text-center">
-              <div className="mb-2 text-5xl">{"⭐".repeat(stars)}{"☆".repeat(3 - stars)}</div>
+            <div className="absolute inset-0 flex animate-fade-in flex-col items-center justify-center bg-[oklch(0.97_0.015_80/0.9)] p-6 text-center">
+              <div className="mb-2 text-5xl">
+                {"⭐".repeat(stars)}
+                {"☆".repeat(3 - stars)}
+              </div>
               <h3 className="font-display text-2xl">Beautifully done!</h3>
               <p className="mt-1 text-sm italic text-muted-foreground">"{puzzle.verse}"</p>
               <div className="mt-5 flex gap-2">
@@ -343,66 +433,59 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
 
       {/* Tray */}
       <div
-        ref={trayRef}
         className="paper-card mx-2 mb-2 flex items-center gap-2 overflow-x-auto p-3"
         style={{ minHeight: trayPieceSize + 24 }}
       >
         {trayPieces.length === 0 && !done && (
           <p className="w-full text-center text-sm text-muted-foreground">All pieces placed!</p>
         )}
-        {trayPieces.map((p) => {
-          if (drag?.pieceId === p.id) {
+        {boardSize.w > 0 &&
+          trayPieces.map((p) => {
+            if (drag?.pieceId === p.id) {
+              return (
+                <div
+                  key={p.id}
+                  style={{ width: trayPieceSize, height: trayPieceSize, flex: "0 0 auto", opacity: 0.25 }}
+                />
+              );
+            }
             return (
               <div
                 key={p.id}
-                style={{ width: trayPieceSize, height: trayPieceSize, flex: "0 0 auto", opacity: 0.25 }}
-              />
+                onPointerDown={(e) => startDrag(e, p.id, true)}
+                className="no-select piece-shadow shrink-0 cursor-grab transition-transform active:cursor-grabbing active:scale-105"
+                style={{
+                  width: trayPieceSize,
+                  height: trayPieceSize,
+                  touchAction: "none",
+                }}
+              >
+                {renderPieceSvg(p, trayPieceSize, trayPieceSize)}
+              </div>
             );
-          }
-          return (
-            <div
-              key={p.id}
-              onPointerDown={(e) => startDrag(e, p.id, true)}
-              className="no-select piece-shadow shrink-0 cursor-grab rounded-md transition-transform active:cursor-grabbing active:scale-105"
-              style={{
-                width: trayPieceSize,
-                height: trayPieceSize,
-                backgroundImage: `url(${puzzle.image})`,
-                backgroundSize: `${trayPieceSize * puzzle.cols}px ${trayPieceSize * puzzle.rows}px`,
-                backgroundPosition: `-${p.col * trayPieceSize}px -${p.row * trayPieceSize}px`,
-                touchAction: "none",
-              }}
-            />
-          );
-        })}
+          })}
       </div>
 
       {/* Dragging floating piece */}
-      {drag && (() => {
+      {drag && boardSize.w > 0 && (() => {
         const p = pieces.find((x) => x.id === drag.pieceId);
         if (!p) return null;
-        // Use board piece size while over board area, tray size otherwise — keep board size when drag started from tray for visual consistency.
-        const w = pieceW;
-        const h = pieceH;
-        // scale offset (tray piece was trayPieceSize; remap proportionally)
-        const ratioX = drag.fromTray ? w / trayPieceSize : 1;
-        const ratioY = drag.fromTray ? h / trayPieceSize : 1;
-        const ox = drag.offsetX * ratioX;
-        const oy = drag.offsetY * ratioY;
+        const ratio = drag.fromTray ? paddedW / trayPieceSize : 1;
+        const ox = drag.offsetX * ratio;
+        const oy = drag.offsetY * ratio;
         return (
           <div
-            className="pointer-events-none fixed z-50 piece-shadow rounded-md"
+            className="pointer-events-none fixed z-50 piece-shadow"
             style={{
               left: drag.pointerX - ox,
               top: drag.pointerY - oy,
-              width: w,
-              height: h,
-              backgroundImage: `url(${puzzle.image})`,
-              backgroundSize: bgSize,
-              backgroundPosition: `-${p.col * pieceW}px -${p.row * pieceH}px`,
+              width: paddedW,
+              height: paddedH,
               transform: "rotate(-1deg)",
             }}
-          />
+          >
+            {renderPieceSvg(p, paddedW, paddedH)}
+          </div>
         );
       })()}
     </div>
