@@ -154,14 +154,18 @@ function DifficultyList({
   progress: Progress;
   onPlay: (p: Puzzle) => void;
 }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   // Recompute resume flags whenever progress changes so the "Resume" badge
   // refreshes after completing a puzzle.
   const resumeFlags = useMemo(
-    () => difficulty.puzzles.map((p) => hasSession(p.id)),
+    () => difficulty.puzzles.map((p) => mounted && hasSession(p.id)),
     // Intentional: re-evaluate after each completion / mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [difficulty.id, progress],
+    [difficulty.id, progress, mounted],
   );
+
 
   return (
     <>
