@@ -46,6 +46,7 @@ export const Route = createFileRoute("/")({
 interface ActiveState {
   puzzle: Puzzle;
   seed: number;
+  difficultyId: Difficulty["id"];
 }
 
 type Screen = "home" | "select" | "more" | "premium";
