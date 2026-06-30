@@ -228,15 +228,48 @@ function Home() {
             difficulty={difficulty}
             progress={progress}
             devMode={devMode}
-            onPlay={startPuzzle}
+            onPlay={(p) => startPuzzle(p, difficulty.id)}
           />
-          <p className="px-2 pt-2 text-center text-xs text-muted-foreground">
-            {t("home.unlockHint")}
-          </p>
         </main>
       </div>
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      {pendingTutorial && (
+        <TutorialModal
+          onClose={() => {
+            try {
+              localStorage.setItem(`sp.tutorialShown.${pendingTutorial}`, "1");
+            } catch {}
+            setPendingTutorial(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function TutorialModal({ onClose }: { onClose: () => void }) {
+  const { t } = useSettings();
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6"
+      onClick={onClose}
+    >
+      <div
+        className="paper-card max-w-sm w-full p-6 text-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="font-display text-2xl text-foreground">{t("tutorial.title")}</h2>
+        <p className="mt-3 text-sm text-muted-foreground whitespace-pre-line">
+          {t("tutorial.body")}
+        </p>
+        <button
+          onClick={onClose}
+          className="mt-5 w-full rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-base font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
+        >
+          {t("tutorial.ok")}
+        </button>
+      </div>
     </div>
   );
 }
