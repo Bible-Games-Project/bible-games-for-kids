@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Puzzle } from "@/lib/puzzles";
 import { pieceCount } from "@/lib/puzzles";
-import { computeStars } from "@/lib/progress";
+import {
+  computeStars,
+  saveSession,
+  type SavedSession,
+} from "@/lib/progress";
 
 interface Piece {
   id: number;
@@ -30,6 +34,8 @@ interface PendingPointer {
 
 interface Props {
   puzzle: Puzzle;
+  seed: number;
+  initialSession: SavedSession | null;
   onComplete: (stars: number, timeSec: number) => void;
   onExit: () => void;
 }
@@ -37,6 +43,15 @@ interface Props {
 const ASPECT = 896 / 1152;
 const TAB_RATIO = 0.15;
 const DRAG_THRESHOLD = 6; // px of movement before a tap becomes a drag
+
+// Seeded RNG (mulberry32) — guarantees stable piece shapes & shuffle on resume.
+const mulberry32 = (a: number) => () => {
+  a = (a + 0x6d2b79f5) | 0;
+  let t = a;
+  t = Math.imul(t ^ (t >>> 15), 1 | t);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
 
 // ---------- Audio ----------
 const playDing = () => {
@@ -104,23 +119,24 @@ const FLAT: EdgeShape = {
   sign: 0, shift: 0, neckL: 0, neckR: 0, overL: 0, overR: 0, depthL: 0, depthR: 0,
 };
 
-const jitter = (base: number, spread: number) => base + (Math.random() - 0.5) * spread;
+type Rng = () => number;
+const jitter = (rng: Rng, base: number, spread: number) => base + (rng() - 0.5) * spread;
 
-const randEdge = (): EdgeShape => {
-  const character = Math.random();
+const randEdge = (rng: Rng): EdgeShape => {
+  const character = rng();
   const baseNeck = 0.075 + character * 0.06;
   const baseOver = 0.055 + (1 - character) * 0.095;
-  const baseDepth = 0.88 + Math.random() * 0.26;
-  const shift = (Math.random() - 0.5) * 0.26;
+  const baseDepth = 0.88 + rng() * 0.26;
+  const shift = (rng() - 0.5) * 0.26;
   return {
-    sign: Math.random() < 0.5 ? -1 : 1,
+    sign: rng() < 0.5 ? -1 : 1,
     shift,
-    neckL: jitter(baseNeck, 0.045),
-    neckR: jitter(baseNeck, 0.045),
-    overL: Math.max(0.025, jitter(baseOver, 0.07)),
-    overR: Math.max(0.025, jitter(baseOver, 0.07)),
-    depthL: Math.max(0.65, jitter(baseDepth, 0.2)),
-    depthR: Math.max(0.65, jitter(baseDepth, 0.2)),
+    neckL: jitter(rng, baseNeck, 0.045),
+    neckR: jitter(rng, baseNeck, 0.045),
+    overL: Math.max(0.025, jitter(rng, baseOver, 0.07)),
+    overR: Math.max(0.025, jitter(rng, baseOver, 0.07)),
+    depthL: Math.max(0.65, jitter(rng, baseDepth, 0.2)),
+    depthR: Math.max(0.65, jitter(rng, baseDepth, 0.2)),
   };
 };
 
@@ -201,37 +217,49 @@ const buildPiecePath = (
     "Z",
   ].join(" ");
 
-export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
+export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }: Props) {
   const total = pieceCount(puzzle);
   const boardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const justDraggedRef = useRef(false);
 
+  // Two independent seeded streams so shuffle order and edge shapes
+  // both stay stable across resumes without coupling to each other.
+  const shuffleRng = useMemo(() => mulberry32(seed ^ 0x9e3779b9), [seed]);
+  const edgeRng = useMemo(() => mulberry32(seed ^ 0x85ebca6b), [seed]);
+
   const [pieces, setPieces] = useState<Piece[]>(() => {
+    const placedSet = new Set(initialSession?.placedIds ?? []);
     const arr: Piece[] = [];
     for (let r = 0; r < puzzle.rows; r++) {
       for (let c = 0; c < puzzle.cols; c++) {
-        arr.push({ id: r * puzzle.cols + c, row: r, col: c, placed: false });
+        const id = r * puzzle.cols + c;
+        arr.push({ id, row: r, col: c, placed: placedSet.has(id) });
       }
     }
-    return arr.sort(() => Math.random() - 0.5);
+    // Seeded Fisher–Yates so tray order is stable per seed.
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(shuffleRng() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   });
 
   const edgeData = useMemo(() => {
     const eH: EdgeShape[][] = [];
     for (let r = 0; r < puzzle.rows - 1; r++) {
       const row: EdgeShape[] = [];
-      for (let c = 0; c < puzzle.cols; c++) row.push(randEdge());
+      for (let c = 0; c < puzzle.cols; c++) row.push(randEdge(edgeRng));
       eH.push(row);
     }
     const eV: EdgeShape[][] = [];
     for (let r = 0; r < puzzle.rows; r++) {
       const row: EdgeShape[] = [];
-      for (let c = 0; c < puzzle.cols - 1; c++) row.push(randEdge());
+      for (let c = 0; c < puzzle.cols - 1; c++) row.push(randEdge(edgeRng));
       eV.push(row);
     }
     return { eH, eV };
-  }, [puzzle.id, puzzle.rows, puzzle.cols]);
+  }, [puzzle.id, puzzle.rows, puzzle.cols, edgeRng]);
 
   const flipSign = (e: EdgeShape): EdgeShape => ({ ...e, sign: -e.sign });
 
@@ -246,11 +274,15 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
   const [drag, setDrag] = useState<DragState | null>(null);
   const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
   const [hint, setHint] = useState<number | null>(null);
-  const [hintsUsed, setHintsUsed] = useState(0);
-  const [startTime] = useState(() => Date.now());
+  const [hintsUsed, setHintsUsed] = useState(initialSession?.hintsUsed ?? 0);
+  // startTime is shifted back by the saved elapsed seconds so the timer
+  // continues from where the player left off. It does NOT keep counting
+  // while the app is closed — savedAt is not used to advance time.
+  const initialElapsedRef = useRef(initialSession?.elapsedSec ?? 0);
+  const [startTime] = useState(() => Date.now() - initialElapsedRef.current * 1000);
   const [done, setDone] = useState(false);
   const [stars, setStars] = useState(0);
-  const [elapsed, setElapsed] = useState(0);
+  const [elapsed, setElapsed] = useState(initialElapsedRef.current);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [shakeId, setShakeId] = useState<number | null>(null);
 
@@ -281,6 +313,44 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     const i = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
     return () => clearInterval(i);
   }, [done, startTime]);
+
+  // Persist session whenever placed pieces change (and we're not done).
+  // Cheap — localStorage write of a small JSON object.
+  const doneRef = useRef(false);
+  doneRef.current = done;
+  const piecesRef = useRef(pieces);
+  piecesRef.current = pieces;
+  const hintsRef = useRef(hintsUsed);
+  hintsRef.current = hintsUsed;
+
+  useEffect(() => {
+    if (done) return;
+    const placedIds = pieces.filter((p) => p.placed).map((p) => p.id);
+    saveSession(puzzle.id, {
+      placedIds,
+      elapsedSec: Math.floor((Date.now() - startTime) / 1000),
+      hintsUsed,
+      seed,
+      savedAt: Date.now(),
+    });
+  }, [pieces, done, puzzle.id, startTime, hintsUsed, seed]);
+
+  // Save once more on unmount (e.g. browser tab close) so the very latest
+  // elapsed time is captured if the user leaves mid-second.
+  useEffect(() => {
+    return () => {
+      if (doneRef.current) return;
+      const placedIds = piecesRef.current.filter((p) => p.placed).map((p) => p.id);
+      saveSession(puzzle.id, {
+        placedIds,
+        elapsedSec: Math.floor((Date.now() - startTime) / 1000),
+        hintsUsed: hintsRef.current,
+        seed,
+        savedAt: Date.now(),
+      });
+    };
+  }, [puzzle.id, seed, startTime]);
+
 
   const pieceW = boardSize.w / puzzle.cols;
   const pieceH = boardSize.h / puzzle.rows;
