@@ -16,6 +16,11 @@ import {
   type Progress,
 } from "@/lib/progress";
 import { PuzzleBoard } from "@/components/PuzzleBoard";
+import { useSettings } from "@/lib/i18n";
+import { OnboardingLanguage } from "@/components/OnboardingLanguage";
+import { SettingsModal } from "@/components/SettingsModal";
+import { MoreGamesScreen } from "@/components/MoreGamesScreen";
+import { PremiumScreen } from "@/components/PremiumScreen";
 import menuBg from "@/assets/menu-background.jpg";
 
 export const Route = createFileRoute("/")({
@@ -43,9 +48,14 @@ interface ActiveState {
   seed: number;
 }
 
+type Screen = "menu" | "more" | "premium";
+
 function Home() {
+  const { onboarded, t } = useSettings();
   const [progress, setProgress] = useState<Progress>({});
   const [active, setActive] = useState<ActiveState | null>(null);
+  const [screen, setScreen] = useState<Screen>("menu");
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty["id"]>(
     DIFFICULTIES[0].id,
   );
@@ -53,6 +63,10 @@ function Home() {
   useEffect(() => {
     setProgress(loadProgress());
   }, []);
+
+  if (!onboarded) {
+    return <OnboardingLanguage />;
+  }
 
   const startPuzzle = (puzzle: Puzzle) => {
     const existing = getSession(puzzle.id);
@@ -76,6 +90,9 @@ function Home() {
     );
   }
 
+  if (screen === "more") return <MoreGamesScreen onBack={() => setScreen("menu")} />;
+  if (screen === "premium") return <PremiumScreen onBack={() => setScreen("menu")} />;
+
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
 
   return (
@@ -88,36 +105,66 @@ function Home() {
           backgroundPosition: "center top",
         }}
       >
-        <header className="mx-auto max-w-3xl px-5 pt-10 pb-6 text-center sm:pt-16">
+        {/* Settings button - top right */}
+        <button
+          onClick={() => setSettingsOpen(true)}
+          aria-label={t("settings.title")}
+          className="absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full bg-card text-foreground/80 shadow-md transition active:scale-95"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+
+        <header className="mx-auto max-w-3xl px-5 pt-10 pb-4 text-center sm:pt-16">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Storybook Puzzles
+            {t("app.tagline")}
           </p>
           <h1 className="mt-2 font-display text-3xl leading-tight text-foreground sm:text-5xl">
-            Stories of Jesus
+            {t("app.title")}
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
-            Piece together gentle paintings of stories from the New Testament.
+            {t("app.subtitle")}
           </p>
         </header>
+
+        {/* Premium / More Games quick actions */}
+        <div className="mx-auto flex max-w-3xl items-stretch gap-3 px-4 pb-4">
+          <button
+            onClick={() => setScreen("premium")}
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.78_0.13_55)] px-4 py-3 font-semibold text-[oklch(0.25_0.05_50)] shadow-sm transition active:scale-95"
+          >
+            <span aria-hidden>✨</span>
+            {t("home.premium")}
+          </button>
+          <button
+            onClick={() => setScreen("more")}
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-card px-4 py-3 font-semibold text-foreground shadow-sm transition active:scale-95"
+          >
+            <span aria-hidden>🎮</span>
+            {t("home.moreGames")}
+          </button>
+        </div>
 
         {/* Difficulty selector */}
         <nav className="mx-auto max-w-3xl px-3 pb-3">
           <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {DIFFICULTIES.map((d) => {
-              const active = d.id === selectedDifficulty;
+              const isActive = d.id === selectedDifficulty;
               const completed = d.puzzles.filter((p) => (progress[p.id]?.stars ?? 0) > 0).length;
               return (
                 <button
                   key={d.id}
                   onClick={() => setSelectedDifficulty(d.id)}
                   className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition active:scale-95 ${
-                    active
+                    isActive
                       ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
                       : "bg-card text-foreground/80 hover:bg-secondary"
                   }`}
                 >
-                  {d.label}
-                  <span className={`ml-2 text-[10px] font-bold ${active ? "opacity-80" : "text-muted-foreground"}`}>
+                  {t(`diff.${d.id}`)}
+                  <span className={`ml-2 text-[10px] font-bold ${isActive ? "opacity-80" : "text-muted-foreground"}`}>
                     {completed}/{d.puzzles.length}
                   </span>
                 </button>
@@ -125,7 +172,7 @@ function Home() {
             })}
           </div>
           <p className="mt-2 px-2 text-center text-xs italic text-muted-foreground">
-            {difficulty.description}
+            {t(`diff.${difficulty.id}.desc`)}
           </p>
         </nav>
 
@@ -137,10 +184,12 @@ function Home() {
             onPlay={startPuzzle}
           />
           <p className="px-2 pt-2 text-center text-xs text-muted-foreground">
-            Finish a puzzle with at least ⭐ to unlock the next story in this difficulty.
+            {t("home.unlockHint")}
           </p>
         </main>
       </div>
+
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }
@@ -154,18 +203,15 @@ function DifficultyList({
   progress: Progress;
   onPlay: (p: Puzzle) => void;
 }) {
+  const { t } = useSettings();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Recompute resume flags whenever progress changes so the "Resume" badge
-  // refreshes after completing a puzzle.
   const resumeFlags = useMemo(
     () => difficulty.puzzles.map((p) => mounted && hasSession(p.id)),
-    // Intentional: re-evaluate after each completion / mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [difficulty.id, progress, mounted],
   );
-
 
   return (
     <>
@@ -198,18 +244,18 @@ function DifficultyList({
 
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-                Puzzle {i + 1} · {difficulty.label}
+                {t("puzzle.label")} {i + 1} · {t(`diff.${difficulty.id}`)}
               </p>
               <h3 className="mt-1 truncate font-display text-lg leading-snug sm:text-xl">
                 {p.title}
               </h3>
               <p className="mt-0.5 truncate text-xs italic text-muted-foreground">{p.verse}</p>
               <div className="mt-2 flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">{pieceCount(p)} pieces</span>
+                <span className="text-xs text-muted-foreground">{pieceCount(p)} {t("home.pieces")}</span>
                 <span className="flex items-center gap-2">
                   {canResume && (
                     <span className="rounded-full bg-[var(--color-sage-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[oklch(0.35_0.05_150)]">
-                      Resume
+                      {t("home.resume")}
                     </span>
                   )}
                   <span className="text-base tracking-wider" aria-label={`${stars} of 3 stars`}>
