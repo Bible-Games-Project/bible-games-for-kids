@@ -62,11 +62,11 @@ interface DifficultyDef {
 }
 
 const DIFFICULTY_DEFS: DifficultyDef[] = [
-  { id: "easy", label: "Easy", description: "Gentle first puzzles", pieceTargets: [5, 8, 10, 12, 15] },
-  { id: "easy-medium", label: "Easy – Medium", description: "A little more to piece together", pieceTargets: [15, 18, 22, 26, 30] },
-  { id: "medium", label: "Medium", description: "For curious little builders", pieceTargets: [30, 38, 45, 52, 60] },
-  { id: "medium-hard", label: "Medium – Hard", description: "A satisfying challenge", pieceTargets: [60, 70, 80, 90, 100] },
-  { id: "hard", label: "Hard", description: "For patient hearts and hands", pieceTargets: [100, 110, 125, 140, 150] },
+  { id: "easy", label: "Easy", description: "Gentle first puzzles", pieceTargets: [5, 6, 8, 9, 10, 11, 12, 13, 14, 15] },
+  { id: "easy-medium", label: "Easy – Medium", description: "A little more to piece together", pieceTargets: [15, 17, 19, 21, 23, 25, 26, 27, 28, 30] },
+  { id: "medium", label: "Medium", description: "For curious little builders", pieceTargets: [30, 34, 38, 42, 45, 48, 51, 54, 57, 60] },
+  { id: "medium-hard", label: "Medium – Hard", description: "A satisfying challenge", pieceTargets: [60, 65, 70, 75, 80, 85, 90, 93, 96, 100] },
+  { id: "hard", label: "Hard", description: "For patient hearts and hands", pieceTargets: [100, 106, 112, 118, 124, 130, 135, 140, 145, 150] },
 ];
 
 const TARGET_ASPECT = 896 / 1152; // cols / rows of the artwork (portrait)
