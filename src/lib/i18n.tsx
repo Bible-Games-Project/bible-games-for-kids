@@ -50,12 +50,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const l = localStorage.getItem(LANG_KEY) as Lang | null;
+      const l = localStorage.getItem(LANG_KEY);
       const s = localStorage.getItem(SOUND_KEY);
       const o = localStorage.getItem(ONBOARD_KEY);
       const d = localStorage.getItem(DEV_KEY);
       const p = localStorage.getItem(PREMIUM_KEY);
-      if (l === "en" || l === "es") setLangState(l);
+      if (isLang(l)) setLangState(l);
       if (s !== null) setSoundState(s === "1");
       setOnboarded(o === "1");
       setDevModeState(d === "1");
@@ -63,6 +63,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     } catch {}
     setHydrated(true);
   }, []);
+
+  // Keep <html lang> and <html dir> in sync with the selected language.
+  useEffect(() => {
+    applyHtmlLangDir(lang);
+  }, [lang]);
 
   const setLang = (l: Lang) => {
     setLangState(l);
