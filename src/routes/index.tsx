@@ -287,16 +287,59 @@ function TutorialModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+function PremiumLockModal({
+  onClose,
+  onUnlock,
+}: {
+  onClose: () => void;
+  onUnlock: () => void;
+}) {
+  const { t } = useSettings();
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6"
+      onClick={onClose}
+    >
+      <div
+        className="paper-card max-w-sm w-full p-6 text-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--color-gold)]/30 text-2xl">
+          ✨
+        </div>
+        <h2 className="mt-3 font-display text-2xl text-foreground">{t("lock.title")}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{t("lock.body")}</p>
+        <button
+          onClick={onUnlock}
+          className="mt-5 w-full rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.78_0.13_55)] px-5 py-3 text-base font-semibold text-[oklch(0.25_0.05_50)] shadow-md transition active:scale-95"
+        >
+          {t("lock.cta")}
+        </button>
+        <button
+          onClick={onClose}
+          className="mt-2 w-full rounded-2xl bg-card px-5 py-2.5 text-sm font-semibold text-foreground/70 transition active:scale-95"
+        >
+          {t("lock.later")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function DifficultyList({
   difficulty,
   progress,
   devMode,
+  premium,
   onPlay,
+  onLocked,
 }: {
   difficulty: Difficulty;
   progress: Progress;
   devMode: boolean;
+  premium: boolean;
   onPlay: (p: Puzzle) => void;
+  onLocked: () => void;
 }) {
   const { t } = useSettings();
   const [mounted, setMounted] = useState(false);
@@ -311,15 +354,22 @@ function DifficultyList({
   return (
     <>
       {difficulty.puzzles.map((p, i) => {
-        const unlocked = devMode || isPuzzleUnlocked(difficulty.puzzles, i, progress);
+        const progressUnlocked = devMode || isPuzzleUnlocked(difficulty.puzzles, i, progress);
+        const premiumAllowed = devMode || premium || isFreePuzzle(i);
+        const premiumLocked = !premiumAllowed;
+        const unlocked = progressUnlocked && premiumAllowed;
         const res = progress[p.id];
         const stars = res?.stars ?? 0;
         const canResume = unlocked && resumeFlags[i];
+        const clickable = unlocked || premiumLocked; // locked-premium still clickable → opens unlock modal
         return (
           <button
             key={p.id}
-            disabled={!unlocked}
-            onClick={() => unlocked && onPlay(p)}
+            disabled={!clickable}
+            onClick={() => {
+              if (premiumLocked) return onLocked();
+              if (unlocked) onPlay(p);
+            }}
             className="paper-card group relative grid w-full grid-cols-[96px_minmax(0,1fr)] items-center gap-4 overflow-hidden p-3 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:grid-cols-[120px_minmax(0,1fr)]"
           >
             <div
@@ -330,11 +380,15 @@ function DifficultyList({
                 backgroundPosition: "center",
               }}
             >
-              {!unlocked && (
+              {premiumLocked ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[oklch(0.96_0.03_60/0.78)] text-[var(--color-gold)]">
+                  <span className="text-2xl">✨</span>
+                </div>
+              ) : !unlocked ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-[oklch(0.96_0.03_60/0.7)] text-2xl">
                   🔒
                 </div>
-              )}
+              ) : null}
             </div>
 
             <div className="min-w-0">
@@ -346,17 +400,26 @@ function DifficultyList({
               </h3>
               <p className="mt-0.5 truncate text-xs italic text-muted-foreground">{p.verse}</p>
               <div className="mt-2 flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">{pieceCount(p)} {t("home.pieces")}</span>
+                <span className="text-xs text-muted-foreground">
+                  {pieceCount(p)} {t("home.pieces")}
+                </span>
                 <span className="flex items-center gap-2">
+                  {premiumLocked && (
+                    <span className="rounded-full bg-[var(--color-gold)]/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[oklch(0.45_0.12_70)]">
+                      ✨ {t("lock.badge")}
+                    </span>
+                  )}
                   {canResume && (
                     <span className="rounded-full bg-[var(--color-sage-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[oklch(0.35_0.05_150)]">
                       {t("home.resume")}
                     </span>
                   )}
-                  <span className="text-base tracking-wider" aria-label={`${stars} of 3 stars`}>
-                    <span className="text-[var(--color-gold)]">{"★".repeat(stars)}</span>
-                    <span className="text-[oklch(0.85_0.02_75)]">{"★".repeat(3 - stars)}</span>
-                  </span>
+                  {!premiumLocked && (
+                    <span className="text-base tracking-wider" aria-label={`${stars} of 3 stars`}>
+                      <span className="text-[var(--color-gold)]">{"★".repeat(stars)}</span>
+                      <span className="text-[oklch(0.85_0.02_75)]">{"★".repeat(3 - stars)}</span>
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
@@ -366,3 +429,4 @@ function DifficultyList({
     </>
   );
 }
+
