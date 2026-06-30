@@ -91,6 +91,12 @@ const SCENES: Scene[] = [
   { slug: "adam-animals", title: "Adam Names the Animals", verse: "Genesis 2:19", image: adamAnimals },
   { slug: "ruth-fields", title: "Ruth in the Fields", verse: "Ruth 2:3", image: ruthFields },
   { slug: "abraham-stars", title: "Abraham Counts the Stars", verse: "Genesis 15:5", image: abrahamStars },
+  { slug: "annunciation", title: "The Annunciation", verse: "Luke 1:30", image: annunciation },
+  { slug: "wise-men", title: "The Wise Men Visit Jesus", verse: "Matthew 2:11", image: wiseMen },
+  { slug: "lost-sheep", title: "The Lost Sheep", verse: "Luke 15:6", image: lostSheep },
+  { slug: "jacobs-ladder", title: "Jacob's Ladder", verse: "Genesis 28:12", image: jacobsLadder },
+  { slug: "samuel-call", title: "Samuel Hears God's Voice", verse: "1 Samuel 3:10", image: samuelCall },
+  { slug: "elijah-ravens", title: "Elijah Fed by the Ravens", verse: "1 Kings 17:6", image: elijahRavens },
 ];
 
 // Each difficulty defines its piece-count range. Targets are generated as
