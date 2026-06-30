@@ -9,6 +9,7 @@ import trueChristIcon from "@/assets/game-true-christ.png";
 interface Game {
   id: string;
   name: string;
+  description: string;
   icon: string;
   links: GameLinks;
 }
@@ -17,6 +18,7 @@ const GAMES: Game[] = [
   {
     id: "didactic-jesus",
     name: "Didactic Jesus Game",
+    description: "Experience the life of Jesus in a first-person RPG adventure.",
     icon: didacticIcon,
     links: {
       android: "https://play.google.com/store/apps/details?id=com.biblegamesproject.pro&hl=es_419",
@@ -27,6 +29,7 @@ const GAMES: Game[] = [
   {
     id: "lost-sheep",
     name: "The Lost Sheep",
+    description: "Discover Jesus' parable through a heartfelt journey of hope and personal growth.",
     icon: lostSheepIcon,
     links: {
       android: "https://www.biblegamesproject.com/the-lost-sheep",
@@ -37,6 +40,7 @@ const GAMES: Game[] = [
   {
     id: "bible-unlocked",
     name: "Bible Unlocked",
+    description: "Explore the Bible's greatest stories and choose your own path.",
     icon: bibleUnlockedIcon,
     links: {
       android: "https://play.google.com/store/apps/details?id=com.biblegames.eden&pcampaignid=web_share",
@@ -47,6 +51,7 @@ const GAMES: Game[] = [
   {
     id: "true-christ",
     name: "True Christ",
+    description: "Live the life of Jesus in a unique 3D experience unlike any other.",
     icon: trueChristIcon,
     links: {
       android: "https://www.biblegamesproject.com/true-christ",
@@ -94,8 +99,8 @@ export function MoreGamesScreen({ onBack }: { onBack: () => void }) {
               />
               <div className="min-w-0">
                 <h3 className="truncate font-display text-lg leading-snug">{g.name}</h3>
-                <p className="mt-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">
-                  {platform === "android" ? "Google Play" : platform === "ios" ? "App Store" : "Steam / Web"}
+                <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted-foreground">
+                  {g.description}
                 </p>
               </div>
               <span className="rounded-full bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary-foreground)]">
