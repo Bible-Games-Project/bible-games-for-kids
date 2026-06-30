@@ -58,7 +58,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
         {/* Language */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-card p-4">
           <span className="text-sm font-semibold">{t("settings.language")}</span>
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="mt-3 grid max-h-56 grid-cols-2 gap-2 overflow-y-auto pr-1">
             {langs.map((l) => {
               const active = lang === l.id;
               return (
@@ -72,7 +72,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                   }`}
                 >
                   <span className="text-lg">{l.flag}</span>
-                  {l.label}
+                  <span className="truncate">{l.label}</span>
                 </button>
               );
             })}
