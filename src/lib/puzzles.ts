@@ -113,10 +113,10 @@ interface DifficultyDef {
 
 const DIFFICULTY_DEFS: DifficultyDef[] = [
   { id: "easy", label: "Easy", description: "Gentle first puzzles", min: 5, max: 15 },
-  { id: "easy-medium", label: "Easy – Medium", description: "A little more to piece together", min: 15, max: 30 },
-  { id: "medium", label: "Medium", description: "For curious little builders", min: 30, max: 65 },
-  { id: "medium-hard", label: "Medium – Hard", description: "A satisfying challenge", min: 65, max: 100 },
-  { id: "hard", label: "Hard", description: "For patient hearts and hands", min: 100, max: 250 },
+  { id: "easy-medium", label: "Normal", description: "A little more to piece together", min: 15, max: 30 },
+  { id: "medium", label: "Hard", description: "For curious little builders", min: 30, max: 65 },
+  { id: "medium-hard", label: "Expert", description: "A satisfying challenge", min: 65, max: 100 },
+  { id: "hard", label: "Master", description: "For patient hearts and hands", min: 100, max: 250 },
 ];
 
 // Deterministic small-integer hash → [0,1) for stable per-slot variation.
