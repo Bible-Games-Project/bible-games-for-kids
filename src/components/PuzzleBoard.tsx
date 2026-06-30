@@ -377,6 +377,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
 
   const triggerShake = (pieceId: number) => {
     setShakeId(pieceId);
+    audio.playIncorrect();
     setTimeout(() => setShakeId((s) => (s === pieceId ? null : s)), 500);
   };
 
