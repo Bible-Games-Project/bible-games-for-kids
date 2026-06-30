@@ -152,6 +152,8 @@ interface SettingsContextValue {
   completeOnboarding: (l: Lang) => void;
   devMode: boolean;
   setDevMode: (v: boolean) => void;
+  premium: boolean;
+  setPremium: (v: boolean) => void;
   resetAll: () => void;
   t: (key: string) => string;
 }
@@ -163,6 +165,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [sound, setSoundState] = useState<boolean>(true);
   const [onboarded, setOnboarded] = useState<boolean>(true);
   const [devMode, setDevModeState] = useState<boolean>(false);
+  const [premium, setPremiumState] = useState<boolean>(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -171,10 +174,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const s = localStorage.getItem(SOUND_KEY);
       const o = localStorage.getItem(ONBOARD_KEY);
       const d = localStorage.getItem(DEV_KEY);
+      const p = localStorage.getItem(PREMIUM_KEY);
       if (l === "en" || l === "es") setLangState(l);
       if (s !== null) setSoundState(s === "1");
       setOnboarded(o === "1");
       setDevModeState(d === "1");
+      setPremiumState(p === "1");
     } catch {}
     setHydrated(true);
   }, []);
@@ -196,17 +201,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setDevModeState(v);
     try { localStorage.setItem(DEV_KEY, v ? "1" : "0"); } catch {}
   };
+  const setPremium = (v: boolean) => {
+    setPremiumState(v);
+    try { localStorage.setItem(PREMIUM_KEY, v ? "1" : "0"); } catch {}
+  };
   const resetAll = () => {
     try {
-      // Clear all known app keys + any starting with our prefix.
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (!k) continue;
-        if (
-          k.startsWith("sp.") ||
-          k.startsWith("jesus-puzzles-")
-        ) {
+        if (k.startsWith("sp.") || k.startsWith("jesus-puzzles-")) {
           keysToRemove.push(k);
         }
       }
@@ -216,6 +221,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSoundState(true);
     setOnboarded(false);
     setDevModeState(false);
+    setPremiumState(false);
   };
 
   const t = useMemo(() => {
@@ -232,6 +238,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     completeOnboarding,
     devMode: hydrated ? devMode : false,
     setDevMode,
+    premium: hydrated ? premium : false,
+    setPremium,
     resetAll,
     t,
   };
