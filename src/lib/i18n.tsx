@@ -10,14 +10,18 @@ type Dict = Record<string, string>;
 
 const STRINGS: Record<Lang, Dict> = {
   en: {
-    "app.title": "Stories of Jesus",
+    "app.title": "Bible Puzzles",
     "app.tagline": "Storybook Puzzles",
     "app.subtitle": "Piece together gentle paintings of stories from the New Testament.",
     "home.unlockHint": "Finish a puzzle with at least ⭐ to unlock the next story in this difficulty.",
+    "home.play": "Play",
     "home.premium": "Premium",
     "home.moreGames": "More Games",
     "home.pieces": "pieces",
     "home.resume": "Resume",
+    "home.welcome": "Welcome to a peaceful place to play.",
+    "select.title": "Choose a Story",
+    "select.back": "Home",
     "puzzle.label": "Puzzle",
     "settings.title": "Settings",
     "settings.sound": "Sound",
