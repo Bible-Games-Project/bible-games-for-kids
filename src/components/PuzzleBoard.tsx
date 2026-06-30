@@ -119,23 +119,24 @@ const FLAT: EdgeShape = {
   sign: 0, shift: 0, neckL: 0, neckR: 0, overL: 0, overR: 0, depthL: 0, depthR: 0,
 };
 
-const jitter = (base: number, spread: number) => base + (Math.random() - 0.5) * spread;
+type Rng = () => number;
+const jitter = (rng: Rng, base: number, spread: number) => base + (rng() - 0.5) * spread;
 
-const randEdge = (): EdgeShape => {
-  const character = Math.random();
+const randEdge = (rng: Rng): EdgeShape => {
+  const character = rng();
   const baseNeck = 0.075 + character * 0.06;
   const baseOver = 0.055 + (1 - character) * 0.095;
-  const baseDepth = 0.88 + Math.random() * 0.26;
-  const shift = (Math.random() - 0.5) * 0.26;
+  const baseDepth = 0.88 + rng() * 0.26;
+  const shift = (rng() - 0.5) * 0.26;
   return {
-    sign: Math.random() < 0.5 ? -1 : 1,
+    sign: rng() < 0.5 ? -1 : 1,
     shift,
-    neckL: jitter(baseNeck, 0.045),
-    neckR: jitter(baseNeck, 0.045),
-    overL: Math.max(0.025, jitter(baseOver, 0.07)),
-    overR: Math.max(0.025, jitter(baseOver, 0.07)),
-    depthL: Math.max(0.65, jitter(baseDepth, 0.2)),
-    depthR: Math.max(0.65, jitter(baseDepth, 0.2)),
+    neckL: jitter(rng, baseNeck, 0.045),
+    neckR: jitter(rng, baseNeck, 0.045),
+    overL: Math.max(0.025, jitter(rng, baseOver, 0.07)),
+    overR: Math.max(0.025, jitter(rng, baseOver, 0.07)),
+    depthL: Math.max(0.65, jitter(rng, baseDepth, 0.2)),
+    depthR: Math.max(0.65, jitter(rng, baseDepth, 0.2)),
   };
 };
 
