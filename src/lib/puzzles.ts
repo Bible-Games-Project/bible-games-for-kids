@@ -26,6 +26,12 @@ import palmSunday from "@/assets/puzzle-palm-sunday.jpg";
 import adamAnimals from "@/assets/puzzle-adam-animals.jpg";
 import ruthFields from "@/assets/puzzle-ruth-fields.jpg";
 import abrahamStars from "@/assets/puzzle-abraham-stars.jpg";
+import annunciation from "@/assets/puzzle-annunciation.jpg";
+import wiseMen from "@/assets/puzzle-wise-men.jpg";
+import lostSheep from "@/assets/puzzle-lost-sheep.jpg";
+import jacobsLadder from "@/assets/puzzle-jacobs-ladder.jpg";
+import samuelCall from "@/assets/puzzle-samuel-call.jpg";
+import elijahRavens from "@/assets/puzzle-elijah-ravens.jpg";
 
 export type DifficultyId = "easy" | "easy-medium" | "medium" | "medium-hard" | "hard";
 
