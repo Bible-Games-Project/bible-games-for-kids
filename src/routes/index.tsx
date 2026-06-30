@@ -230,12 +230,23 @@ function Home() {
             difficulty={difficulty}
             progress={progress}
             devMode={devMode}
+            premium={premium}
             onPlay={(p) => startPuzzle(p, difficulty.id)}
+            onLocked={() => setShowPremiumLock(true)}
           />
         </main>
       </div>
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      {showPremiumLock && (
+        <PremiumLockModal
+          onClose={() => setShowPremiumLock(false)}
+          onUnlock={() => {
+            setShowPremiumLock(false);
+            setScreen("premium");
+          }}
+        />
+      )}
       {pendingTutorial && (
         <TutorialModal
           onClose={() => {
