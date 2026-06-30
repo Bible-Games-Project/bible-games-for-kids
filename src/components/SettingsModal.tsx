@@ -81,6 +81,58 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             })}
           </div>
         </div>
+
+        {/* Developer Mode */}
+        <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] bg-card p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold">{t("settings.dev")}</span>
+            <button
+              onClick={() => setDevMode(!devMode)}
+              className={`relative h-7 w-12 rounded-full transition ${devMode ? "bg-[var(--color-primary)]" : "bg-[var(--color-border)]"}`}
+              aria-pressed={devMode}
+            >
+              <span
+                className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${devMode ? "left-6" : "left-1"}`}
+              />
+            </button>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">{t("settings.devHint")}</p>
+
+          {devMode && (
+            <div className="mt-3">
+              {!confirmReset ? (
+                <button
+                  onClick={() => setConfirmReset(true)}
+                  className="w-full rounded-xl border border-[oklch(0.65_0.18_25)]/40 bg-[oklch(0.97_0.04_25)] px-3 py-2 text-sm font-semibold text-[oklch(0.45_0.15_25)] transition active:scale-95"
+                >
+                  {t("settings.reset")}
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-foreground/80">{t("settings.resetConfirm")}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setConfirmReset(false)}
+                      className="rounded-xl border border-[var(--color-border)] bg-card px-3 py-2 text-sm font-semibold active:scale-95"
+                    >
+                      ✕
+                    </button>
+                    <button
+                      onClick={() => {
+                        resetAll();
+                        setConfirmReset(false);
+                        onClose();
+                      }}
+                      className="rounded-xl bg-[oklch(0.55_0.18_25)] px-3 py-2 text-sm font-semibold text-white active:scale-95"
+                    >
+                      ✓
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
