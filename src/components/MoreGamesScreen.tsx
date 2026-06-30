@@ -18,6 +18,7 @@ const GAMES: Game[] = [
   {
     id: "didactic-jesus",
     name: "Didactic Jesus Game",
+    description: "Experience the life of Jesus in a first-person RPG adventure.",
     icon: didacticIcon,
     links: {
       android: "https://play.google.com/store/apps/details?id=com.biblegamesproject.pro&hl=es_419",
@@ -28,6 +29,7 @@ const GAMES: Game[] = [
   {
     id: "lost-sheep",
     name: "The Lost Sheep",
+    description: "Discover Jesus' parable through a heartfelt journey of hope and personal growth.",
     icon: lostSheepIcon,
     links: {
       android: "https://www.biblegamesproject.com/the-lost-sheep",
@@ -38,6 +40,7 @@ const GAMES: Game[] = [
   {
     id: "bible-unlocked",
     name: "Bible Unlocked",
+    description: "Explore the Bible's greatest stories and choose your own path.",
     icon: bibleUnlockedIcon,
     links: {
       android: "https://play.google.com/store/apps/details?id=com.biblegames.eden&pcampaignid=web_share",
@@ -48,6 +51,7 @@ const GAMES: Game[] = [
   {
     id: "true-christ",
     name: "True Christ",
+    description: "Live the life of Jesus in a unique 3D experience unlike any other.",
     icon: trueChristIcon,
     links: {
       android: "https://www.biblegamesproject.com/true-christ",
