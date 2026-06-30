@@ -19,15 +19,24 @@ interface DragState {
   offsetY: number;
 }
 
+interface PendingPointer {
+  pieceId: number;
+  fromTray: boolean;
+  startX: number;
+  startY: number;
+  offsetX: number;
+  offsetY: number;
+}
+
 interface Props {
   puzzle: Puzzle;
   onComplete: (stars: number, timeSec: number) => void;
   onExit: () => void;
 }
 
-const ASPECT = 896 / 1152; // image width / height
-// Tab depth as fraction of the smaller piece side — smaller = subtler tabs
+const ASPECT = 896 / 1152;
 const TAB_RATIO = 0.15;
+const DRAG_THRESHOLD = 6; // px of movement before a tap becomes a drag
 
 // ---------- Audio ----------
 const playDing = () => {
@@ -80,18 +89,6 @@ const playWin = () => {
 };
 
 // ---------- Jigsaw edge generation ----------
-// Each shared boundary stores one EdgeShape; the two adjacent pieces draw the
-// SAME physical curve — one piece traverses it forward (edgeRight / edgeDown),
-// the neighbor traverses it backward (edgeLeft / edgeUp). The only difference
-// is the `sign`, which is flipped so one side bulges out (tab) and the other
-// curves in (socket). All shape parameters are split into left/right halves
-// so each bulb can be subtly asymmetric while still interlocking perfectly.
-//
-//   sign        : +1 / -1 bulge direction, 0 = flat border
-//   shift       : bulb center offset along the edge from midpoint (~ -0.05..+0.05)
-//   neckL/neckR : neck half-widths on each side of the bulb center (fraction of L)
-//   overL/overR : how far the cubic control points overshoot past the neck (fraction of L)
-//   depthL/depthR : cubic control-point depth multipliers on each side of the bulb
 interface EdgeShape {
   sign: number;
   shift: number;
@@ -110,15 +107,11 @@ const FLAT: EdgeShape = {
 const jitter = (base: number, spread: number) => base + (Math.random() - 0.5) * spread;
 
 const randEdge = (): EdgeShape => {
-  // Pick a base "character" so different boundaries vary noticeably:
-  // some bulbs are narrow & tall, others wider & shorter.
   const character = Math.random();
-  const baseNeck = 0.075 + character * 0.06;           // 0.075..0.135
-  const baseOver = 0.055 + (1 - character) * 0.095;    // 0.055..0.15  (narrower neck → wider overshoot)
-  const baseDepth = 0.88 + Math.random() * 0.26;       // 0.88..1.14
-  // Subtle off-center placement of the bulb along the edge. Both pieces sharing
-  // this boundary read the same shift, so tabs/sockets still align perfectly.
-  const shift = (Math.random() - 0.5) * 0.26;          // ±0.13
+  const baseNeck = 0.075 + character * 0.06;
+  const baseOver = 0.055 + (1 - character) * 0.095;
+  const baseDepth = 0.88 + Math.random() * 0.26;
+  const shift = (Math.random() - 0.5) * 0.26;
   return {
     sign: Math.random() < 0.5 ? -1 : 1,
     shift,
@@ -131,10 +124,8 @@ const randEdge = (): EdgeShape => {
   };
 };
 
-// Cubic peak sits at ~0.75 of control-point depth, so divide to land on target.
 const PEAK = 0.75;
 
-// Traverses the edge in the +x direction; "outward" = -y * sign.
 const edgeRight = (L: number, T: number, e: EdgeShape) => {
   if (e.sign === 0) return `l ${L} 0`;
   const cx = L * (0.5 + e.shift);
@@ -150,29 +141,21 @@ const edgeRight = (L: number, T: number, e: EdgeShape) => {
   );
 };
 
-// Same physical curve as edgeRight, traversed in the -x direction.
-// The pre/post sections and the cubic control points are swapped so the curve
-// is identical to its neighbour's edgeRight output (with opposite sign).
 const edgeLeft = (L: number, T: number, e: EdgeShape) => {
   if (e.sign === 0) return `l ${-L} 0`;
   const cx = L * (0.5 + e.shift);
   const preEnd = cx - L * e.neckL;
   const postStart = cx + L * e.neckR;
   const span = postStart - preEnd;
-  // When traversing backward, outward (-y in the right frame) flips to +y here,
-  // because we want to draw the very same physical curve. Sign of cpY stays as
-  // in edgeRight relative to the canonical frame, which means we negate it.
   const cpYL = (e.sign * T * e.depthL) / PEAK;
   const cpYR = (e.sign * T * e.depthR) / PEAK;
   return (
     `l ${-(L - postStart)} 0 ` +
-    // Reversed cubic: from postStart back to preEnd, controls swapped (R then L).
     `c ${L * e.overR} ${cpYR} ${-(span + L * e.overL)} ${cpYL} ${-span} 0 ` +
     `l ${-preEnd} 0`
   );
 };
 
-// Same as edgeRight but rotated 90° clockwise: traverses +y, outward = +x * sign.
 const edgeDown = (L: number, T: number, e: EdgeShape) => {
   if (e.sign === 0) return `l 0 ${L}`;
   const cy = L * (0.5 + e.shift);
@@ -188,7 +171,6 @@ const edgeDown = (L: number, T: number, e: EdgeShape) => {
   );
 };
 
-// Reverse of edgeDown.
 const edgeUp = (L: number, T: number, e: EdgeShape) => {
   if (e.sign === 0) return `l 0 ${-L}`;
   const cy = L * (0.5 + e.shift);
@@ -223,6 +205,7 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
   const total = pieceCount(puzzle);
   const boardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const justDraggedRef = useRef(false);
 
   const [pieces, setPieces] = useState<Piece[]>(() => {
     const arr: Piece[] = [];
@@ -234,8 +217,6 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     return arr.sort(() => Math.random() - 0.5);
   });
 
-  // One EdgeShape per shared boundary. Adjacent pieces read the same descriptor
-  // and only flip the sign so their tab+socket interlock perfectly.
   const edgeData = useMemo(() => {
     const eH: EdgeShape[][] = [];
     for (let r = 0; r < puzzle.rows - 1; r++) {
@@ -261,6 +242,7 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     right: c === puzzle.cols - 1 ? FLAT : edgeData.eV[r][c],
   });
 
+  const [pending, setPending] = useState<PendingPointer | null>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
   const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
   const [hint, setHint] = useState<number | null>(null);
@@ -269,6 +251,8 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
   const [done, setDone] = useState(false);
   const [stars, setStars] = useState(0);
   const [elapsed, setElapsed] = useState(0);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [shakeId, setShakeId] = useState<number | null>(null);
 
   useEffect(() => {
     const measure = () => {
@@ -309,37 +293,74 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
 
   const trayPieceSize = window.innerWidth < 640 ? 88 : 100;
 
-  // Pointer handlers
+  const toggleSelect = (pieceId: number) => {
+    setSelectedId((cur) => (cur === pieceId ? null : pieceId));
+  };
+
+  const triggerShake = (pieceId: number) => {
+    setShakeId(pieceId);
+    setTimeout(() => setShakeId((s) => (s === pieceId ? null : s)), 500);
+  };
+
+  // Pointer handlers — covers both drag-and-drop and tap-to-select
   useEffect(() => {
-    if (!drag) return;
+    if (!pending && !drag) return;
     const move = (e: PointerEvent) => {
-      e.preventDefault();
-      setDrag((d) => (d ? { ...d, pointerX: e.clientX, pointerY: e.clientY } : d));
-    };
-    const up = (e: PointerEvent) => {
-      const d = drag;
-      if (!d) return;
-      const board = boardRef.current?.getBoundingClientRect();
-      const piece = pieces.find((p) => p.id === d.pieceId);
-      if (board && piece && boardSize.w > 0) {
-        // Convert pointer offset back to padded-box scale
-        const ratio = d.fromTray ? paddedW / trayPieceSize : 1;
-        const paddedLeft = e.clientX - d.offsetX * ratio;
-        const paddedTop = e.clientY - d.offsetY * ratio;
-        // Inner rect top-left in screen space
-        const innerLeft = paddedLeft + tab;
-        const innerTop = paddedTop + tab;
-        const targetX = board.left + piece.col * pieceW;
-        const targetY = board.top + piece.row * pieceH;
-        const dx = innerLeft - targetX;
-        const dy = innerTop - targetY;
-        const snap = Math.min(pieceW, pieceH) * 0.5;
-        if (Math.abs(dx) < snap && Math.abs(dy) < snap) {
-          setPieces((prev) => prev.map((p) => (p.id === piece.id ? { ...p, placed: true } : p)));
-          playDing();
+      if (drag) {
+        e.preventDefault();
+        setDrag((d) => (d ? { ...d, pointerX: e.clientX, pointerY: e.clientY } : d));
+        return;
+      }
+      if (pending) {
+        const dx = e.clientX - pending.startX;
+        const dy = e.clientY - pending.startY;
+        if (dx * dx + dy * dy > DRAG_THRESHOLD * DRAG_THRESHOLD) {
+          // Promote to drag
+          setDrag({
+            pieceId: pending.pieceId,
+            fromTray: pending.fromTray,
+            pointerX: e.clientX,
+            pointerY: e.clientY,
+            offsetX: pending.offsetX,
+            offsetY: pending.offsetY,
+          });
+          setPending(null);
+          // Dragging a piece cancels tap-selection
+          setSelectedId(null);
         }
       }
-      setDrag(null);
+    };
+    const up = (e: PointerEvent) => {
+      if (drag) {
+        const d = drag;
+        const board = boardRef.current?.getBoundingClientRect();
+        const piece = pieces.find((p) => p.id === d.pieceId);
+        if (board && piece && boardSize.w > 0) {
+          const ratio = d.fromTray ? paddedW / trayPieceSize : 1;
+          const paddedLeft = e.clientX - d.offsetX * ratio;
+          const paddedTop = e.clientY - d.offsetY * ratio;
+          const innerLeft = paddedLeft + tab;
+          const innerTop = paddedTop + tab;
+          const targetX = board.left + piece.col * pieceW;
+          const targetY = board.top + piece.row * pieceH;
+          const dx = innerLeft - targetX;
+          const dy = innerTop - targetY;
+          const snap = Math.min(pieceW, pieceH) * 0.5;
+          if (Math.abs(dx) < snap && Math.abs(dy) < snap) {
+            setPieces((prev) => prev.map((p) => (p.id === piece.id ? { ...p, placed: true } : p)));
+            playDing();
+          }
+        }
+        setDrag(null);
+        justDraggedRef.current = true;
+        setTimeout(() => {
+          justDraggedRef.current = false;
+        }, 150);
+      } else if (pending) {
+        // Treat as a tap — toggle selection of this piece
+        toggleSelect(pending.pieceId);
+        setPending(null);
+      }
     };
     window.addEventListener("pointermove", move, { passive: false });
     window.addEventListener("pointerup", up);
@@ -349,7 +370,7 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
       window.removeEventListener("pointerup", up);
       window.removeEventListener("pointercancel", up);
     };
-  }, [drag, pieces, pieceW, pieceH, tab, paddedW, trayPieceSize, boardSize.w]);
+  }, [pending, drag, pieces, pieceW, pieceH, tab, paddedW, trayPieceSize, boardSize.w]);
 
   useEffect(() => {
     if (done) return;
@@ -365,18 +386,39 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     }
   }, [placedCount, total, hintsUsed, startTime, done, onComplete]);
 
-  const startDrag = (e: React.PointerEvent, pieceId: number, fromTray: boolean) => {
+  const startPointer = (e: React.PointerEvent, pieceId: number, fromTray: boolean) => {
     e.preventDefault();
+    e.stopPropagation();
     (e.target as Element).releasePointerCapture?.(e.pointerId);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    setDrag({
+    setPending({
       pieceId,
       fromTray,
-      pointerX: e.clientX,
-      pointerY: e.clientY,
+      startX: e.clientX,
+      startY: e.clientY,
       offsetX: e.clientX - rect.left,
       offsetY: e.clientY - rect.top,
     });
+  };
+
+  const handleBoardClick = (e: React.MouseEvent) => {
+    if (justDraggedRef.current) return;
+    if (selectedId == null) return;
+    const piece = pieces.find((p) => p.id === selectedId);
+    if (!piece || piece.placed) return;
+    const board = boardRef.current?.getBoundingClientRect();
+    if (!board) return;
+    const cx = board.left + piece.col * pieceW + pieceW / 2;
+    const cy = board.top + piece.row * pieceH + pieceH / 2;
+    const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+    const tolerance = Math.min(pieceW, pieceH) * 0.65;
+    if (dist < tolerance) {
+      setPieces((prev) => prev.map((p) => (p.id === selectedId ? { ...p, placed: true } : p)));
+      setSelectedId(null);
+      playDing();
+    } else {
+      triggerShake(selectedId);
+    }
   };
 
   const useHint = () => {
@@ -387,8 +429,6 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     setTimeout(() => setHint(null), 2000);
   };
 
-  // Renders one piece as an SVG. The piece's inner rect occupies (tab,tab) .. (tab+pieceW, tab+pieceH).
-  // The image is positioned so that the piece's source region appears under the inner rect.
   const renderPieceSvg = (
     p: Piece,
     width: number,
@@ -398,7 +438,6 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     const edges = edgesFor(p.row, p.col);
     const d = buildPiecePath(pieceW, pieceH, tab, edges);
     const clipId = `clip-${puzzle.id}-${p.id}`;
-    // image position so piece source region sits at (tab, tab)
     const imgX = tab - p.col * pieceW;
     const imgY = tab - p.row * pieceH;
     return (
@@ -426,7 +465,6 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
             <rect x={0} y={0} width={paddedW} height={paddedH} fill="oklch(0.97 0.015 80 / 0.5)" />
           )}
         </g>
-        {/* Soft outline */}
         <path d={d} fill="none" stroke="oklch(0.35 0.04 60 / 0.35)" strokeWidth={1} />
         <path d={d} fill="none" stroke="oklch(1 0 0 / 0.45)" strokeWidth={0.6} strokeDasharray="2 3" />
       </svg>
@@ -462,6 +500,7 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
       <div className="flex flex-1 items-center justify-center px-4">
         <div
           ref={boardRef}
+          onClick={handleBoardClick}
           className="relative overflow-visible rounded-2xl bg-[oklch(0.94_0.02_75)] shadow-[var(--shadow-soft)]"
           style={{
             width: boardSize.w,
@@ -469,9 +508,9 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
             backgroundImage: `linear-gradient(oklch(0.97 0.015 80 / 0.75), oklch(0.97 0.015 80 / 0.75)), url(${puzzle.image})`,
             backgroundSize: `cover, ${boardSize.w}px ${boardSize.h}px`,
             backgroundPosition: "center, top left",
+            cursor: selectedId != null ? "crosshair" : "default",
           }}
         >
-          {/* Hint highlight */}
           {hint !== null && boardSize.w > 0 && (() => {
             const hp = pieces.find((p) => p.id === hint);
             if (!hp) return null;
@@ -492,7 +531,27 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
             );
           })()}
 
-          {/* Placed pieces */}
+          {/* Selected piece target ghost */}
+          {selectedId != null && boardSize.w > 0 && (() => {
+            const sp = pieces.find((p) => p.id === selectedId);
+            if (!sp || sp.placed) return null;
+            return (
+              <div
+                className="pointer-events-none absolute"
+                style={{
+                  left: sp.col * pieceW - tab,
+                  top: sp.row * pieceH - tab,
+                  width: paddedW,
+                  height: paddedH,
+                  opacity: 0.55,
+                  filter: "drop-shadow(0 0 10px oklch(0.85 0.14 85 / 0.7))",
+                }}
+              >
+                {renderPieceSvg(sp, paddedW, paddedH, { dim: true })}
+              </div>
+            );
+          })()}
+
           {boardSize.w > 0 &&
             pieces
               .filter((p) => p.placed)
@@ -511,7 +570,6 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
                 </div>
               ))}
 
-          {/* Completion overlay */}
           {done && (
             <div className="absolute inset-0 flex animate-fade-in flex-col items-center justify-center bg-[oklch(0.97_0.015_80/0.9)] p-6 text-center">
               <div className="mb-2 text-5xl">
@@ -551,11 +609,15 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
                 />
               );
             }
+            const isSelected = selectedId === p.id;
+            const isShaking = shakeId === p.id;
             return (
               <div
                 key={p.id}
-                onPointerDown={(e) => startDrag(e, p.id, true)}
-                className="no-select piece-shadow shrink-0 cursor-grab transition-transform active:cursor-grabbing active:scale-105"
+                onPointerDown={(e) => startPointer(e, p.id, true)}
+                className={`no-select piece-shadow shrink-0 cursor-grab transition-transform active:cursor-grabbing ${
+                  isSelected ? "piece-selected" : ""
+                } ${isShaking ? "piece-shake" : ""}`}
                 style={{
                   width: trayPieceSize,
                   height: trayPieceSize,
@@ -568,7 +630,6 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
           })}
       </div>
 
-      {/* Dragging floating piece */}
       {drag && boardSize.w > 0 && (() => {
         const p = pieces.find((x) => x.id === drag.pieceId);
         if (!p) return null;
