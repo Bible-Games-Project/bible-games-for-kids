@@ -14,6 +14,12 @@ import feeding5000Two from "@/assets/puzzle-feeding-5000-2.jpg";
 import noahsArkTwo from "@/assets/puzzle-noahs-ark-2.jpg";
 import creationTwo from "@/assets/puzzle-creation-2.jpg";
 import mosesBasketTwo from "@/assets/puzzle-moses-basket-2.jpg";
+import weddingCana from "@/assets/puzzle-wedding-cana.jpg";
+import prodigalSon from "@/assets/puzzle-prodigal-son.jpg";
+import zacchaeus from "@/assets/puzzle-zacchaeus.jpg";
+import jonahFish from "@/assets/puzzle-jonah-fish.jpg";
+import danielLions from "@/assets/puzzle-daniel-lions.jpg";
+import josephCoat from "@/assets/puzzle-joseph-coat.jpg";
 
 export type DifficultyId = "easy" | "easy-medium" | "medium" | "medium-hard" | "hard";
 
@@ -61,6 +67,12 @@ const SCENES: Scene[] = [
   { slug: "noahs-ark-2", title: "Noah's Ark", verse: "Genesis 9:13", image: noahsArkTwo },
   { slug: "creation-2", title: "The Creation", verse: "Genesis 1:31", image: creationTwo },
   { slug: "moses-basket-2", title: "Baby Moses in the Basket", verse: "Exodus 2:3", image: mosesBasketTwo },
+  { slug: "wedding-cana", title: "The Wedding at Cana", verse: "John 2:9", image: weddingCana },
+  { slug: "prodigal-son", title: "The Prodigal Son", verse: "Luke 15:20", image: prodigalSon },
+  { slug: "zacchaeus", title: "Zacchaeus in the Tree", verse: "Luke 19:5", image: zacchaeus },
+  { slug: "jonah-fish", title: "Jonah and the Great Fish", verse: "Jonah 2:10", image: jonahFish },
+  { slug: "daniel-lions", title: "Daniel in the Lions' Den", verse: "Daniel 6:22", image: danielLions },
+  { slug: "joseph-coat", title: "Joseph's Coat of Many Colors", verse: "Genesis 37:3", image: josephCoat },
 ];
 
 // Each difficulty defines its target piece counts. Adding more entries
@@ -74,11 +86,11 @@ interface DifficultyDef {
 }
 
 const DIFFICULTY_DEFS: DifficultyDef[] = [
-  { id: "easy", label: "Easy", description: "Gentle first puzzles", pieceTargets: [5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15, 15] },
-  { id: "easy-medium", label: "Easy – Medium", description: "A little more to piece together", pieceTargets: [15, 17, 19, 21, 23, 25, 26, 27, 28, 30, 30, 30, 30, 30, 30, 30] },
-  { id: "medium", label: "Medium", description: "For curious little builders", pieceTargets: [30, 34, 38, 42, 45, 48, 51, 54, 57, 60, 60, 60, 60, 60, 60, 60] },
-  { id: "medium-hard", label: "Medium – Hard", description: "A satisfying challenge", pieceTargets: [60, 65, 70, 75, 80, 85, 90, 93, 96, 100, 100, 100, 100, 100, 100, 100] },
-  { id: "hard", label: "Hard", description: "For patient hearts and hands", pieceTargets: [100, 106, 112, 118, 124, 130, 135, 140, 145, 150, 150, 150, 150, 150, 150, 150] },
+  { id: "easy", label: "Easy", description: "Gentle first puzzles", pieceTargets: [5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15] },
+  { id: "easy-medium", label: "Easy – Medium", description: "A little more to piece together", pieceTargets: [15, 17, 19, 21, 23, 25, 26, 27, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30] },
+  { id: "medium", label: "Medium", description: "For curious little builders", pieceTargets: [30, 34, 38, 42, 45, 48, 51, 54, 57, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60] },
+  { id: "medium-hard", label: "Medium – Hard", description: "A satisfying challenge", pieceTargets: [60, 65, 70, 75, 80, 85, 90, 93, 96, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100] },
+  { id: "hard", label: "Hard", description: "For patient hearts and hands", pieceTargets: [100, 106, 112, 118, 124, 130, 135, 140, 145, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150] },
 ];
 
 const TARGET_ASPECT = 896 / 1152; // cols / rows of the artwork (portrait)
