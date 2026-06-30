@@ -55,54 +55,7 @@ const mulberry32 = (a: number) => () => {
 };
 
 // ---------- Audio ----------
-const playDing = () => {
-  try {
-    const AC = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = "sine";
-    o.frequency.setValueAtTime(880, ctx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.12);
-    g.gain.setValueAtTime(0.0001, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
-    o.connect(g);
-    g.connect(ctx.destination);
-    o.start();
-    o.stop(ctx.currentTime + 0.4);
-    setTimeout(() => ctx.close(), 500);
-  } catch {
-    /* ignore */
-  }
-};
-
-const playWin = () => {
-  try {
-    const AC = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
-    const notes = [523.25, 659.25, 783.99, 1046.5];
-    notes.forEach((f, i) => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "triangle";
-      o.frequency.value = f;
-      const t0 = ctx.currentTime + i * 0.12;
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(0.2, t0 + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
-      o.connect(g);
-      g.connect(ctx.destination);
-      o.start(t0);
-      o.stop(t0 + 0.4);
-    });
-    setTimeout(() => ctx.close(), 1200);
-  } catch {
-    /* ignore */
-  }
-};
+// Sound effects are provided by the global AudioProvider via useAudio().
 
 // ---------- Jigsaw edge generation ----------
 interface EdgeShape {
