@@ -128,18 +128,6 @@ interface SettingsContextValue {
   resetAll: () => void;
   t: (key: string) => string;
 }
-  },
-};
-
-interface SettingsContextValue {
-  lang: Lang;
-  setLang: (l: Lang) => void;
-  sound: boolean;
-  setSound: (s: boolean) => void;
-  onboarded: boolean;
-  completeOnboarding: (l: Lang) => void;
-  t: (key: string) => string;
-}
 
 const Ctx = createContext<SettingsContextValue | null>(null);
 
