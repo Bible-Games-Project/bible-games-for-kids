@@ -601,26 +601,6 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
             );
           })()}
 
-          {/* Selected piece target ghost */}
-          {selectedId != null && boardSize.w > 0 && (() => {
-            const sp = pieces.find((p) => p.id === selectedId);
-            if (!sp || sp.placed) return null;
-            return (
-              <div
-                className="pointer-events-none absolute"
-                style={{
-                  left: sp.col * pieceW - tab,
-                  top: sp.row * pieceH - tab,
-                  width: paddedW,
-                  height: paddedH,
-                  opacity: 0.55,
-                  filter: "drop-shadow(0 0 10px oklch(0.85 0.14 85 / 0.7))",
-                }}
-              >
-                {renderPieceSvg(sp, paddedW, paddedH, { dim: true })}
-              </div>
-            );
-          })()}
 
           {boardSize.w > 0 &&
             pieces
