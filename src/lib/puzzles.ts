@@ -87,23 +87,60 @@ const SCENES: Scene[] = [
   { slug: "abraham-stars", title: "Abraham Counts the Stars", verse: "Genesis 15:5", image: abrahamStars },
 ];
 
-// Each difficulty defines its target piece counts. Adding more entries
-// to the array (or more difficulties) just works — no other code changes
-// needed for content expansion.
+// Each difficulty defines its piece-count range. Targets are generated as
+// a smooth ascending curve from min→max with small deterministic variation
+// so progression feels gradual without identical repetition. Adding more
+// scenes or difficulties just works — counts adapt to SCENES.length.
 interface DifficultyDef {
   id: DifficultyId;
   label: string;
   description: string;
-  pieceTargets: number[];
+  min: number;
+  max: number;
 }
 
 const DIFFICULTY_DEFS: DifficultyDef[] = [
-  { id: "easy", label: "Easy", description: "Gentle first puzzles", pieceTargets: [5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15] },
-  { id: "easy-medium", label: "Easy – Medium", description: "A little more to piece together", pieceTargets: [15, 17, 19, 21, 23, 25, 26, 27, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30] },
-  { id: "medium", label: "Medium", description: "For curious little builders", pieceTargets: [30, 34, 38, 42, 45, 48, 51, 54, 57, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60] },
-  { id: "medium-hard", label: "Medium – Hard", description: "A satisfying challenge", pieceTargets: [60, 65, 70, 75, 80, 85, 90, 93, 96, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100] },
-  { id: "hard", label: "Hard", description: "For patient hearts and hands", pieceTargets: [100, 106, 112, 118, 124, 130, 135, 140, 145, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150] },
+  { id: "easy", label: "Easy", description: "Gentle first puzzles", min: 5, max: 15 },
+  { id: "easy-medium", label: "Easy – Medium", description: "A little more to piece together", min: 15, max: 30 },
+  { id: "medium", label: "Medium", description: "For curious little builders", min: 30, max: 65 },
+  { id: "medium-hard", label: "Medium – Hard", description: "A satisfying challenge", min: 65, max: 100 },
+  { id: "hard", label: "Hard", description: "For patient hearts and hands", min: 100, max: 250 },
 ];
+
+// Deterministic small-integer hash → [0,1) for stable per-slot variation.
+const hash01 = (seed: string, i: number): number => {
+  let h = 2166136261 >>> 0;
+  const s = `${seed}#${i}`;
+  for (let k = 0; k < s.length; k++) {
+    h ^= s.charCodeAt(k);
+    h = Math.imul(h, 16777619);
+  }
+  return ((h >>> 0) % 100000) / 100000;
+};
+
+// Build N piece targets that ascend smoothly from min→max with ±12%
+// jitter, clamped to the range and monotonically non-decreasing so the
+// curve never dips backwards.
+const buildPieceTargets = (def: DifficultyDef, count: number): number[] => {
+  const { min, max, id } = def;
+  if (count <= 0) return [];
+  const out: number[] = [];
+  let prev = 0;
+  for (let i = 0; i < count; i++) {
+    const t = count === 1 ? 0 : i / (count - 1); // 0..1
+    // Mild ease-in-out for a gentle curve.
+    const eased = t * t * (3 - 2 * t);
+    const base = min + (max - min) * eased;
+    const jitter = (hash01(id, i) - 0.5) * 0.24; // ±12%
+    let v = Math.round(base * (1 + jitter));
+    v = Math.max(min, Math.min(max, v));
+    if (v < prev) v = prev; // keep non-decreasing
+    out.push(v);
+    prev = v;
+  }
+  return out;
+};
+
 
 const TARGET_ASPECT = 896 / 1152; // cols / rows of the artwork (portrait)
 
