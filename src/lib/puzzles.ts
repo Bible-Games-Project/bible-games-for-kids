@@ -8,6 +8,12 @@ import creation from "@/assets/puzzle-creation.jpg";
 import mosesBasket from "@/assets/puzzle-moses-basket.jpg";
 import davidShepherd from "@/assets/puzzle-david-shepherd.jpg";
 import nativity from "@/assets/puzzle-nativity.jpg";
+import calmingStormTwo from "@/assets/puzzle-calming-storm-2.jpg";
+import blessingChildrenTwo from "@/assets/puzzle-blessing-children-2.jpg";
+import feeding5000Two from "@/assets/puzzle-feeding-5000-2.jpg";
+import noahsArkTwo from "@/assets/puzzle-noahs-ark-2.jpg";
+import creationTwo from "@/assets/puzzle-creation-2.jpg";
+import mosesBasketTwo from "@/assets/puzzle-moses-basket-2.jpg";
 
 export type DifficultyId = "easy" | "easy-medium" | "medium" | "medium-hard" | "hard";
 
@@ -49,6 +55,12 @@ const SCENES: Scene[] = [
   { slug: "moses-basket", title: "Baby Moses in the Basket", verse: "Exodus 2:3", image: mosesBasket },
   { slug: "david-shepherd", title: "David the Shepherd Boy", verse: "1 Samuel 16:11", image: davidShepherd },
   { slug: "nativity", title: "The Nativity", verse: "Luke 2:7", image: nativity },
+  { slug: "calming-storm-2", title: "Jesus Calms the Storm", verse: "Mark 4:39", image: calmingStormTwo },
+  { slug: "blessing-children-2", title: "Jesus Blesses the Children", verse: "Matthew 19:14", image: blessingChildrenTwo },
+  { slug: "feeding-5000-2", title: "Jesus Feeds the 5,000", verse: "John 6:11", image: feeding5000Two },
+  { slug: "noahs-ark-2", title: "Noah's Ark", verse: "Genesis 9:13", image: noahsArkTwo },
+  { slug: "creation-2", title: "The Creation", verse: "Genesis 1:31", image: creationTwo },
+  { slug: "moses-basket-2", title: "Baby Moses in the Basket", verse: "Exodus 2:3", image: mosesBasketTwo },
 ];
 
 // Each difficulty defines its target piece counts. Adding more entries
@@ -62,11 +74,11 @@ interface DifficultyDef {
 }
 
 const DIFFICULTY_DEFS: DifficultyDef[] = [
-  { id: "easy", label: "Easy", description: "Gentle first puzzles", pieceTargets: [5, 6, 8, 9, 10, 11, 12, 13, 14, 15] },
-  { id: "easy-medium", label: "Easy – Medium", description: "A little more to piece together", pieceTargets: [15, 17, 19, 21, 23, 25, 26, 27, 28, 30] },
-  { id: "medium", label: "Medium", description: "For curious little builders", pieceTargets: [30, 34, 38, 42, 45, 48, 51, 54, 57, 60] },
-  { id: "medium-hard", label: "Medium – Hard", description: "A satisfying challenge", pieceTargets: [60, 65, 70, 75, 80, 85, 90, 93, 96, 100] },
-  { id: "hard", label: "Hard", description: "For patient hearts and hands", pieceTargets: [100, 106, 112, 118, 124, 130, 135, 140, 145, 150] },
+  { id: "easy", label: "Easy", description: "Gentle first puzzles", pieceTargets: [5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15, 15] },
+  { id: "easy-medium", label: "Easy – Medium", description: "A little more to piece together", pieceTargets: [15, 17, 19, 21, 23, 25, 26, 27, 28, 30, 30, 30, 30, 30, 30, 30] },
+  { id: "medium", label: "Medium", description: "For curious little builders", pieceTargets: [30, 34, 38, 42, 45, 48, 51, 54, 57, 60, 60, 60, 60, 60, 60, 60] },
+  { id: "medium-hard", label: "Medium – Hard", description: "A satisfying challenge", pieceTargets: [60, 65, 70, 75, 80, 85, 90, 93, 96, 100, 100, 100, 100, 100, 100, 100] },
+  { id: "hard", label: "Hard", description: "For patient hearts and hands", pieceTargets: [100, 106, 112, 118, 124, 130, 135, 140, 145, 150, 150, 150, 150, 150, 150, 150] },
 ];
 
 const TARGET_ASPECT = 896 / 1152; // cols / rows of the artwork (portrait)
