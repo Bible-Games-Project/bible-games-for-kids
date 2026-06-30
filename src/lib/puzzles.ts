@@ -43,6 +43,11 @@ import boyTemple from "@/assets/puzzle-boy-temple.jpg";
 import catchFish from "@/assets/puzzle-catch-fish.jpg";
 import bethlehemJourney from "@/assets/puzzle-bethlehem-journey.jpg";
 import sowerSeed from "@/assets/puzzle-sower-seed.jpg";
+import transfiguration from "@/assets/puzzle-transfiguration.jpg";
+import washesFeet from "@/assets/puzzle-washes-feet.jpg";
+import maryMartha from "@/assets/puzzle-mary-martha.jpg";
+import emmaus from "@/assets/puzzle-emmaus.jpg";
+import mustardSeed from "@/assets/puzzle-mustard-seed.jpg";
 
 export type DifficultyId = "easy" | "easy-medium" | "medium" | "medium-hard" | "hard";
 
@@ -119,6 +124,11 @@ const SCENES: Scene[] = [
   { slug: "catch-fish", title: "The Miraculous Catch of Fish", verse: "John 21:6", image: catchFish },
   { slug: "bethlehem-journey", title: "The Journey to Bethlehem", verse: "Luke 2:4", image: bethlehemJourney },
   { slug: "sower-seed", title: "The Sower and the Seed", verse: "Matthew 13:3", image: sowerSeed },
+  { slug: "transfiguration", title: "The Transfiguration", verse: "Matthew 17:2", image: transfiguration },
+  { slug: "washes-feet", title: "Jesus Washes the Disciples' Feet", verse: "John 13:5", image: washesFeet },
+  { slug: "mary-martha", title: "Mary and Martha", verse: "Luke 10:39", image: maryMartha },
+  { slug: "emmaus", title: "The Road to Emmaus", verse: "Luke 24:15", image: emmaus },
+  { slug: "mustard-seed", title: "The Mustard Seed", verse: "Matthew 13:31", image: mustardSeed },
 ];
 
 // Each difficulty defines its piece-count range. Targets are generated as
