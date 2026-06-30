@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSettings, type Lang } from "@/lib/i18n";
+import { useSettings, LANGS } from "@/lib/i18n";
 
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { lang, setLang, sound, setSound, devMode, setDevMode, resetAll, t } = useSettings();
@@ -14,10 +14,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
   if (!open) return null;
 
-  const langs: { id: Lang; label: string; flag: string }[] = [
-    { id: "en", label: "English", flag: "🇬🇧" },
-    { id: "es", label: "Español", flag: "🇪🇸" },
-  ];
+  const langs = LANGS;
 
   return (
     <div
