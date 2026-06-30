@@ -223,22 +223,6 @@ function Home() {
             {t("home.unlockHint")}
           </p>
         </main>
-          <p className="mt-2 px-2 text-center text-xs italic text-muted-foreground">
-            {t(`diff.${difficulty.id}.desc`)}
-          </p>
-        </nav>
-
-        <main className="mx-auto max-w-3xl space-y-4 px-4 pb-12">
-          <DifficultyList
-            key={difficulty.id}
-            difficulty={difficulty}
-            progress={progress}
-            onPlay={startPuzzle}
-          />
-          <p className="px-2 pt-2 text-center text-xs text-muted-foreground">
-            {t("home.unlockHint")}
-          </p>
-        </main>
       </div>
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
