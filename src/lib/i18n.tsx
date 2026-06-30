@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { STRINGS, LANGS, RTL_LANGS, type Lang } from "./translations";
 
-export type Lang = "en" | "es";
+export type { Lang } from "./translations";
+export { LANGS, RTL_LANGS } from "./translations";
 
 const LANG_KEY = "sp.lang";
 const SOUND_KEY = "sp.sound";
@@ -8,140 +10,18 @@ const ONBOARD_KEY = "sp.onboarded";
 const DEV_KEY = "sp.devMode";
 const PREMIUM_KEY = "sp.premium";
 
-type Dict = Record<string, string>;
+const SUPPORTED_LANGS = new Set<Lang>(LANGS.map((l) => l.id));
 
-const STRINGS: Record<Lang, Dict> = {
-  en: {
-    "app.title": "Bible Jigsaw",
-    "app.tagline": "Storybook Puzzles",
-    "app.subtitle": "Piece together gentle paintings of stories from the New Testament.",
-    "tutorial.title": "Great!",
-    "tutorial.body": "Finish each puzzle with at least ⭐ to unlock the next story in this difficulty.",
-    "tutorial.ok": "Got it",
-    "home.play": "Play",
-    "home.premium": "Premium",
-    "home.moreGames": "More Games",
-    "home.pieces": "pieces",
-    "home.resume": "Resume",
-    "home.welcome": "Welcome to a peaceful place to play.",
-    "select.title": "Choose a Story",
-    "select.back": "Home",
-    "puzzle.label": "Puzzle",
-    "settings.title": "Settings",
-    "settings.sound": "Sound",
-    "settings.on": "On",
-    "settings.off": "Off",
-    "settings.language": "Language",
-    "settings.close": "Close",
-    "onboard.welcome": "Welcome",
-    "onboard.choose": "Choose your language",
-    "onboard.continue": "Continue",
-    "more.title": "More Games",
-    "more.subtitle": "Other stories from the Bible Games Project",
-    "more.back": "Back",
-    "more.play": "Play",
-    "premium.title": "Full Game",
-    "premium.subtitle": "Unlock every Bible story",
-    "premium.body": "You're enjoying the free version of Bible Jigsaw. Unlock the full game to play every puzzle across all difficulty levels — plus all future stories we add.",
-    "premium.feature1": "All puzzles in every difficulty",
-    "premium.feature2": "All current and future stories",
-    "premium.feature3": "No limits on progression",
-    "premium.cta": "Unlock Full Game",
-    "premium.thanks": "Thank you! The full game is unlocked. Enjoy every story.",
-    "premium.unlocked": "Full Game unlocked",
-    "premium.back": "Back",
-    "lock.title": "Part of the Full Game",
-    "lock.body": "You've finished the free stories in this level. Unlock the Full Game to keep playing every puzzle.",
-    "lock.cta": "Unlock Full Game",
-    "lock.later": "Maybe later",
-    "lock.badge": "Full Game",
-    "diff.easy": "Easy",
-    "diff.easy-medium": "Normal",
-    "diff.medium": "Hard",
-    "diff.medium-hard": "Expert",
-    "diff.hard": "Master",
-    "diff.easy.short": "Easy",
-    "diff.easy-medium.short": "Normal",
-    "diff.medium.short": "Hard",
-    "diff.medium-hard.short": "Expert",
-    "diff.hard.short": "Master",
-    "diff.easy.desc": "Gentle first puzzles",
-    "diff.easy-medium.desc": "A little more to piece together",
-    "diff.medium.desc": "For curious little builders",
-    "diff.medium-hard.desc": "A satisfying challenge",
-    "diff.hard.desc": "For patient hearts and hands",
-    "settings.dev": "Game Developer Mode",
-    "settings.devHint": "Unlocks all puzzles for testing. Your real progress is kept safe.",
-    "settings.reset": "Reset Game Data",
-    "settings.resetConfirm": "This will permanently delete all progress, saved puzzles, and onboarding. Continue?",
-    "settings.resetDone": "Game data has been reset.",
-  },
-  es: {
-    "app.title": "Jigsaw Bíblico",
-    "app.tagline": "Puzles del Libro de Cuentos",
-    "app.subtitle": "Arma con calma pinturas suaves de historias del Nuevo Testamento.",
-    "tutorial.title": "¡Genial!",
-    "tutorial.body": "Termina cada puzle con al menos ⭐ para desbloquear la siguiente historia en esta dificultad.",
-    "tutorial.ok": "Entendido",
-    "home.play": "Jugar",
-    "home.premium": "Premium",
-    "home.moreGames": "Más Juegos",
-    "home.pieces": "piezas",
-    "home.resume": "Continuar",
-    "home.welcome": "Bienvenido a un lugar tranquilo para jugar.",
-    "select.title": "Elige una Historia",
-    "select.back": "Inicio",
-    "puzzle.label": "Puzle",
-    "settings.title": "Ajustes",
-    "settings.sound": "Sonido",
-    "settings.on": "Activado",
-    "settings.off": "Apagado",
-    "settings.language": "Idioma",
-    "settings.close": "Cerrar",
-    "onboard.welcome": "Bienvenido",
-    "onboard.choose": "Elige tu idioma",
-    "onboard.continue": "Continuar",
-    "more.title": "Más Juegos",
-    "more.subtitle": "Otras historias de Bible Games Project",
-    "more.back": "Volver",
-    "more.play": "Jugar",
-    "premium.title": "Juego Completo",
-    "premium.subtitle": "Desbloquea todas las historias",
-    "premium.body": "Estás jugando la versión gratuita de Jigsaw Bíblico. Desbloquea el juego completo para jugar todos los puzles en todas las dificultades, además de las nuevas historias que añadamos.",
-    "premium.feature1": "Todos los puzles en cada dificultad",
-    "premium.feature2": "Todas las historias actuales y futuras",
-    "premium.feature3": "Sin límites de progresión",
-    "premium.cta": "Desbloquear Juego Completo",
-    "premium.thanks": "¡Gracias! Has desbloqueado el juego completo. Disfruta cada historia.",
-    "premium.unlocked": "Juego Completo desbloqueado",
-    "premium.back": "Volver",
-    "lock.title": "Parte del Juego Completo",
-    "lock.body": "Has terminado las historias gratuitas de este nivel. Desbloquea el Juego Completo para seguir jugando todos los puzles.",
-    "lock.cta": "Desbloquear Juego Completo",
-    "lock.later": "Quizás luego",
-    "lock.badge": "Juego Completo",
-    "diff.easy": "Fácil",
-    "diff.easy-medium": "Normal",
-    "diff.medium": "Difícil",
-    "diff.medium-hard": "Experto",
-    "diff.hard": "Maestro",
-    "diff.easy.short": "Fácil",
-    "diff.easy-medium.short": "Normal",
-    "diff.medium.short": "Difícil",
-    "diff.medium-hard.short": "Experto",
-    "diff.hard.short": "Maestro",
-    "diff.easy.desc": "Puzles suaves para empezar",
-    "diff.easy-medium.desc": "Un poco más para armar",
-    "diff.medium.desc": "Para pequeños curiosos",
-    "diff.medium-hard.desc": "Un reto agradable",
-    "diff.hard.desc": "Para corazones y manos pacientes",
-    "settings.dev": "Modo Desarrollador",
-    "settings.devHint": "Desbloquea todos los puzles para pruebas. Tu progreso real se conserva.",
-    "settings.reset": "Borrar Datos del Juego",
-    "settings.resetConfirm": "Esto borrará permanentemente todo el progreso, puzles guardados y la introducción. ¿Continuar?",
-    "settings.resetDone": "Los datos del juego se han borrado.",
-  },
-};
+function isLang(v: unknown): v is Lang {
+  return typeof v === "string" && SUPPORTED_LANGS.has(v as Lang);
+}
+
+function applyHtmlLangDir(lang: Lang) {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  root.lang = lang;
+  root.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
+}
 
 interface SettingsContextValue {
   lang: Lang;
@@ -170,12 +50,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const l = localStorage.getItem(LANG_KEY) as Lang | null;
+      const l = localStorage.getItem(LANG_KEY);
       const s = localStorage.getItem(SOUND_KEY);
       const o = localStorage.getItem(ONBOARD_KEY);
       const d = localStorage.getItem(DEV_KEY);
       const p = localStorage.getItem(PREMIUM_KEY);
-      if (l === "en" || l === "es") setLangState(l);
+      if (isLang(l)) setLangState(l);
       if (s !== null) setSoundState(s === "1");
       setOnboarded(o === "1");
       setDevModeState(d === "1");
@@ -183,6 +63,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     } catch {}
     setHydrated(true);
   }, []);
+
+  // Keep <html lang> and <html dir> in sync with the selected language.
+  useEffect(() => {
+    applyHtmlLangDir(lang);
+  }, [lang]);
 
   const setLang = (l: Lang) => {
     setLangState(l);

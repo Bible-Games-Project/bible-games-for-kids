@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSettings, type Lang } from "@/lib/i18n";
+import { useSettings, LANGS } from "@/lib/i18n";
 
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { lang, setLang, sound, setSound, devMode, setDevMode, resetAll, t } = useSettings();
@@ -14,10 +14,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
   if (!open) return null;
 
-  const langs: { id: Lang; label: string; flag: string }[] = [
-    { id: "en", label: "English", flag: "🇬🇧" },
-    { id: "es", label: "Español", flag: "🇪🇸" },
-  ];
+  const langs = LANGS;
 
   return (
     <div
@@ -61,7 +58,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
         {/* Language */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-card p-4">
           <span className="text-sm font-semibold">{t("settings.language")}</span>
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="mt-3 grid max-h-56 grid-cols-2 gap-2 overflow-y-auto pr-1">
             {langs.map((l) => {
               const active = lang === l.id;
               return (
@@ -75,7 +72,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                   }`}
                 >
                   <span className="text-lg">{l.flag}</span>
-                  {l.label}
+                  <span className="truncate">{l.label}</span>
                 </button>
               );
             })}
