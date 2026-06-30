@@ -60,6 +60,8 @@ function Home() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty["id"]>(
     DIFFICULTIES[0].id,
   );
+  const [pendingTutorial, setPendingTutorial] = useState<Difficulty["id"] | null>(null);
+
 
   useEffect(() => {
     setProgress(loadProgress());
