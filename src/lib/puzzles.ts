@@ -38,6 +38,11 @@ import resurrectionMorning from "@/assets/puzzle-resurrection-morning.jpg";
 import queenEsther from "@/assets/puzzle-queen-esther.jpg";
 import josephForgives from "@/assets/puzzle-joseph-forgives.jpg";
 import gideonFleece from "@/assets/puzzle-gideon-fleece.jpg";
+import angelsShepherds from "@/assets/puzzle-angels-shepherds.jpg";
+import boyTemple from "@/assets/puzzle-boy-temple.jpg";
+import catchFish from "@/assets/puzzle-catch-fish.jpg";
+import bethlehemJourney from "@/assets/puzzle-bethlehem-journey.jpg";
+import sowerSeed from "@/assets/puzzle-sower-seed.jpg";
 
 export type DifficultyId = "easy" | "easy-medium" | "medium" | "medium-hard" | "hard";
 
