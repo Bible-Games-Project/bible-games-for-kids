@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSettings, type Lang } from "@/lib/i18n";
 
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { lang, setLang, sound, setSound, t } = useSettings();
+  const { lang, setLang, sound, setSound, devMode, setDevMode, resetAll, t } = useSettings();
+  const [confirmReset, setConfirmReset] = useState(false);
 
   useEffect(() => {
     if (!open) return;
