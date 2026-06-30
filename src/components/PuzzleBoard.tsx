@@ -427,7 +427,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
           const snap = Math.min(pieceW, pieceH) * 0.5;
           if (Math.abs(dx) < snap && Math.abs(dy) < snap) {
             setPieces((prev) => prev.map((p) => (p.id === piece.id ? { ...p, placed: true } : p)));
-            playDing();
+            audio.playCorrect();
           }
         }
         setDrag(null);
@@ -459,7 +459,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
       setStars(s);
       setDone(true);
       setTimeout(() => {
-        playWin();
+        audio.playWin();
         onComplete(s, t);
       }, 300);
     }
@@ -494,7 +494,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
     if (dist < tolerance) {
       setPieces((prev) => prev.map((p) => (p.id === selectedId ? { ...p, placed: true } : p)));
       setSelectedId(null);
-      playDing();
+      audio.playCorrect();
     } else {
       triggerShake(selectedId);
     }
