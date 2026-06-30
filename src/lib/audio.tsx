@@ -67,11 +67,30 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       el.src = playlistRef.current[indexRef.current];
       el.play().catch(() => {});
     };
+    const FADE_SEC = 2;
+    const onTimeUpdate = () => {
+      if (!audioRef.current) return;
+      const dur = el.duration;
+      if (!isFinite(dur) || dur <= 0) return;
+      const remaining = dur - el.currentTime;
+      const base = targetVolRef.current;
+      if (base <= 0) return; // sound off; fadeTo(0) controls volume
+      if (remaining <= FADE_SEC) {
+        if (fadeRafRef.current) {
+          cancelAnimationFrame(fadeRafRef.current);
+          fadeRafRef.current = null;
+        }
+        const v = Math.max(0, base * (remaining / FADE_SEC));
+        el.volume = Math.min(1, v);
+      }
+    };
     el.addEventListener("ended", onEnded);
+    el.addEventListener("timeupdate", onTimeUpdate);
     el.src = playlistRef.current[0];
 
     return () => {
       el.removeEventListener("ended", onEnded);
+      el.removeEventListener("timeupdate", onTimeUpdate);
       el.pause();
       audioRef.current = null;
     };
