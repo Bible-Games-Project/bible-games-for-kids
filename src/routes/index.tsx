@@ -21,7 +21,6 @@ import { OnboardingLanguage } from "@/components/OnboardingLanguage";
 import { SettingsModal } from "@/components/SettingsModal";
 import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
-import { PuzzleButton } from "@/components/PuzzleButton";
 import menuBg from "@/assets/menu-background.jpg";
 
 export const Route = createFileRoute("/")({
@@ -131,35 +130,28 @@ function Home() {
               {t("home.welcome")}
             </p>
 
-            <div className="mt-10 w-full max-w-sm">
-              <div className="mx-auto w-[78%]">
-                <PuzzleButton
-                  variant="play"
-                  onClick={() => setScreen("select")}
-                  icon="▶"
-                  label={t("home.play")}
-                  fill="oklch(0.72 0.13 200)"
-                  textColor="oklch(0.99 0.01 95)"
-                />
-              </div>
-              <div className="-mt-4 grid grid-cols-2 gap-3 sm:gap-4">
-                <PuzzleButton
-                  variant="premium"
-                  onClick={() => setScreen("premium")}
-                  icon="⭐"
-                  label={t("home.premium")}
-                  fill="oklch(0.85 0.13 80)"
-                  textColor="oklch(0.28 0.05 50)"
-                />
-                <PuzzleButton
-                  variant="more"
-                  onClick={() => setScreen("more")}
-                  icon="🎮"
-                  label={t("home.moreGames")}
-                  fill="oklch(0.82 0.06 150)"
-                  textColor="oklch(0.28 0.04 150)"
-                />
-              </div>
+            <div className="mt-10 w-full space-y-3">
+              <button
+                onClick={() => setScreen("select")}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-5 py-4 text-lg font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
+              >
+                <span aria-hidden>▶</span>
+                {t("home.play")}
+              </button>
+              <button
+                onClick={() => setScreen("premium")}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.78_0.13_55)] px-5 py-4 text-lg font-semibold text-[oklch(0.25_0.05_50)] shadow-md transition active:scale-95"
+              >
+                <span aria-hidden>⭐</span>
+                {t("home.premium")}
+              </button>
+              <button
+                onClick={() => setScreen("more")}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-card px-5 py-4 text-lg font-semibold text-foreground shadow-md transition active:scale-95"
+              >
+                <span aria-hidden>🎮</span>
+                {t("home.moreGames")}
+              </button>
             </div>
           </div>
         </div>
