@@ -223,6 +223,13 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
   const boardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const justDraggedRef = useRef(false);
+  const audio = useAudio();
+
+  // Boost music volume while playing; restore menu volume on exit.
+  useEffect(() => {
+    audio.setScope("puzzle");
+    return () => audio.setScope("menu");
+  }, [audio]);
 
   // Two independent seeded streams so shuffle order and edge shapes
   // both stay stable across resumes without coupling to each other.
