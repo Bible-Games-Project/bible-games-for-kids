@@ -99,8 +99,8 @@ export function MoreGamesScreen({ onBack }: { onBack: () => void }) {
               />
               <div className="min-w-0">
                 <h3 className="truncate font-display text-lg leading-snug">{g.name}</h3>
-                <p className="mt-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">
-                  {platform === "android" ? "Google Play" : platform === "ios" ? "App Store" : "Steam / Web"}
+                <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted-foreground">
+                  {g.description}
                 </p>
               </div>
               <span className="rounded-full bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary-foreground)]">
