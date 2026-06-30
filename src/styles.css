@@ -126,3 +126,28 @@
   -webkit-touch-callout: none;
   touch-action: none;
 }
+
+@keyframes piece-shake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  20% { transform: translateX(-5px) rotate(-1.5deg); }
+  40% { transform: translateX(5px) rotate(1.5deg); }
+  60% { transform: translateX(-4px) rotate(-1deg); }
+  80% { transform: translateX(4px) rotate(1deg); }
+}
+
+@keyframes piece-select-pop {
+  0% { transform: scale(1); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1.07); }
+}
+
+.piece-shake {
+  animation: piece-shake 0.45s ease-in-out;
+}
+
+.piece-selected {
+  animation: piece-select-pop 0.25s ease-out forwards;
+  filter: drop-shadow(0 0 10px oklch(0.85 0.14 85 / 0.85))
+          drop-shadow(0 0 2px oklch(0.85 0.14 85 / 0.95));
+}
+
