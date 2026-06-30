@@ -48,13 +48,13 @@ interface ActiveState {
   seed: number;
 }
 
-type Screen = "menu" | "more" | "premium";
+type Screen = "home" | "select" | "more" | "premium";
 
 function Home() {
   const { onboarded, t } = useSettings();
   const [progress, setProgress] = useState<Progress>({});
   const [active, setActive] = useState<ActiveState | null>(null);
-  const [screen, setScreen] = useState<Screen>("menu");
+  const [screen, setScreen] = useState<Screen>("home");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty["id"]>(
     DIFFICULTIES[0].id,
