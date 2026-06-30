@@ -5,6 +5,7 @@ export type Lang = "en" | "es";
 const LANG_KEY = "sp.lang";
 const SOUND_KEY = "sp.sound";
 const ONBOARD_KEY = "sp.onboarded";
+const DEV_KEY = "sp.devMode";
 
 type Dict = Record<string, string>;
 
@@ -45,11 +46,21 @@ const STRINGS: Record<Lang, Dict> = {
     "diff.medium": "Medium",
     "diff.medium-hard": "Medium – Hard",
     "diff.hard": "Hard",
+    "diff.easy.short": "Easy",
+    "diff.easy-medium.short": "E-Med",
+    "diff.medium.short": "Med",
+    "diff.medium-hard.short": "M-Hard",
+    "diff.hard.short": "Hard",
     "diff.easy.desc": "Gentle first puzzles",
     "diff.easy-medium.desc": "A little more to piece together",
     "diff.medium.desc": "For curious little builders",
     "diff.medium-hard.desc": "A satisfying challenge",
     "diff.hard.desc": "For patient hearts and hands",
+    "settings.dev": "Game Developer Mode",
+    "settings.devHint": "Unlocks all puzzles for testing. Your real progress is kept safe.",
+    "settings.reset": "Reset Game Data",
+    "settings.resetConfirm": "This will permanently delete all progress, saved puzzles, and onboarding. Continue?",
+    "settings.resetDone": "Game data has been reset.",
   },
   es: {
     "app.title": "Puzles Bíblicos",
@@ -87,11 +98,21 @@ const STRINGS: Record<Lang, Dict> = {
     "diff.medium": "Medio",
     "diff.medium-hard": "Medio – Difícil",
     "diff.hard": "Difícil",
+    "diff.easy.short": "Fácil",
+    "diff.easy-medium.short": "F-Med",
+    "diff.medium.short": "Medio",
+    "diff.medium-hard.short": "M-Dif",
+    "diff.hard.short": "Difícil",
     "diff.easy.desc": "Puzles suaves para empezar",
     "diff.easy-medium.desc": "Un poco más para armar",
     "diff.medium.desc": "Para pequeños curiosos",
     "diff.medium-hard.desc": "Un reto agradable",
     "diff.hard.desc": "Para corazones y manos pacientes",
+    "settings.dev": "Modo Desarrollador",
+    "settings.devHint": "Desbloquea todos los puzles para pruebas. Tu progreso real se conserva.",
+    "settings.reset": "Borrar Datos del Juego",
+    "settings.resetConfirm": "Esto borrará permanentemente todo el progreso, puzles guardados y la introducción. ¿Continuar?",
+    "settings.resetDone": "Los datos del juego se han borrado.",
   },
 };
 
@@ -102,6 +123,9 @@ interface SettingsContextValue {
   setSound: (s: boolean) => void;
   onboarded: boolean;
   completeOnboarding: (l: Lang) => void;
+  devMode: boolean;
+  setDevMode: (v: boolean) => void;
+  resetAll: () => void;
   t: (key: string) => string;
 }
 
@@ -110,7 +134,8 @@ const Ctx = createContext<SettingsContextValue | null>(null);
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
   const [sound, setSoundState] = useState<boolean>(true);
-  const [onboarded, setOnboarded] = useState<boolean>(true); // assume true on SSR so nothing flashes
+  const [onboarded, setOnboarded] = useState<boolean>(true);
+  const [devMode, setDevModeState] = useState<boolean>(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -118,9 +143,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const l = localStorage.getItem(LANG_KEY) as Lang | null;
       const s = localStorage.getItem(SOUND_KEY);
       const o = localStorage.getItem(ONBOARD_KEY);
+      const d = localStorage.getItem(DEV_KEY);
       if (l === "en" || l === "es") setLangState(l);
       if (s !== null) setSoundState(s === "1");
       setOnboarded(o === "1");
+      setDevModeState(d === "1");
     } catch {}
     setHydrated(true);
   }, []);
@@ -138,6 +165,31 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setOnboarded(true);
     try { localStorage.setItem(ONBOARD_KEY, "1"); } catch {}
   };
+  const setDevMode = (v: boolean) => {
+    setDevModeState(v);
+    try { localStorage.setItem(DEV_KEY, v ? "1" : "0"); } catch {}
+  };
+  const resetAll = () => {
+    try {
+      // Clear all known app keys + any starting with our prefix.
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (
+          k.startsWith("sp.") ||
+          k.startsWith("jesus-puzzles-")
+        ) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+    } catch {}
+    setLangState("en");
+    setSoundState(true);
+    setOnboarded(false);
+    setDevModeState(false);
+  };
 
   const t = useMemo(() => {
     const dict = STRINGS[lang];
@@ -151,6 +203,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSound,
     onboarded: hydrated ? onboarded : true,
     completeOnboarding,
+    devMode: hydrated ? devMode : false,
+    setDevMode,
+    resetAll,
     t,
   };
 
