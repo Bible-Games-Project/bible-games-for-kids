@@ -20,6 +20,12 @@ import zacchaeus from "@/assets/puzzle-zacchaeus.jpg";
 import jonahFish from "@/assets/puzzle-jonah-fish.jpg";
 import danielLions from "@/assets/puzzle-daniel-lions.jpg";
 import josephCoat from "@/assets/puzzle-joseph-coat.jpg";
+import sermonMount from "@/assets/puzzle-sermon-mount.jpg";
+import baptismJesus from "@/assets/puzzle-baptism-jesus.jpg";
+import palmSunday from "@/assets/puzzle-palm-sunday.jpg";
+import adamAnimals from "@/assets/puzzle-adam-animals.jpg";
+import ruthFields from "@/assets/puzzle-ruth-fields.jpg";
+import abrahamStars from "@/assets/puzzle-abraham-stars.jpg";
 
 export type DifficultyId = "easy" | "easy-medium" | "medium" | "medium-hard" | "hard";
 
@@ -73,6 +79,12 @@ const SCENES: Scene[] = [
   { slug: "jonah-fish", title: "Jonah and the Great Fish", verse: "Jonah 2:10", image: jonahFish },
   { slug: "daniel-lions", title: "Daniel in the Lions' Den", verse: "Daniel 6:22", image: danielLions },
   { slug: "joseph-coat", title: "Joseph's Coat of Many Colors", verse: "Genesis 37:3", image: josephCoat },
+  { slug: "sermon-mount", title: "The Sermon on the Mount", verse: "Matthew 5:1", image: sermonMount },
+  { slug: "baptism-jesus", title: "The Baptism of Jesus", verse: "Matthew 3:16", image: baptismJesus },
+  { slug: "palm-sunday", title: "The Triumphal Entry", verse: "Matthew 21:9", image: palmSunday },
+  { slug: "adam-animals", title: "Adam Names the Animals", verse: "Genesis 2:19", image: adamAnimals },
+  { slug: "ruth-fields", title: "Ruth in the Fields", verse: "Ruth 2:3", image: ruthFields },
+  { slug: "abraham-stars", title: "Abraham Counts the Stars", verse: "Genesis 15:5", image: abrahamStars },
 ];
 
 // Each difficulty defines its target piece counts. Adding more entries
