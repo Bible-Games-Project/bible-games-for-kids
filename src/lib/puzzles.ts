@@ -3,6 +3,11 @@ import blessingChildren from "@/assets/puzzle-blessing-children.jpg";
 import feeding5000 from "@/assets/puzzle-feeding-5000.jpg";
 import calmingStorm from "@/assets/puzzle-calming-storm.jpg";
 import goodSamaritan from "@/assets/puzzle-good-samaritan.jpg";
+import noahsArk from "@/assets/puzzle-noahs-ark.jpg";
+import creation from "@/assets/puzzle-creation.jpg";
+import mosesBasket from "@/assets/puzzle-moses-basket.jpg";
+import davidShepherd from "@/assets/puzzle-david-shepherd.jpg";
+import nativity from "@/assets/puzzle-nativity.jpg";
 
 export type DifficultyId = "easy" | "easy-medium" | "medium" | "medium-hard" | "hard";
 
@@ -39,6 +44,11 @@ const SCENES: Scene[] = [
   { slug: "feeding-5000", title: "Jesus Feeds the 5,000", verse: "John 6:11", image: feeding5000 },
   { slug: "calming-storm", title: "Jesus Calms the Storm", verse: "Mark 4:39", image: calmingStorm },
   { slug: "good-samaritan", title: "The Good Samaritan", verse: "Luke 10:33", image: goodSamaritan },
+  { slug: "noahs-ark", title: "Noah's Ark", verse: "Genesis 9:13", image: noahsArk },
+  { slug: "creation", title: "The Creation", verse: "Genesis 1:31", image: creation },
+  { slug: "moses-basket", title: "Baby Moses in the Basket", verse: "Exodus 2:3", image: mosesBasket },
+  { slug: "david-shepherd", title: "David the Shepherd Boy", verse: "1 Samuel 16:11", image: davidShepherd },
+  { slug: "nativity", title: "The Nativity", verse: "Luke 2:7", image: nativity },
 ];
 
 // Each difficulty defines its target piece counts. Adding more entries
