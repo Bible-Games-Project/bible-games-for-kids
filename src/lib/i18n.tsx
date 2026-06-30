@@ -11,10 +11,12 @@ type Dict = Record<string, string>;
 
 const STRINGS: Record<Lang, Dict> = {
   en: {
-    "app.title": "Bible Puzzles",
+    "app.title": "Bible Jigsaw",
     "app.tagline": "Storybook Puzzles",
     "app.subtitle": "Piece together gentle paintings of stories from the New Testament.",
-    "home.unlockHint": "Finish a puzzle with at least ⭐ to unlock the next story in this difficulty.",
+    "tutorial.title": "Great!",
+    "tutorial.body": "Finish each puzzle with at least ⭐ to unlock the next story in this difficulty.",
+    "tutorial.ok": "Got it",
     "home.play": "Play",
     "home.premium": "Premium",
     "home.moreGames": "More Games",
@@ -63,10 +65,12 @@ const STRINGS: Record<Lang, Dict> = {
     "settings.resetDone": "Game data has been reset.",
   },
   es: {
-    "app.title": "Puzles Bíblicos",
+    "app.title": "Jigsaw Bíblico",
     "app.tagline": "Puzles del Libro de Cuentos",
     "app.subtitle": "Arma con calma pinturas suaves de historias del Nuevo Testamento.",
-    "home.unlockHint": "Termina un puzle con al menos ⭐ para desbloquear la siguiente historia en esta dificultad.",
+    "tutorial.title": "¡Genial!",
+    "tutorial.body": "Termina cada puzle con al menos ⭐ para desbloquear la siguiente historia en esta dificultad.",
+    "tutorial.ok": "Entendido",
     "home.play": "Jugar",
     "home.premium": "Premium",
     "home.moreGames": "Más Juegos",
