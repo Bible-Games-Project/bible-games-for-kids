@@ -6,6 +6,7 @@ import {
   saveSession,
   type SavedSession,
 } from "@/lib/progress";
+import { useAudio } from "@/lib/audio";
 
 interface Piece {
   id: number;
