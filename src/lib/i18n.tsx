@@ -6,6 +6,7 @@ const LANG_KEY = "sp.lang";
 const SOUND_KEY = "sp.sound";
 const ONBOARD_KEY = "sp.onboarded";
 const DEV_KEY = "sp.devMode";
+const PREMIUM_KEY = "sp.premium";
 
 type Dict = Record<string, string>;
 
@@ -39,10 +40,21 @@ const STRINGS: Record<Lang, Dict> = {
     "more.subtitle": "Other stories from the Bible Games Project",
     "more.back": "Back",
     "more.play": "Play",
-    "premium.title": "Premium",
-    "premium.subtitle": "Coming soon",
-    "premium.body": "Premium features are on the way. Thank you for your patience and support!",
+    "premium.title": "Full Game",
+    "premium.subtitle": "Unlock every Bible story",
+    "premium.body": "You're enjoying the free version of Bible Jigsaw. Unlock the full game to play every puzzle across all difficulty levels — plus all future stories we add.",
+    "premium.feature1": "All puzzles in every difficulty",
+    "premium.feature2": "All current and future stories",
+    "premium.feature3": "No limits on progression",
+    "premium.cta": "Unlock Full Game",
+    "premium.thanks": "Thank you! The full game is unlocked. Enjoy every story.",
+    "premium.unlocked": "Full Game unlocked",
     "premium.back": "Back",
+    "lock.title": "Part of the Full Game",
+    "lock.body": "You've finished the free stories in this level. Unlock the Full Game to keep playing every puzzle.",
+    "lock.cta": "Unlock Full Game",
+    "lock.later": "Maybe later",
+    "lock.badge": "Full Game",
     "diff.easy": "Easy",
     "diff.easy-medium": "Normal",
     "diff.medium": "Hard",
@@ -93,10 +105,21 @@ const STRINGS: Record<Lang, Dict> = {
     "more.subtitle": "Otras historias de Bible Games Project",
     "more.back": "Volver",
     "more.play": "Jugar",
-    "premium.title": "Premium",
-    "premium.subtitle": "Próximamente",
-    "premium.body": "Las funciones Premium están en camino. ¡Gracias por tu paciencia y apoyo!",
+    "premium.title": "Juego Completo",
+    "premium.subtitle": "Desbloquea todas las historias",
+    "premium.body": "Estás jugando la versión gratuita de Jigsaw Bíblico. Desbloquea el juego completo para jugar todos los puzles en todas las dificultades, además de las nuevas historias que añadamos.",
+    "premium.feature1": "Todos los puzles en cada dificultad",
+    "premium.feature2": "Todas las historias actuales y futuras",
+    "premium.feature3": "Sin límites de progresión",
+    "premium.cta": "Desbloquear Juego Completo",
+    "premium.thanks": "¡Gracias! Has desbloqueado el juego completo. Disfruta cada historia.",
+    "premium.unlocked": "Juego Completo desbloqueado",
     "premium.back": "Volver",
+    "lock.title": "Parte del Juego Completo",
+    "lock.body": "Has terminado las historias gratuitas de este nivel. Desbloquea el Juego Completo para seguir jugando todos los puzles.",
+    "lock.cta": "Desbloquear Juego Completo",
+    "lock.later": "Quizás luego",
+    "lock.badge": "Juego Completo",
     "diff.easy": "Fácil",
     "diff.easy-medium": "Normal",
     "diff.medium": "Difícil",
@@ -129,6 +152,8 @@ interface SettingsContextValue {
   completeOnboarding: (l: Lang) => void;
   devMode: boolean;
   setDevMode: (v: boolean) => void;
+  premium: boolean;
+  setPremium: (v: boolean) => void;
   resetAll: () => void;
   t: (key: string) => string;
 }
@@ -140,6 +165,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [sound, setSoundState] = useState<boolean>(true);
   const [onboarded, setOnboarded] = useState<boolean>(true);
   const [devMode, setDevModeState] = useState<boolean>(false);
+  const [premium, setPremiumState] = useState<boolean>(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -148,10 +174,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const s = localStorage.getItem(SOUND_KEY);
       const o = localStorage.getItem(ONBOARD_KEY);
       const d = localStorage.getItem(DEV_KEY);
+      const p = localStorage.getItem(PREMIUM_KEY);
       if (l === "en" || l === "es") setLangState(l);
       if (s !== null) setSoundState(s === "1");
       setOnboarded(o === "1");
       setDevModeState(d === "1");
+      setPremiumState(p === "1");
     } catch {}
     setHydrated(true);
   }, []);
@@ -173,17 +201,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setDevModeState(v);
     try { localStorage.setItem(DEV_KEY, v ? "1" : "0"); } catch {}
   };
+  const setPremium = (v: boolean) => {
+    setPremiumState(v);
+    try { localStorage.setItem(PREMIUM_KEY, v ? "1" : "0"); } catch {}
+  };
   const resetAll = () => {
     try {
-      // Clear all known app keys + any starting with our prefix.
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (!k) continue;
-        if (
-          k.startsWith("sp.") ||
-          k.startsWith("jesus-puzzles-")
-        ) {
+        if (k.startsWith("sp.") || k.startsWith("jesus-puzzles-")) {
           keysToRemove.push(k);
         }
       }
@@ -193,6 +221,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSoundState(true);
     setOnboarded(false);
     setDevModeState(false);
+    setPremiumState(false);
   };
 
   const t = useMemo(() => {
@@ -209,6 +238,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     completeOnboarding,
     devMode: hydrated ? devMode : false,
     setDevMode,
+    premium: hydrated ? premium : false,
+    setPremium,
     resetAll,
     t,
   };
