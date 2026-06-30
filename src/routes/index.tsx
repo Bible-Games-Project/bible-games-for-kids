@@ -21,7 +21,7 @@ import { OnboardingLanguage } from "@/components/OnboardingLanguage";
 import { SettingsModal } from "@/components/SettingsModal";
 import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
-import { isFreePuzzle, FREE_PER_DIFFICULTY } from "@/lib/freemium";
+import { isFreePuzzle } from "@/lib/freemium";
 import menuBg from "@/assets/menu-background.jpg";
 
 export const Route = createFileRoute("/")({
