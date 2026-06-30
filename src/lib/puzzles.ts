@@ -1,8 +1,3 @@
-import burningBush from "@/assets/puzzle-burning-bush.jpg";
-import transfiguration from "@/assets/puzzle-transfiguration.jpg";
-import footWashing from "@/assets/puzzle-foot-washing.jpg";
-import roadEmmaus from "@/assets/puzzle-road-emmaus.jpg";
-import ascension from "@/assets/puzzle-ascension.jpg";
 import walkingWater from "@/assets/puzzle-walking-water.jpg";
 import blessingChildren from "@/assets/puzzle-blessing-children.jpg";
 import feeding5000 from "@/assets/puzzle-feeding-5000.jpg";
@@ -124,11 +119,6 @@ const SCENES: Scene[] = [
   { slug: "catch-fish", title: "The Miraculous Catch of Fish", verse: "John 21:6", image: catchFish },
   { slug: "bethlehem-journey", title: "The Journey to Bethlehem", verse: "Luke 2:4", image: bethlehemJourney },
   { slug: "sower-seed", title: "The Sower and the Seed", verse: "Matthew 13:3", image: sowerSeed },
-  { slug: "burning-bush", title: "Moses and the Burning Bush", verse: "Exodus 3:2", image: burningBush },
-  { slug: "transfiguration", title: "The Transfiguration", verse: "Matthew 17:2", image: transfiguration },
-  { slug: "foot-washing", title: "Jesus Washes the Disciples' Feet", verse: "John 13:5", image: footWashing },
-  { slug: "road-emmaus", title: "The Road to Emmaus", verse: "Luke 24:15", image: roadEmmaus },
-  { slug: "ascension", title: "The Ascension", verse: "Acts 1:9", image: ascension },
 ];
 
 // Each difficulty defines its piece-count range. Targets are generated as
