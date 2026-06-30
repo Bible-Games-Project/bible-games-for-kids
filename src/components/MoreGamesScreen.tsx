@@ -9,6 +9,7 @@ import trueChristIcon from "@/assets/game-true-christ.png";
 interface Game {
   id: string;
   name: string;
+  description: string;
   icon: string;
   links: GameLinks;
 }
