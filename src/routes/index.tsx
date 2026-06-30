@@ -90,65 +90,95 @@ function Home() {
     );
   }
 
-  if (screen === "more") return <MoreGamesScreen onBack={() => setScreen("menu")} />;
-  if (screen === "premium") return <PremiumScreen onBack={() => setScreen("menu")} />;
+  if (screen === "more") return <MoreGamesScreen onBack={() => setScreen("home")} />;
+  if (screen === "premium") return <PremiumScreen onBack={() => setScreen("home")} />;
 
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
 
+  const settingsButton = (
+    <button
+      onClick={() => setSettingsOpen(true)}
+      aria-label={t("settings.title")}
+      className="absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full bg-card text-foreground/80 shadow-md transition active:scale-95"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    </button>
+  );
+
+  const bgStyle = {
+    backgroundImage: `linear-gradient(180deg, oklch(0.98 0.015 80 / 0.4), oklch(0.96 0.03 60 / 0.85)), url(${menuBg})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center top",
+  } as const;
+
+  if (screen === "home") {
+    return (
+      <div className="min-h-[100dvh] w-full">
+        <div className="relative min-h-[100dvh] w-full" style={bgStyle}>
+          {settingsButton}
+          <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col items-center justify-center px-6 py-12 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              {t("app.tagline")}
+            </p>
+            <h1 className="mt-2 font-display text-5xl leading-tight text-foreground sm:text-6xl">
+              {t("app.title")}
+            </h1>
+            <p className="mt-4 max-w-xs text-sm text-muted-foreground">
+              {t("home.welcome")}
+            </p>
+
+            <div className="mt-10 w-full space-y-3">
+              <button
+                onClick={() => setScreen("select")}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-5 py-4 text-lg font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
+              >
+                <span aria-hidden>▶</span>
+                {t("home.play")}
+              </button>
+              <button
+                onClick={() => setScreen("premium")}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.78_0.13_55)] px-5 py-4 text-lg font-semibold text-[oklch(0.25_0.05_50)] shadow-md transition active:scale-95"
+              >
+                <span aria-hidden>⭐</span>
+                {t("home.premium")}
+              </button>
+              <button
+                onClick={() => setScreen("more")}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-card px-5 py-4 text-lg font-semibold text-foreground shadow-md transition active:scale-95"
+              >
+                <span aria-hidden>🎮</span>
+                {t("home.moreGames")}
+              </button>
+            </div>
+          </div>
+        </div>
+        <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      </div>
+    );
+  }
+
+  // screen === "select"
   return (
     <div className="min-h-[100dvh] w-full">
-      <div
-        className="relative w-full"
-        style={{
-          backgroundImage: `linear-gradient(180deg, oklch(0.98 0.015 80 / 0.4), oklch(0.96 0.03 60 / 0.85)), url(${menuBg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center top",
-        }}
-      >
-        {/* Settings button - top right */}
-        <button
-          onClick={() => setSettingsOpen(true)}
-          aria-label={t("settings.title")}
-          className="absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full bg-card text-foreground/80 shadow-md transition active:scale-95"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-        </button>
+      <div className="relative w-full" style={bgStyle}>
+        {settingsButton}
 
-        <header className="mx-auto max-w-3xl px-5 pt-10 pb-4 text-center sm:pt-16">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            {t("app.tagline")}
-          </p>
-          <h1 className="mt-2 font-display text-3xl leading-tight text-foreground sm:text-5xl">
-            {t("app.title")}
-          </h1>
-          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
-            {t("app.subtitle")}
-          </p>
+        <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
+          <button
+            onClick={() => setScreen("home")}
+            className="grid h-10 w-10 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
+            aria-label={t("select.back")}
+          >
+            ←
+          </button>
+          <h1 className="font-display text-2xl sm:text-3xl">{t("select.title")}</h1>
         </header>
 
-        {/* Premium / More Games quick actions */}
-        <div className="mx-auto flex max-w-3xl items-stretch gap-3 px-4 pb-4">
-          <button
-            onClick={() => setScreen("premium")}
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.78_0.13_55)] px-4 py-3 font-semibold text-[oklch(0.25_0.05_50)] shadow-sm transition active:scale-95"
-          >
-            <span aria-hidden>✨</span>
-            {t("home.premium")}
-          </button>
-          <button
-            onClick={() => setScreen("more")}
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-card px-4 py-3 font-semibold text-foreground shadow-sm transition active:scale-95"
-          >
-            <span aria-hidden>🎮</span>
-            {t("home.moreGames")}
-          </button>
-        </div>
-
         {/* Difficulty selector */}
-        <nav className="mx-auto max-w-3xl px-3 pb-3">
+        <nav className="mx-auto max-w-3xl px-3 pb-3 pt-2">
           <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {DIFFICULTIES.map((d) => {
               const isActive = d.id === selectedDifficulty;
