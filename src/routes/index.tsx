@@ -177,9 +177,9 @@ function Home() {
           <h1 className="font-display text-2xl sm:text-3xl">{t("select.title")}</h1>
         </header>
 
-        {/* Difficulty selector */}
+        {/* Difficulty selector — compact 5-col grid so every tab is always reachable */}
         <nav className="mx-auto max-w-3xl px-3 pb-3 pt-2">
-          <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
             {DIFFICULTIES.map((d) => {
               const isActive = d.id === selectedDifficulty;
               const completed = d.puzzles.filter((p) => (progress[p.id]?.stars ?? 0) > 0).length;
@@ -187,20 +187,42 @@ function Home() {
                 <button
                   key={d.id}
                   onClick={() => setSelectedDifficulty(d.id)}
-                  className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition active:scale-95 ${
+                  className={`flex min-w-0 flex-col items-center justify-center rounded-xl px-1 py-2 text-[11px] font-semibold leading-tight shadow-sm transition active:scale-95 sm:text-sm ${
                     isActive
                       ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
                       : "bg-card text-foreground/80 hover:bg-secondary"
                   }`}
                 >
-                  {t(`diff.${d.id}`)}
-                  <span className={`ml-2 text-[10px] font-bold ${isActive ? "opacity-80" : "text-muted-foreground"}`}>
+                  <span className="block w-full truncate text-center sm:hidden">
+                    {t(`diff.${d.id}.short`)}
+                  </span>
+                  <span className="hidden w-full truncate text-center sm:block">
+                    {t(`diff.${d.id}`)}
+                  </span>
+                  <span className={`mt-0.5 text-[9px] font-bold sm:text-[10px] ${isActive ? "opacity-80" : "text-muted-foreground"}`}>
                     {completed}/{d.puzzles.length}
                   </span>
                 </button>
               );
             })}
           </div>
+          <p className="mt-2 px-2 text-center text-xs italic text-muted-foreground">
+            {t(`diff.${difficulty.id}.desc`)}
+          </p>
+        </nav>
+
+        <main className="mx-auto max-w-3xl space-y-4 px-4 pb-12">
+          <DifficultyList
+            key={difficulty.id}
+            difficulty={difficulty}
+            progress={progress}
+            devMode={devMode}
+            onPlay={startPuzzle}
+          />
+          <p className="px-2 pt-2 text-center text-xs text-muted-foreground">
+            {t("home.unlockHint")}
+          </p>
+        </main>
           <p className="mt-2 px-2 text-center text-xs italic text-muted-foreground">
             {t(`diff.${difficulty.id}.desc`)}
           </p>
