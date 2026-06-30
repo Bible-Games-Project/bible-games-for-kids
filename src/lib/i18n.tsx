@@ -134,7 +134,8 @@ const Ctx = createContext<SettingsContextValue | null>(null);
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
   const [sound, setSoundState] = useState<boolean>(true);
-  const [onboarded, setOnboarded] = useState<boolean>(true); // assume true on SSR so nothing flashes
+  const [onboarded, setOnboarded] = useState<boolean>(true);
+  const [devMode, setDevModeState] = useState<boolean>(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -142,9 +143,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const l = localStorage.getItem(LANG_KEY) as Lang | null;
       const s = localStorage.getItem(SOUND_KEY);
       const o = localStorage.getItem(ONBOARD_KEY);
+      const d = localStorage.getItem(DEV_KEY);
       if (l === "en" || l === "es") setLangState(l);
       if (s !== null) setSoundState(s === "1");
       setOnboarded(o === "1");
+      setDevModeState(d === "1");
     } catch {}
     setHydrated(true);
   }, []);
@@ -162,6 +165,31 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setOnboarded(true);
     try { localStorage.setItem(ONBOARD_KEY, "1"); } catch {}
   };
+  const setDevMode = (v: boolean) => {
+    setDevModeState(v);
+    try { localStorage.setItem(DEV_KEY, v ? "1" : "0"); } catch {}
+  };
+  const resetAll = () => {
+    try {
+      // Clear all known app keys + any starting with our prefix.
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (
+          k.startsWith("sp.") ||
+          k.startsWith("jesus-puzzles-")
+        ) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+    } catch {}
+    setLangState("en");
+    setSoundState(true);
+    setOnboarded(false);
+    setDevModeState(false);
+  };
 
   const t = useMemo(() => {
     const dict = STRINGS[lang];
@@ -175,6 +203,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSound,
     onboarded: hydrated ? onboarded : true,
     completeOnboarding,
+    devMode: hydrated ? devMode : false,
+    setDevMode,
+    resetAll,
     t,
   };
 
