@@ -208,14 +208,27 @@ const computeGrid = (target: number): { cols: number; rows: number } => {
   return { cols: best.cols, rows: best.rows };
 };
 
+// Deterministic per-difficulty shuffle of the scene pool. Each difficulty
+// gets a unique order seeded by its id (Fisher–Yates with hash01), so the
+// sequence is stable across sessions but differs between difficulties.
+const shuffledScenesFor = (seed: string): Scene[] => {
+  const arr = SCENES.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(hash01(`${seed}:shuffle`, i) * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
 export const DIFFICULTIES: Difficulty[] = DIFFICULTY_DEFS.map((d) => {
   const targets = buildPieceTargets(d, SCENES.length);
+  const scenes = shuffledScenesFor(d.id);
   return {
     id: d.id,
     label: d.label,
     description: d.description,
     puzzles: targets.map((target, i) => {
-      const scene = SCENES[i % SCENES.length];
+      const scene = scenes[i % scenes.length];
       const grid = computeGrid(target);
       return {
         id: `${d.id}__${i + 1}__${scene.slug}`,
