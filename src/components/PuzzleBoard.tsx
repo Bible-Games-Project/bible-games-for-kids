@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Puzzle } from "@/lib/puzzles";
 import { pieceCount } from "@/lib/puzzles";
-import { computeStars } from "@/lib/progress";
+import {
+  computeStars,
+  saveSession,
+  type SavedSession,
+} from "@/lib/progress";
 
 interface Piece {
   id: number;
