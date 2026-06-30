@@ -51,7 +51,7 @@ interface ActiveState {
 type Screen = "home" | "select" | "more" | "premium";
 
 function Home() {
-  const { onboarded, t } = useSettings();
+  const { onboarded, devMode, t } = useSettings();
   const [progress, setProgress] = useState<Progress>({});
   const [active, setActive] = useState<ActiveState | null>(null);
   const [screen, setScreen] = useState<Screen>("home");
