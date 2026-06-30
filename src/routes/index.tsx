@@ -233,10 +233,12 @@ function Home() {
 function DifficultyList({
   difficulty,
   progress,
+  devMode,
   onPlay,
 }: {
   difficulty: Difficulty;
   progress: Progress;
+  devMode: boolean;
   onPlay: (p: Puzzle) => void;
 }) {
   const { t } = useSettings();
@@ -252,7 +254,7 @@ function DifficultyList({
   return (
     <>
       {difficulty.puzzles.map((p, i) => {
-        const unlocked = isPuzzleUnlocked(difficulty.puzzles, i, progress);
+        const unlocked = devMode || isPuzzleUnlocked(difficulty.puzzles, i, progress);
         const res = progress[p.id];
         const stars = res?.stars ?? 0;
         const canResume = unlocked && resumeFlags[i];
