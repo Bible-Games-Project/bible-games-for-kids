@@ -5,6 +5,7 @@ export type Lang = "en" | "es";
 const LANG_KEY = "sp.lang";
 const SOUND_KEY = "sp.sound";
 const ONBOARD_KEY = "sp.onboarded";
+const DEV_KEY = "sp.devMode";
 
 type Dict = Record<string, string>;
 
