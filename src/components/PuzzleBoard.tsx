@@ -217,37 +217,49 @@ const buildPiecePath = (
     "Z",
   ].join(" ");
 
-export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
+export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }: Props) {
   const total = pieceCount(puzzle);
   const boardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const justDraggedRef = useRef(false);
 
+  // Two independent seeded streams so shuffle order and edge shapes
+  // both stay stable across resumes without coupling to each other.
+  const shuffleRng = useMemo(() => mulberry32(seed ^ 0x9e3779b9), [seed]);
+  const edgeRng = useMemo(() => mulberry32(seed ^ 0x85ebca6b), [seed]);
+
   const [pieces, setPieces] = useState<Piece[]>(() => {
+    const placedSet = new Set(initialSession?.placedIds ?? []);
     const arr: Piece[] = [];
     for (let r = 0; r < puzzle.rows; r++) {
       for (let c = 0; c < puzzle.cols; c++) {
-        arr.push({ id: r * puzzle.cols + c, row: r, col: c, placed: false });
+        const id = r * puzzle.cols + c;
+        arr.push({ id, row: r, col: c, placed: placedSet.has(id) });
       }
     }
-    return arr.sort(() => Math.random() - 0.5);
+    // Seeded Fisher–Yates so tray order is stable per seed.
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(shuffleRng() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   });
 
   const edgeData = useMemo(() => {
     const eH: EdgeShape[][] = [];
     for (let r = 0; r < puzzle.rows - 1; r++) {
       const row: EdgeShape[] = [];
-      for (let c = 0; c < puzzle.cols; c++) row.push(randEdge());
+      for (let c = 0; c < puzzle.cols; c++) row.push(randEdge(edgeRng));
       eH.push(row);
     }
     const eV: EdgeShape[][] = [];
     for (let r = 0; r < puzzle.rows; r++) {
       const row: EdgeShape[] = [];
-      for (let c = 0; c < puzzle.cols - 1; c++) row.push(randEdge());
+      for (let c = 0; c < puzzle.cols - 1; c++) row.push(randEdge(edgeRng));
       eV.push(row);
     }
     return { eH, eV };
-  }, [puzzle.id, puzzle.rows, puzzle.cols]);
+  }, [puzzle.id, puzzle.rows, puzzle.cols, edgeRng]);
 
   const flipSign = (e: EdgeShape): EdgeShape => ({ ...e, sign: -e.sign });
 
@@ -262,11 +274,15 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
   const [drag, setDrag] = useState<DragState | null>(null);
   const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
   const [hint, setHint] = useState<number | null>(null);
-  const [hintsUsed, setHintsUsed] = useState(0);
-  const [startTime] = useState(() => Date.now());
+  const [hintsUsed, setHintsUsed] = useState(initialSession?.hintsUsed ?? 0);
+  // startTime is shifted back by the saved elapsed seconds so the timer
+  // continues from where the player left off. It does NOT keep counting
+  // while the app is closed — savedAt is not used to advance time.
+  const initialElapsedRef = useRef(initialSession?.elapsedSec ?? 0);
+  const [startTime] = useState(() => Date.now() - initialElapsedRef.current * 1000);
   const [done, setDone] = useState(false);
   const [stars, setStars] = useState(0);
-  const [elapsed, setElapsed] = useState(0);
+  const [elapsed, setElapsed] = useState(initialElapsedRef.current);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [shakeId, setShakeId] = useState<number | null>(null);
 
@@ -297,6 +313,44 @@ export function PuzzleBoard({ puzzle, onComplete, onExit }: Props) {
     const i = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
     return () => clearInterval(i);
   }, [done, startTime]);
+
+  // Persist session whenever placed pieces change (and we're not done).
+  // Cheap — localStorage write of a small JSON object.
+  const doneRef = useRef(false);
+  doneRef.current = done;
+  const piecesRef = useRef(pieces);
+  piecesRef.current = pieces;
+  const hintsRef = useRef(hintsUsed);
+  hintsRef.current = hintsUsed;
+
+  useEffect(() => {
+    if (done) return;
+    const placedIds = pieces.filter((p) => p.placed).map((p) => p.id);
+    saveSession(puzzle.id, {
+      placedIds,
+      elapsedSec: Math.floor((Date.now() - startTime) / 1000),
+      hintsUsed,
+      seed,
+      savedAt: Date.now(),
+    });
+  }, [pieces, done, puzzle.id, startTime, hintsUsed, seed]);
+
+  // Save once more on unmount (e.g. browser tab close) so the very latest
+  // elapsed time is captured if the user leaves mid-second.
+  useEffect(() => {
+    return () => {
+      if (doneRef.current) return;
+      const placedIds = piecesRef.current.filter((p) => p.placed).map((p) => p.id);
+      saveSession(puzzle.id, {
+        placedIds,
+        elapsedSec: Math.floor((Date.now() - startTime) / 1000),
+        hintsUsed: hintsRef.current,
+        seed,
+        savedAt: Date.now(),
+      });
+    };
+  }, [puzzle.id, seed, startTime]);
+
 
   const pieceW = boardSize.w / puzzle.cols;
   const pieceH = boardSize.h / puzzle.rows;
