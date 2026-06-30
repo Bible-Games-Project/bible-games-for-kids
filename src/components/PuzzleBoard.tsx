@@ -6,6 +6,7 @@ import {
   saveSession,
   type SavedSession,
 } from "@/lib/progress";
+import { useAudio } from "@/lib/audio";
 
 interface Piece {
   id: number;
@@ -54,54 +55,7 @@ const mulberry32 = (a: number) => () => {
 };
 
 // ---------- Audio ----------
-const playDing = () => {
-  try {
-    const AC = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = "sine";
-    o.frequency.setValueAtTime(880, ctx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.12);
-    g.gain.setValueAtTime(0.0001, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
-    o.connect(g);
-    g.connect(ctx.destination);
-    o.start();
-    o.stop(ctx.currentTime + 0.4);
-    setTimeout(() => ctx.close(), 500);
-  } catch {
-    /* ignore */
-  }
-};
-
-const playWin = () => {
-  try {
-    const AC = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
-    const notes = [523.25, 659.25, 783.99, 1046.5];
-    notes.forEach((f, i) => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "triangle";
-      o.frequency.value = f;
-      const t0 = ctx.currentTime + i * 0.12;
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(0.2, t0 + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
-      o.connect(g);
-      g.connect(ctx.destination);
-      o.start(t0);
-      o.stop(t0 + 0.4);
-    });
-    setTimeout(() => ctx.close(), 1200);
-  } catch {
-    /* ignore */
-  }
-};
+// Sound effects are provided by the global AudioProvider via useAudio().
 
 // ---------- Jigsaw edge generation ----------
 interface EdgeShape {
@@ -222,6 +176,13 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
   const boardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const justDraggedRef = useRef(false);
+  const audio = useAudio();
+
+  // Boost music volume while playing; restore menu volume on exit.
+  useEffect(() => {
+    audio.setScope("puzzle");
+    return () => audio.setScope("menu");
+  }, [audio]);
 
   // Two independent seeded streams so shuffle order and edge shapes
   // both stay stable across resumes without coupling to each other.
@@ -369,6 +330,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
 
   const triggerShake = (pieceId: number) => {
     setShakeId(pieceId);
+    audio.playIncorrect();
     setTimeout(() => setShakeId((s) => (s === pieceId ? null : s)), 500);
   };
 
@@ -418,7 +380,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
           const snap = Math.min(pieceW, pieceH) * 0.5;
           if (Math.abs(dx) < snap && Math.abs(dy) < snap) {
             setPieces((prev) => prev.map((p) => (p.id === piece.id ? { ...p, placed: true } : p)));
-            playDing();
+            audio.playCorrect();
           }
         }
         setDrag(null);
@@ -450,7 +412,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
       setStars(s);
       setDone(true);
       setTimeout(() => {
-        playWin();
+        audio.playWin();
         onComplete(s, t);
       }, 300);
     }
@@ -485,7 +447,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
     if (dist < tolerance) {
       setPieces((prev) => prev.map((p) => (p.id === selectedId ? { ...p, placed: true } : p)));
       setSelectedId(null);
-      playDing();
+      audio.playCorrect();
     } else {
       triggerShake(selectedId);
     }
