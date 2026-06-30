@@ -34,6 +34,8 @@ interface PendingPointer {
 
 interface Props {
   puzzle: Puzzle;
+  seed: number;
+  initialSession: SavedSession | null;
   onComplete: (stars: number, timeSec: number) => void;
   onExit: () => void;
 }
@@ -41,6 +43,15 @@ interface Props {
 const ASPECT = 896 / 1152;
 const TAB_RATIO = 0.15;
 const DRAG_THRESHOLD = 6; // px of movement before a tap becomes a drag
+
+// Seeded RNG (mulberry32) — guarantees stable piece shapes & shuffle on resume.
+const mulberry32 = (a: number) => () => {
+  a = (a + 0x6d2b79f5) | 0;
+  let t = a;
+  t = Math.imul(t ^ (t >>> 15), 1 | t);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
 
 // ---------- Audio ----------
 const playDing = () => {
