@@ -53,7 +53,7 @@ interface ActiveState {
 type Screen = "home" | "select" | "more" | "premium";
 
 function Home() {
-  const { onboarded, devMode, t } = useSettings();
+  const { onboarded, devMode, premium, t } = useSettings();
   const [progress, setProgress] = useState<Progress>({});
   const [active, setActive] = useState<ActiveState | null>(null);
   const [screen, setScreen] = useState<Screen>("home");
@@ -62,6 +62,7 @@ function Home() {
     DIFFICULTIES[0].id,
   );
   const [pendingTutorial, setPendingTutorial] = useState<Difficulty["id"] | null>(null);
+  const [showPremiumLock, setShowPremiumLock] = useState(false);
 
 
   useEffect(() => {
