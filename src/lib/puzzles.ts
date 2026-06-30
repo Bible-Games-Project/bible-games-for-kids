@@ -164,25 +164,28 @@ const computeGrid = (target: number): { cols: number; rows: number } => {
   return { cols: best.cols, rows: best.rows };
 };
 
-export const DIFFICULTIES: Difficulty[] = DIFFICULTY_DEFS.map((d) => ({
-  id: d.id,
-  label: d.label,
-  description: d.description,
-  puzzles: d.pieceTargets.map((target, i) => {
-    const scene = SCENES[i % SCENES.length];
-    const grid = computeGrid(target);
-    return {
-      id: `${d.id}__${i + 1}__${scene.slug}`,
-      difficultyId: d.id,
-      indexInDifficulty: i,
-      title: scene.title,
-      verse: scene.verse,
-      image: scene.image,
-      cols: grid.cols,
-      rows: grid.rows,
-    };
-  }),
-}));
+export const DIFFICULTIES: Difficulty[] = DIFFICULTY_DEFS.map((d) => {
+  const targets = buildPieceTargets(d, SCENES.length);
+  return {
+    id: d.id,
+    label: d.label,
+    description: d.description,
+    puzzles: targets.map((target, i) => {
+      const scene = SCENES[i % SCENES.length];
+      const grid = computeGrid(target);
+      return {
+        id: `${d.id}__${i + 1}__${scene.slug}`,
+        difficultyId: d.id,
+        indexInDifficulty: i,
+        title: scene.title,
+        verse: scene.verse,
+        image: scene.image,
+        cols: grid.cols,
+        rows: grid.rows,
+      };
+    }),
+  };
+});
 
 export const ALL_PUZZLES: Puzzle[] = DIFFICULTIES.flatMap((d) => d.puzzles);
 
