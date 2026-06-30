@@ -32,6 +32,12 @@ import lostSheep from "@/assets/puzzle-lost-sheep.jpg";
 import jacobsLadder from "@/assets/puzzle-jacobs-ladder.jpg";
 import samuelCall from "@/assets/puzzle-samuel-call.jpg";
 import elijahRavens from "@/assets/puzzle-elijah-ravens.jpg";
+import goodShepherd from "@/assets/puzzle-good-shepherd.jpg";
+import healsBlind from "@/assets/puzzle-heals-blind.jpg";
+import resurrectionMorning from "@/assets/puzzle-resurrection-morning.jpg";
+import queenEsther from "@/assets/puzzle-queen-esther.jpg";
+import josephForgives from "@/assets/puzzle-joseph-forgives.jpg";
+import gideonFleece from "@/assets/puzzle-gideon-fleece.jpg";
 
 export type DifficultyId = "easy" | "easy-medium" | "medium" | "medium-hard" | "hard";
 
