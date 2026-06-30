@@ -69,10 +69,10 @@ function Home() {
     return <OnboardingLanguage />;
   }
 
-  const startPuzzle = (puzzle: Puzzle) => {
+  const startPuzzle = (puzzle: Puzzle, difficultyId: Difficulty["id"]) => {
     const existing = getSession(puzzle.id);
     const seed = existing?.seed ?? Math.floor(Math.random() * 2 ** 31);
-    setActive({ puzzle, seed });
+    setActive({ puzzle, seed, difficultyId });
   };
 
   if (active) {
@@ -84,6 +84,14 @@ function Home() {
         initialSession={getSession(active.puzzle.id)}
         onComplete={(stars, timeSec) => {
           clearSession(active.puzzle.id);
+          const diff = DIFFICULTIES.find((d) => d.id === active.difficultyId);
+          const isFirst = diff?.puzzles[0]?.id === active.puzzle.id;
+          const tutKey = `sp.tutorialShown.${active.difficultyId}`;
+          const alreadyShown =
+            typeof window !== "undefined" && localStorage.getItem(tutKey) === "1";
+          if (stars > 0 && isFirst && !alreadyShown) {
+            setPendingTutorial(active.difficultyId);
+          }
           setProgress(saveResult(active.puzzle.id, stars, timeSec));
         }}
         onExit={() => setActive(null)}
