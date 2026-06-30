@@ -98,11 +98,36 @@ const STRINGS: Record<Lang, Dict> = {
     "diff.medium": "Medio",
     "diff.medium-hard": "Medio – Difícil",
     "diff.hard": "Difícil",
+    "diff.easy.short": "Fácil",
+    "diff.easy-medium.short": "F-Med",
+    "diff.medium.short": "Medio",
+    "diff.medium-hard.short": "M-Dif",
+    "diff.hard.short": "Difícil",
     "diff.easy.desc": "Puzles suaves para empezar",
     "diff.easy-medium.desc": "Un poco más para armar",
     "diff.medium.desc": "Para pequeños curiosos",
     "diff.medium-hard.desc": "Un reto agradable",
     "diff.hard.desc": "Para corazones y manos pacientes",
+    "settings.dev": "Modo Desarrollador",
+    "settings.devHint": "Desbloquea todos los puzles para pruebas. Tu progreso real se conserva.",
+    "settings.reset": "Borrar Datos del Juego",
+    "settings.resetConfirm": "Esto borrará permanentemente todo el progreso, puzles guardados y la introducción. ¿Continuar?",
+    "settings.resetDone": "Los datos del juego se han borrado.",
+  },
+};
+
+interface SettingsContextValue {
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  sound: boolean;
+  setSound: (s: boolean) => void;
+  onboarded: boolean;
+  completeOnboarding: (l: Lang) => void;
+  devMode: boolean;
+  setDevMode: (v: boolean) => void;
+  resetAll: () => void;
+  t: (key: string) => string;
+}
   },
 };
 
