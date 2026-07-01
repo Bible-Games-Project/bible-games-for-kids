@@ -98,6 +98,19 @@ const en: Dict = {
   "settings.reset": "Reset Game Data",
   "settings.resetConfirm": "This will permanently delete all progress, saved puzzles, and onboarding. Continue?",
   "settings.resetDone": "Game data has been reset.",
+  "puzzle.menu": "Menu",
+  "puzzle.hint": "Hint",
+  "puzzle.allPlaced": "All pieces placed!",
+  "puzzle.done": "Beautifully done!",
+  "puzzle.continue": "Continue",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "Experience the life of Jesus in a first-person RPG adventure.",
+  "more.game.lost-sheep.name": "The Lost Sheep",
+  "more.game.lost-sheep.desc": "Discover Jesus' parable through a heartfelt journey of hope and personal growth.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "Explore the Bible's greatest stories and choose your own path.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "Live the life of Jesus in a unique 3D experience unlike any other.",
 };
 
 const es: Dict = {
@@ -164,6 +177,19 @@ const es: Dict = {
   "settings.reset": "Borrar Datos del Juego",
   "settings.resetConfirm": "Esto borrará permanentemente todo el progreso, puzles guardados y la introducción. ¿Continuar?",
   "settings.resetDone": "Los datos del juego se han borrado.",
+  "puzzle.menu": "Menú",
+  "puzzle.hint": "Pista",
+  "puzzle.allPlaced": "¡Todas las piezas colocadas!",
+  "puzzle.done": "¡Bellamente hecho!",
+  "puzzle.continue": "Continuar",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "Vive la vida de Jesús en una aventura RPG en primera persona.",
+  "more.game.lost-sheep.name": "La oveja perdida",
+  "more.game.lost-sheep.desc": "Descubre la parábola de Jesús en un viaje conmovedor de esperanza y crecimiento.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "Explora las grandes historias de la Biblia y elige tu propio camino.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "Vive la vida de Jesús en una experiencia 3D única.",
 };
 
 const de: Dict = {
@@ -230,6 +256,19 @@ const de: Dict = {
   "settings.reset": "Spieldaten zurücksetzen",
   "settings.resetConfirm": "Dadurch werden alle Fortschritte, gespeicherte Puzzles und das Onboarding dauerhaft gelöscht. Fortfahren?",
   "settings.resetDone": "Die Spieldaten wurden zurückgesetzt.",
+  "puzzle.menu": "Menü",
+  "puzzle.hint": "Tipp",
+  "puzzle.allPlaced": "Alle Teile platziert!",
+  "puzzle.done": "Wunderschön gemacht!",
+  "puzzle.continue": "Weiter",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "Erlebe das Leben Jesu in einem Ego-Rollenspiel-Abenteuer.",
+  "more.game.lost-sheep.name": "Das verlorene Schaf",
+  "more.game.lost-sheep.desc": "Entdecke das Gleichnis Jesu in einer bewegenden Reise voller Hoffnung.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "Erkunde die größten Bibelgeschichten und wähle deinen eigenen Weg.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "Erlebe das Leben Jesu in einer einzigartigen 3D-Erfahrung.",
 };
 
 const fr: Dict = {
@@ -296,6 +335,19 @@ const fr: Dict = {
   "settings.reset": "Réinitialiser les données",
   "settings.resetConfirm": "Cela supprimera définitivement toute la progression, les puzzles enregistrés et l'introduction. Continuer ?",
   "settings.resetDone": "Les données du jeu ont été réinitialisées.",
+  "puzzle.menu": "Menu",
+  "puzzle.hint": "Indice",
+  "puzzle.allPlaced": "Toutes les pièces placées !",
+  "puzzle.done": "Magnifiquement réussi !",
+  "puzzle.continue": "Continuer",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "Vis la vie de Jésus dans une aventure RPG à la première personne.",
+  "more.game.lost-sheep.name": "La brebis perdue",
+  "more.game.lost-sheep.desc": "Découvre la parabole de Jésus dans un voyage émouvant d'espérance.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "Explore les plus grandes histoires de la Bible et choisis ton chemin.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "Vis la vie de Jésus dans une expérience 3D unique.",
 };
 
 const it: Dict = {
@@ -362,6 +414,19 @@ const it: Dict = {
   "settings.reset": "Reimposta dati di gioco",
   "settings.resetConfirm": "Verranno eliminati definitivamente tutti i progressi, i puzzle salvati e l'introduzione. Continuare?",
   "settings.resetDone": "I dati di gioco sono stati reimpostati.",
+  "puzzle.menu": "Menu",
+  "puzzle.hint": "Aiuto",
+  "puzzle.allPlaced": "Tutti i pezzi posizionati!",
+  "puzzle.done": "Splendidamente fatto!",
+  "puzzle.continue": "Continua",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "Vivi la vita di Gesù in un'avventura RPG in prima persona.",
+  "more.game.lost-sheep.name": "La pecorella smarrita",
+  "more.game.lost-sheep.desc": "Scopri la parabola di Gesù in un viaggio commovente di speranza.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "Esplora le più grandi storie della Bibbia e scegli il tuo cammino.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "Vivi la vita di Gesù in un'esperienza 3D unica.",
 };
 
 const pt: Dict = {
@@ -428,6 +493,19 @@ const pt: Dict = {
   "settings.reset": "Apagar dados do jogo",
   "settings.resetConfirm": "Isto apagará permanentemente todo o progresso, quebra-cabeças salvos e a introdução. Continuar?",
   "settings.resetDone": "Os dados do jogo foram apagados.",
+  "puzzle.menu": "Menu",
+  "puzzle.hint": "Dica",
+  "puzzle.allPlaced": "Todas as peças no lugar!",
+  "puzzle.done": "Lindamente feito!",
+  "puzzle.continue": "Continuar",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "Viva a vida de Jesus em uma aventura de RPG em primeira pessoa.",
+  "more.game.lost-sheep.name": "A ovelha perdida",
+  "more.game.lost-sheep.desc": "Descubra a parábola de Jesus em uma jornada emocionante de esperança.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "Explore as maiores histórias da Bíblia e escolha seu caminho.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "Viva a vida de Jesus em uma experiência 3D única.",
 };
 
 const pl: Dict = {
@@ -494,6 +572,19 @@ const pl: Dict = {
   "settings.reset": "Zresetuj dane gry",
   "settings.resetConfirm": "Spowoduje to trwałe usunięcie postępu, zapisanych puzzli i wprowadzenia. Kontynuować?",
   "settings.resetDone": "Dane gry zostały zresetowane.",
+  "puzzle.menu": "Menu",
+  "puzzle.hint": "Podpowiedź",
+  "puzzle.allPlaced": "Wszystkie elementy ułożone!",
+  "puzzle.done": "Pięknie ukończone!",
+  "puzzle.continue": "Dalej",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "Przeżyj życie Jezusa w przygodowej grze RPG z widokiem z pierwszej osoby.",
+  "more.game.lost-sheep.name": "Zagubiona owca",
+  "more.game.lost-sheep.desc": "Odkryj przypowieść Jezusa w poruszającej podróży nadziei.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "Poznawaj największe biblijne historie i wybieraj własną ścieżkę.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "Przeżyj życie Jezusa w wyjątkowym doświadczeniu 3D.",
 };
 
 const ru: Dict = {
@@ -560,6 +651,19 @@ const ru: Dict = {
   "settings.reset": "Сбросить данные игры",
   "settings.resetConfirm": "Это навсегда удалит весь прогресс, сохранённые пазлы и приветствие. Продолжить?",
   "settings.resetDone": "Данные игры сброшены.",
+  "puzzle.menu": "Меню",
+  "puzzle.hint": "Подсказка",
+  "puzzle.allPlaced": "Все детали на местах!",
+  "puzzle.done": "Чудесно сделано!",
+  "puzzle.continue": "Продолжить",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "Проживите жизнь Иисуса в приключенческой RPG от первого лица.",
+  "more.game.lost-sheep.name": "Заблудшая овца",
+  "more.game.lost-sheep.desc": "Откройте притчу Иисуса в трогательном путешествии надежды.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "Исследуйте величайшие библейские истории и выбирайте свой путь.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "Проживите жизнь Иисуса в уникальном 3D-опыте.",
 };
 
 const ja: Dict = {
@@ -626,6 +730,19 @@ const ja: Dict = {
   "settings.reset": "ゲームデータをリセット",
   "settings.resetConfirm": "すべての進行、保存されたパズル、初期設定が完全に削除されます。続けますか?",
   "settings.resetDone": "ゲームデータをリセットしました。",
+  "puzzle.menu": "メニュー",
+  "puzzle.hint": "ヒント",
+  "puzzle.allPlaced": "すべてのピースを置きました!",
+  "puzzle.done": "見事にできました!",
+  "puzzle.continue": "つづける",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "一人称RPGアドベンチャーでイエスの生涯を体験しよう。",
+  "more.game.lost-sheep.name": "迷える子羊",
+  "more.game.lost-sheep.desc": "イエスのたとえ話を、希望に満ちた心温まる旅で味わおう。",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "聖書の偉大な物語を探検し、自分だけの道を選ぼう。",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "イエスの生涯を唯一無二の3D体験で生きる。",
 };
 
 const ko: Dict = {
@@ -692,6 +809,19 @@ const ko: Dict = {
   "settings.reset": "게임 데이터 초기화",
   "settings.resetConfirm": "모든 진행 상황, 저장된 퍼즐, 온보딩이 영구적으로 삭제됩니다. 계속하시겠어요?",
   "settings.resetDone": "게임 데이터가 초기화되었습니다.",
+  "puzzle.menu": "메뉴",
+  "puzzle.hint": "힌트",
+  "puzzle.allPlaced": "모든 조각을 맞췄어요!",
+  "puzzle.done": "멋지게 완성했어요!",
+  "puzzle.continue": "계속",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "1인칭 RPG 어드벤처에서 예수님의 삶을 체험하세요.",
+  "more.game.lost-sheep.name": "잃어버린 양",
+  "more.game.lost-sheep.desc": "예수님의 비유를 따라 희망과 성장의 여정을 떠나요.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "성경의 위대한 이야기를 탐험하고 자신만의 길을 선택하세요.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "독특한 3D 경험 속에서 예수님의 삶을 살아보세요.",
 };
 
 const ar: Dict = {
@@ -758,6 +888,19 @@ const ar: Dict = {
   "settings.reset": "إعادة ضبط بيانات اللعبة",
   "settings.resetConfirm": "سيؤدي ذلك إلى حذف كل التقدم والألغاز المحفوظة والترحيب نهائياً. هل تريد المتابعة؟",
   "settings.resetDone": "تمت إعادة ضبط بيانات اللعبة.",
+  "puzzle.menu": "القائمة",
+  "puzzle.hint": "تلميح",
+  "puzzle.allPlaced": "تم وضع كل القطع!",
+  "puzzle.done": "عمل رائع!",
+  "puzzle.continue": "متابعة",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "عش حياة يسوع في مغامرة RPG بمنظور الشخص الأول.",
+  "more.game.lost-sheep.name": "الخروف الضال",
+  "more.game.lost-sheep.desc": "اكتشف مَثَل يسوع في رحلة مؤثرة من الرجاء والنمو.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "استكشف أعظم قصص الكتاب المقدس واختر طريقك.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "عش حياة يسوع في تجربة ثلاثية الأبعاد فريدة من نوعها.",
 };
 
 const tr: Dict = {
@@ -824,6 +967,19 @@ const tr: Dict = {
   "settings.reset": "Oyun Verisini Sıfırla",
   "settings.resetConfirm": "Bu işlem tüm ilerlemeyi, kaydedilmiş yapbozları ve girişi kalıcı olarak siler. Devam edilsin mi?",
   "settings.resetDone": "Oyun verisi sıfırlandı.",
+  "puzzle.menu": "Menü",
+  "puzzle.hint": "İpucu",
+  "puzzle.allPlaced": "Tüm parçalar yerinde!",
+  "puzzle.done": "Harika bir iş çıkardın!",
+  "puzzle.continue": "Devam et",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "İsa'nın hayatını birinci şahıs RPG macerasında yaşa.",
+  "more.game.lost-sheep.name": "Kaybolan Koyun",
+  "more.game.lost-sheep.desc": "İsa'nın benzetmesini umut dolu duygusal bir yolculukta keşfet.",
+  "more.game.bible-unlocked.name": "Bible Unlocked",
+  "more.game.bible-unlocked.desc": "Kutsal Kitap'ın en büyük hikâyelerini keşfet ve kendi yolunu seç.",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "İsa'nın hayatını benzersiz bir 3D deneyimde yaşa.",
 };
 
 export const STRINGS: Record<Lang, Dict> = {
