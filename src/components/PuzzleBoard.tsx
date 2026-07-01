@@ -7,6 +7,9 @@ import {
   type SavedSession,
 } from "@/lib/progress";
 import { useAudio } from "@/lib/audio";
+import { useSettings } from "@/lib/i18n";
+import { localizeSceneTitle, localizeVerse } from "@/lib/scenes-i18n";
+
 
 interface Piece {
   id: number;
@@ -177,6 +180,10 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
   const containerRef = useRef<HTMLDivElement>(null);
   const justDraggedRef = useRef(false);
   const audio = useAudio();
+  const { lang, t } = useSettings();
+  const localizedTitle = localizeSceneTitle(puzzle.slug, lang);
+  const localizedVerse = localizeVerse(puzzle.verse, lang);
+
 
   // Boost music volume while playing; restore menu volume on exit.
   useEffect(() => {
