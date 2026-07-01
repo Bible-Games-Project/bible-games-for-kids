@@ -343,9 +343,10 @@ function DifficultyList({
   onPlay: (p: Puzzle) => void;
   onLocked: () => void;
 }) {
-  const { t } = useSettings();
+  const { t, lang } = useSettings();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
 
   const resumeFlags = useMemo(
     () => difficulty.puzzles.map((p) => mounted && hasSession(p.id)),
@@ -398,9 +399,10 @@ function DifficultyList({
                 {t("puzzle.label")} {i + 1} · {t(`diff.${difficulty.id}`)}
               </p>
               <h3 className="mt-1 truncate font-display text-lg leading-snug sm:text-xl">
-                {p.title}
+                {localizeSceneTitle(p.slug, lang)}
               </h3>
-              <p className="mt-0.5 truncate text-xs italic text-muted-foreground">{p.verse}</p>
+              <p className="mt-0.5 truncate text-xs italic text-muted-foreground">{localizeVerse(p.verse, lang)}</p>
+
               <div className="mt-2 flex items-center justify-between gap-2">
                 <span className="text-xs text-muted-foreground">
                   {pieceCount(p)} {t("home.pieces")}
