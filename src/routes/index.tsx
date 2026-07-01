@@ -17,12 +17,14 @@ import {
 } from "@/lib/progress";
 import { PuzzleBoard } from "@/components/PuzzleBoard";
 import { useSettings } from "@/lib/i18n";
+import { localizeSceneTitle, localizeVerse } from "@/lib/scenes-i18n";
 import { OnboardingLanguage } from "@/components/OnboardingLanguage";
 import { SettingsModal } from "@/components/SettingsModal";
 import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
 import { isFreePuzzle } from "@/lib/freemium";
 import menuBg from "@/assets/menu-background.jpg";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
