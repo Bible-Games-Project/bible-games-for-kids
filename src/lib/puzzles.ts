@@ -236,6 +236,8 @@ export const DIFFICULTIES: Difficulty[] = DIFFICULTY_DEFS.map((d) => {
         id: `${d.id}__${i + 1}__${scene.slug}`,
         difficultyId: d.id,
         indexInDifficulty: i,
+        slug: scene.slug,
+
         title: scene.title,
         verse: scene.verse,
         image: scene.image,
