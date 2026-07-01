@@ -5,7 +5,6 @@ import s1 from "@/assets/music/Song_1.mp3.asset.json";
 import s2 from "@/assets/music/Song_2.mp3.asset.json";
 import s3 from "@/assets/music/Song_3.mp3.asset.json";
 import s4 from "@/assets/music/Song_4.mp3.asset.json";
-import s5 from "@/assets/music/Song_5.mp3.asset.json";
 import s6 from "@/assets/music/Song_6.mp3.asset.json";
 import s7 from "@/assets/music/Song_7.mp3.asset.json";
 import s8 from "@/assets/music/Song_8.mp3.asset.json";
@@ -13,7 +12,7 @@ import s9 from "@/assets/music/Song_9.mp3.asset.json";
 import s10 from "@/assets/music/Song_10.mp3.asset.json";
 
 // Scalable: add more entries here and the system picks them up automatically.
-const TRACKS: string[] = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10].map((a) => a.url);
+const TRACKS: string[] = [s1, s2, s3, s4, s6, s7, s8, s9, s10].map((a) => a.url);
 
 export type MusicScope = "menu" | "puzzle";
 
