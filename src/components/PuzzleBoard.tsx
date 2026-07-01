@@ -518,10 +518,10 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
           onClick={onExit}
           className="rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground shadow-sm transition active:scale-95"
         >
-          ← Menu
+          ← {t("puzzle.menu")}
         </button>
         <div className="min-w-0 flex-1 text-center">
-          <h2 className="truncate font-display text-base leading-tight sm:text-lg">{puzzle.title}</h2>
+          <h2 className="truncate font-display text-base leading-tight sm:text-lg">{localizedTitle}</h2>
           <p className="text-xs text-muted-foreground">
             {placedCount} / {total} · {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, "0")}
           </p>
@@ -531,9 +531,10 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
           disabled={trayPieces.length === 0}
           className="rounded-full bg-[var(--color-gold)]/90 px-4 py-2 text-sm font-semibold text-[oklch(0.3_0.05_50)] shadow-sm transition active:scale-95 disabled:opacity-40"
         >
-          ✨ Hint
+          ✨ {t("puzzle.hint")}
         </button>
       </div>
+
 
       {/* Board */}
       <div className="flex flex-1 items-center justify-center px-4">
@@ -595,16 +596,17 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
                 {"⭐".repeat(stars)}
                 {"☆".repeat(3 - stars)}
               </div>
-              <h3 className="font-display text-2xl">Beautifully done!</h3>
-              <p className="mt-1 text-sm italic text-muted-foreground">"{puzzle.verse}"</p>
+              <h3 className="font-display text-2xl">{t("puzzle.done")}</h3>
+              <p className="mt-1 text-sm italic text-muted-foreground">"{localizedVerse}"</p>
               <div className="mt-5 flex gap-2">
                 <button
                   onClick={onExit}
                   className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm active:scale-95"
                 >
-                  Continue
+                  {t("puzzle.continue")}
                 </button>
               </div>
+
             </div>
           )}
         </div>
@@ -616,7 +618,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
         style={{ minHeight: trayPieceSize + 24 }}
       >
         {trayPieces.length === 0 && !done && (
-          <p className="w-full text-center text-sm text-muted-foreground">All pieces placed!</p>
+          <p className="w-full text-center text-sm text-muted-foreground">{t("puzzle.allPlaced")}</p>
         )}
         {boardSize.w > 0 &&
           trayPieces.map((p) => {
