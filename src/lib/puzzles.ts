@@ -55,12 +55,14 @@ export interface Puzzle {
   id: string;
   difficultyId: DifficultyId;
   indexInDifficulty: number;
+  slug: string;
   title: string;
   verse: string;
   image: string;
   cols: number;
   rows: number;
 }
+
 
 export interface Difficulty {
   id: DifficultyId;
