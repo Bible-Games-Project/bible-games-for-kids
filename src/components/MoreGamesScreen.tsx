@@ -8,8 +8,6 @@ import trueChristIcon from "@/assets/game-true-christ.png";
 
 interface Game {
   id: string;
-  name: string;
-  description: string;
   icon: string;
   links: GameLinks;
 }
@@ -17,8 +15,6 @@ interface Game {
 const GAMES: Game[] = [
   {
     id: "didactic-jesus",
-    name: "Didactic Jesus Game",
-    description: "Experience the life of Jesus in a first-person RPG adventure.",
     icon: didacticIcon,
     links: {
       android: "https://play.google.com/store/apps/details?id=com.biblegamesproject.pro&hl=es_419",
@@ -28,8 +24,6 @@ const GAMES: Game[] = [
   },
   {
     id: "lost-sheep",
-    name: "The Lost Sheep",
-    description: "Discover Jesus' parable through a heartfelt journey of hope and personal growth.",
     icon: lostSheepIcon,
     links: {
       android: "https://www.biblegamesproject.com/the-lost-sheep",
@@ -39,8 +33,6 @@ const GAMES: Game[] = [
   },
   {
     id: "bible-unlocked",
-    name: "Bible Unlocked",
-    description: "Explore the Bible's greatest stories and choose your own path.",
     icon: bibleUnlockedIcon,
     links: {
       android: "https://play.google.com/store/apps/details?id=com.biblegames.eden&pcampaignid=web_share",
@@ -50,8 +42,6 @@ const GAMES: Game[] = [
   },
   {
     id: "true-christ",
-    name: "True Christ",
-    description: "Live the life of Jesus in a unique 3D experience unlike any other.",
     icon: trueChristIcon,
     links: {
       android: "https://www.biblegamesproject.com/true-christ",
@@ -60,6 +50,7 @@ const GAMES: Game[] = [
     },
   },
 ];
+
 
 export function MoreGamesScreen({ onBack }: { onBack: () => void }) {
   const { t } = useSettings();
@@ -84,6 +75,8 @@ export function MoreGamesScreen({ onBack }: { onBack: () => void }) {
       <main className="mx-auto grid max-w-3xl grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-2">
         {GAMES.map((g) => {
           const url = pickLink(g.links, platform);
+          const name = t(`more.game.${g.id}.name`);
+          const desc = t(`more.game.${g.id}.desc`);
           return (
             <a
               key={g.id}
@@ -94,15 +87,16 @@ export function MoreGamesScreen({ onBack }: { onBack: () => void }) {
             >
               <img
                 src={g.icon}
-                alt={g.name}
+                alt={name}
                 className="h-20 w-20 rounded-2xl object-cover shadow-sm"
               />
               <div className="min-w-0">
-                <h3 className="truncate font-display text-lg leading-snug">{g.name}</h3>
+                <h3 className="truncate font-display text-lg leading-snug">{name}</h3>
                 <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted-foreground">
-                  {g.description}
+                  {desc}
                 </p>
               </div>
+
               <span className="rounded-full bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary-foreground)]">
                 {t("more.play")}
               </span>
