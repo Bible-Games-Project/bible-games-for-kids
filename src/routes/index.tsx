@@ -135,25 +135,24 @@ function Home() {
       <div className="min-h-[100dvh] w-full">
         <div className="relative min-h-[100dvh] w-full" style={bgStyle}>
           {settingsButton}
-          <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col items-center justify-center px-6 py-12 text-center">
+          <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-5 py-14 text-center sm:py-16">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               {t("app.tagline")}
             </p>
-            <h1 className="mt-2 font-display text-5xl leading-tight text-foreground sm:text-6xl">
+            <h1 className="mt-2 font-display text-4xl leading-tight text-foreground sm:text-5xl">
               {t("app.title")}
             </h1>
-            <p className="mt-4 max-w-xs text-sm text-muted-foreground">
+            <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               {t("home.welcome")}
             </p>
 
-            <div className="mt-10 w-full space-y-3">
-              <button
-                onClick={() => setScreen("select")}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-5 py-4 text-lg font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
-              >
-                <span aria-hidden>▶</span>
-                {t("home.play")}
-              </button>
+            <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+              {GAMES.map((g) => (
+                <GameTile key={g.id} game={g} label={t(g.labelKey)} comingLabel={t("game.comingSoon")} onPlay={() => setScreen("select")} />
+              ))}
+            </div>
+
+            <div className="mt-6 w-full space-y-3">
               <button
                 onClick={() => setScreen("premium")}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.78_0.13_55)] px-5 py-4 text-lg font-semibold text-[oklch(0.25_0.05_50)] shadow-md transition active:scale-95"
