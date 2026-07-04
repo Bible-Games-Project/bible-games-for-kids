@@ -35,7 +35,7 @@ export const RTL_LANGS: ReadonlySet<Lang> = new Set<Lang>(["ar"]);
 export type Dict = Record<string, string>;
 
 const en: Dict = {
-  "app.title": "Bible Jigsaw",
+  "app.title": "Bible Games for Kids",
   "app.tagline": "Storybook Puzzles",
   "app.subtitle": "Piece together gentle paintings of stories from the New Testament.",
   "tutorial.title": "Great!",
@@ -44,6 +44,14 @@ const en: Dict = {
   "home.play": "Play",
   "home.premium": "Premium",
   "home.moreGames": "More Games",
+  "game.comingSoon": "Coming Soon",
+  "game.puzzles": "Puzzles",
+  "game.coloring": "Coloring",
+  "game.dragdrop": "Drag & Drop",
+  "game.memory": "Memory",
+  "game.spot": "Spot the Difference",
+  "game.wordsearch": "Word Search",
+  "game.quiz": "Quiz",
   "home.pieces": "pieces",
   "home.resume": "Resume",
   "home.welcome": "Welcome to a peaceful place to play.",
@@ -114,7 +122,7 @@ const en: Dict = {
 };
 
 const es: Dict = {
-  "app.title": "Jigsaw Bíblico",
+  "app.title": "Juegos Bíblicos para Niños",
   "app.tagline": "Puzles del Libro de Cuentos",
   "app.subtitle": "Arma con calma pinturas suaves de historias del Nuevo Testamento.",
   "tutorial.title": "¡Genial!",
@@ -123,6 +131,14 @@ const es: Dict = {
   "home.play": "Jugar",
   "home.premium": "Premium",
   "home.moreGames": "Más Juegos",
+  "game.comingSoon": "Próximamente",
+  "game.puzzles": "Rompecabezas",
+  "game.coloring": "Colorear",
+  "game.dragdrop": "Arrastrar",
+  "game.memory": "Memoria",
+  "game.spot": "Encuentra la Diferencia",
+  "game.wordsearch": "Sopa de Letras",
+  "game.quiz": "Quiz",
   "home.pieces": "piezas",
   "home.resume": "Continuar",
   "home.welcome": "Bienvenido a un lugar tranquilo para jugar.",
@@ -193,7 +209,7 @@ const es: Dict = {
 };
 
 const de: Dict = {
-  "app.title": "Bibel-Puzzle",
+  "app.title": "Bibel-Spiele für Kinder",
   "app.tagline": "Bilderbuch-Puzzles",
   "app.subtitle": "Setze ruhige Aquarellbilder mit Geschichten aus dem Neuen Testament zusammen.",
   "tutorial.title": "Toll!",
@@ -202,6 +218,14 @@ const de: Dict = {
   "home.play": "Spielen",
   "home.premium": "Premium",
   "home.moreGames": "Mehr Spiele",
+  "game.comingSoon": "Demnächst",
+  "game.puzzles": "Puzzles",
+  "game.coloring": "Ausmalen",
+  "game.dragdrop": "Ziehen",
+  "game.memory": "Memory",
+  "game.spot": "Fehlersuche",
+  "game.wordsearch": "Wortsuche",
+  "game.quiz": "Quiz",
   "home.pieces": "Teile",
   "home.resume": "Fortsetzen",
   "home.welcome": "Willkommen an einem friedlichen Ort zum Spielen.",
@@ -272,7 +296,7 @@ const de: Dict = {
 };
 
 const fr: Dict = {
-  "app.title": "Puzzle Biblique",
+  "app.title": "Jeux Bibliques pour Enfants",
   "app.tagline": "Puzzles d'Album",
   "app.subtitle": "Assemble en douceur des aquarelles d'histoires du Nouveau Testament.",
   "tutorial.title": "Bravo !",
@@ -281,6 +305,14 @@ const fr: Dict = {
   "home.play": "Jouer",
   "home.premium": "Premium",
   "home.moreGames": "Plus de jeux",
+  "game.comingSoon": "Bientôt",
+  "game.puzzles": "Puzzles",
+  "game.coloring": "Coloriage",
+  "game.dragdrop": "Glisser-Déposer",
+  "game.memory": "Mémoire",
+  "game.spot": "Trouve les Différences",
+  "game.wordsearch": "Mots Mêlés",
+  "game.quiz": "Quiz",
   "home.pieces": "pièces",
   "home.resume": "Reprendre",
   "home.welcome": "Bienvenue dans un lieu paisible pour jouer.",
@@ -351,7 +383,7 @@ const fr: Dict = {
 };
 
 const it: Dict = {
-  "app.title": "Puzzle della Bibbia",
+  "app.title": "Giochi Biblici per Bambini",
   "app.tagline": "Puzzle del Libro Illustrato",
   "app.subtitle": "Componi delicati acquerelli con storie del Nuovo Testamento.",
   "tutorial.title": "Bravo!",
@@ -360,6 +392,14 @@ const it: Dict = {
   "home.play": "Gioca",
   "home.premium": "Premium",
   "home.moreGames": "Altri Giochi",
+  "game.comingSoon": "Prossimamente",
+  "game.puzzles": "Puzzle",
+  "game.coloring": "Colorare",
+  "game.dragdrop": "Trascina",
+  "game.memory": "Memoria",
+  "game.spot": "Trova le Differenze",
+  "game.wordsearch": "Cerca Parole",
+  "game.quiz": "Quiz",
   "home.pieces": "pezzi",
   "home.resume": "Riprendi",
   "home.welcome": "Benvenuto in un luogo sereno per giocare.",
@@ -430,7 +470,7 @@ const it: Dict = {
 };
 
 const pt: Dict = {
-  "app.title": "Quebra-Cabeça Bíblico",
+  "app.title": "Jogos Bíblicos para Crianças",
   "app.tagline": "Quebra-Cabeças Ilustrados",
   "app.subtitle": "Monte aquarelas suaves de histórias do Novo Testamento.",
   "tutorial.title": "Muito bem!",
@@ -439,6 +479,14 @@ const pt: Dict = {
   "home.play": "Jogar",
   "home.premium": "Premium",
   "home.moreGames": "Mais Jogos",
+  "game.comingSoon": "Em Breve",
+  "game.puzzles": "Quebra-Cabeças",
+  "game.coloring": "Colorir",
+  "game.dragdrop": "Arrastar",
+  "game.memory": "Memória",
+  "game.spot": "Ache as Diferenças",
+  "game.wordsearch": "Caça-Palavras",
+  "game.quiz": "Quiz",
   "home.pieces": "peças",
   "home.resume": "Continuar",
   "home.welcome": "Bem-vindo a um lugar tranquilo para brincar.",
@@ -509,7 +557,7 @@ const pt: Dict = {
 };
 
 const pl: Dict = {
-  "app.title": "Biblijne Puzzle",
+  "app.title": "Biblijne Gry dla Dzieci",
   "app.tagline": "Puzzle z Książeczki",
   "app.subtitle": "Układaj delikatne akwarele z historiami z Nowego Testamentu.",
   "tutorial.title": "Świetnie!",
@@ -518,6 +566,14 @@ const pl: Dict = {
   "home.play": "Graj",
   "home.premium": "Premium",
   "home.moreGames": "Więcej Gier",
+  "game.comingSoon": "Wkrótce",
+  "game.puzzles": "Puzzle",
+  "game.coloring": "Kolorowanie",
+  "game.dragdrop": "Przeciągnij",
+  "game.memory": "Pamięć",
+  "game.spot": "Znajdź Różnice",
+  "game.wordsearch": "Wykreślanka",
+  "game.quiz": "Quiz",
   "home.pieces": "elementów",
   "home.resume": "Wznów",
   "home.welcome": "Witaj w spokojnym miejscu do zabawy.",
@@ -588,7 +644,7 @@ const pl: Dict = {
 };
 
 const ru: Dict = {
-  "app.title": "Библейский Пазл",
+  "app.title": "Библейские Игры для Детей",
   "app.tagline": "Пазлы из Книги Сказок",
   "app.subtitle": "Складывайте мягкие акварельные истории Нового Завета.",
   "tutorial.title": "Отлично!",
@@ -597,6 +653,14 @@ const ru: Dict = {
   "home.play": "Играть",
   "home.premium": "Премиум",
   "home.moreGames": "Ещё игры",
+  "game.comingSoon": "Скоро",
+  "game.puzzles": "Пазлы",
+  "game.coloring": "Раскраска",
+  "game.dragdrop": "Перетаскивание",
+  "game.memory": "Память",
+  "game.spot": "Найди Отличия",
+  "game.wordsearch": "Поиск Слов",
+  "game.quiz": "Викторина",
   "home.pieces": "элементов",
   "home.resume": "Продолжить",
   "home.welcome": "Добро пожаловать в тихое место для игры.",
@@ -667,7 +731,7 @@ const ru: Dict = {
 };
 
 const ja: Dict = {
-  "app.title": "聖書ジグソー",
+  "app.title": "子供のための聖書ゲーム",
   "app.tagline": "絵本パズル",
   "app.subtitle": "新約聖書の物語を、やさしい水彩画でつなげましょう。",
   "tutorial.title": "よくできました!",
@@ -676,6 +740,14 @@ const ja: Dict = {
   "home.play": "プレイ",
   "home.premium": "プレミアム",
   "home.moreGames": "ほかのゲーム",
+  "game.comingSoon": "近日公開",
+  "game.puzzles": "パズル",
+  "game.coloring": "ぬりえ",
+  "game.dragdrop": "ドラッグ",
+  "game.memory": "しんけいすいじゃく",
+  "game.spot": "まちがいさがし",
+  "game.wordsearch": "ワードサーチ",
+  "game.quiz": "クイズ",
   "home.pieces": "ピース",
   "home.resume": "つづける",
   "home.welcome": "やすらかな遊び場へようこそ。",
@@ -746,7 +818,7 @@ const ja: Dict = {
 };
 
 const ko: Dict = {
-  "app.title": "성경 직소",
+  "app.title": "어린이를 위한 성경 게임",
   "app.tagline": "그림책 퍼즐",
   "app.subtitle": "신약 성경 이야기의 부드러운 수채화를 맞춰 보세요.",
   "tutorial.title": "잘했어요!",
@@ -755,6 +827,14 @@ const ko: Dict = {
   "home.play": "플레이",
   "home.premium": "프리미엄",
   "home.moreGames": "다른 게임",
+  "game.comingSoon": "곧 출시",
+  "game.puzzles": "퍼즐",
+  "game.coloring": "색칠하기",
+  "game.dragdrop": "드래그",
+  "game.memory": "메모리",
+  "game.spot": "다른 그림 찾기",
+  "game.wordsearch": "단어 찾기",
+  "game.quiz": "퀴즈",
   "home.pieces": "조각",
   "home.resume": "이어서",
   "home.welcome": "평온한 놀이 공간에 오신 것을 환영합니다.",
@@ -825,7 +905,7 @@ const ko: Dict = {
 };
 
 const ar: Dict = {
-  "app.title": "أحجية الكتاب المقدس",
+  "app.title": "ألعاب الكتاب المقدس للأطفال",
   "app.tagline": "أحاجي كتاب القصص",
   "app.subtitle": "ركّب لوحات مائية لطيفة لقصص من العهد الجديد.",
   "tutorial.title": "أحسنت!",
@@ -834,6 +914,14 @@ const ar: Dict = {
   "home.play": "العب",
   "home.premium": "النسخة المميزة",
   "home.moreGames": "ألعاب أخرى",
+  "game.comingSoon": "قريباً",
+  "game.puzzles": "أحجية",
+  "game.coloring": "تلوين",
+  "game.dragdrop": "سحب وإفلات",
+  "game.memory": "الذاكرة",
+  "game.spot": "اكتشف الفرق",
+  "game.wordsearch": "البحث عن الكلمات",
+  "game.quiz": "اختبار",
   "home.pieces": "قطع",
   "home.resume": "متابعة",
   "home.welcome": "أهلاً بك في مكان هادئ للعب.",
@@ -904,7 +992,7 @@ const ar: Dict = {
 };
 
 const tr: Dict = {
-  "app.title": "İncil Yapboz",
+  "app.title": "Çocuklar için İncil Oyunları",
   "app.tagline": "Resimli Kitap Yapbozları",
   "app.subtitle": "Yeni Ahit'ten hikâyelerin yumuşak suluboya resimlerini birleştir.",
   "tutorial.title": "Harika!",
@@ -913,6 +1001,14 @@ const tr: Dict = {
   "home.play": "Oyna",
   "home.premium": "Premium",
   "home.moreGames": "Daha Fazla Oyun",
+  "game.comingSoon": "Yakında",
+  "game.puzzles": "Yapbozlar",
+  "game.coloring": "Boyama",
+  "game.dragdrop": "Sürükle Bırak",
+  "game.memory": "Hafıza",
+  "game.spot": "Farkı Bul",
+  "game.wordsearch": "Kelime Bulmaca",
+  "game.quiz": "Bilgi Yarışması",
   "home.pieces": "parça",
   "home.resume": "Devam et",
   "home.welcome": "Huzurlu bir oyun alanına hoş geldin.",

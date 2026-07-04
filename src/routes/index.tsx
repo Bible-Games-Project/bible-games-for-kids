@@ -24,6 +24,7 @@ import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
 import { isFreePuzzle } from "@/lib/freemium";
 import menuBg from "@/assets/menu-background.jpg";
+import puzzleIcon from "@/assets/icon-puzzle.png.asset.json";
 
 
 export const Route = createFileRoute("/")({
@@ -53,6 +54,70 @@ interface ActiveState {
 }
 
 type Screen = "home" | "select" | "more" | "premium";
+
+interface GameDef {
+  id: string;
+  labelKey: string;
+  icon?: string;
+  emoji?: string;
+  tint: string;
+  playable: boolean;
+}
+
+const GAMES: GameDef[] = [
+  { id: "puzzles", labelKey: "game.puzzles", icon: puzzleIcon.url, tint: "oklch(0.9 0.05 150)", playable: true },
+  { id: "coloring", labelKey: "game.coloring", emoji: "🎨", tint: "oklch(0.92 0.06 20)", playable: false },
+  { id: "dragdrop", labelKey: "game.dragdrop", emoji: "✋", tint: "oklch(0.92 0.06 90)", playable: false },
+  { id: "memory", labelKey: "game.memory", emoji: "🧠", tint: "oklch(0.9 0.06 320)", playable: false },
+  { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.9 0.06 220)", playable: false },
+  { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.9 0.06 260)", playable: false },
+  { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.92 0.06 60)", playable: false },
+];
+
+function GameTile({
+  game,
+  label,
+  comingLabel,
+  onPlay,
+}: {
+  game: GameDef;
+  label: string;
+  comingLabel: string;
+  onPlay: () => void;
+}) {
+  return (
+    <button
+      onClick={() => game.playable && onPlay()}
+      disabled={!game.playable}
+      aria-label={label}
+      className="paper-card group relative flex aspect-square w-full flex-col overflow-hidden p-2 transition active:scale-[0.97] disabled:active:scale-100"
+    >
+      <div
+        className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl"
+        style={{ backgroundColor: game.tint }}
+      >
+        {game.icon ? (
+          <img src={game.icon} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <span className="text-4xl sm:text-5xl" aria-hidden>
+            {game.emoji}
+          </span>
+        )}
+        {!game.playable && (
+          <span className="absolute right-1.5 top-1.5 rounded-full bg-[oklch(0.3_0.03_60/0.75)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[oklch(0.98_0.02_80)] shadow">
+            {comingLabel}
+          </span>
+        )}
+        {!game.playable && (
+          <div className="pointer-events-none absolute inset-0 bg-[oklch(0.96_0.03_60/0.35)]" />
+        )}
+      </div>
+      <span className="mt-1.5 line-clamp-2 px-0.5 text-center text-[11px] font-semibold leading-tight text-foreground sm:text-xs">
+        {label}
+      </span>
+    </button>
+  );
+}
 
 function Home() {
   const { onboarded, devMode, premium, t } = useSettings();
@@ -134,25 +199,24 @@ function Home() {
       <div className="min-h-[100dvh] w-full">
         <div className="relative min-h-[100dvh] w-full" style={bgStyle}>
           {settingsButton}
-          <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col items-center justify-center px-6 py-12 text-center">
+          <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-5 py-14 text-center sm:py-16">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               {t("app.tagline")}
             </p>
-            <h1 className="mt-2 font-display text-5xl leading-tight text-foreground sm:text-6xl">
+            <h1 className="mt-2 font-display text-4xl leading-tight text-foreground sm:text-5xl">
               {t("app.title")}
             </h1>
-            <p className="mt-4 max-w-xs text-sm text-muted-foreground">
+            <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               {t("home.welcome")}
             </p>
 
-            <div className="mt-10 w-full space-y-3">
-              <button
-                onClick={() => setScreen("select")}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-5 py-4 text-lg font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
-              >
-                <span aria-hidden>▶</span>
-                {t("home.play")}
-              </button>
+            <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+              {GAMES.map((g) => (
+                <GameTile key={g.id} game={g} label={t(g.labelKey)} comingLabel={t("game.comingSoon")} onPlay={() => setScreen("select")} />
+              ))}
+            </div>
+
+            <div className="mt-6 w-full space-y-3">
               <button
                 onClick={() => setScreen("premium")}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.78_0.13_55)] px-5 py-4 text-lg font-semibold text-[oklch(0.25_0.05_50)] shadow-md transition active:scale-95"
