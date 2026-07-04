@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "4e635189-b0fe-48c1-81d2-1ff2d2430b95",
-  "project_id": "d9e96117-0507-425f-a525-cb63a0addbfd",
-  "url": "/__l5e/assets-v1/4e635189-b0fe-48c1-81d2-1ff2d2430b95/Song_2.mp3",
-  "r2_key": "a/v1/d9e96117-0507-425f-a525-cb63a0addbfd/4e635189-b0fe-48c1-81d2-1ff2d2430b95/Song_2.mp3",
-  "original_filename": "Song_2.mp3",
-  "size": 4060762,
   "content_type": "audio/mpeg",
-  "created_at": "2026-06-30T19:03:17Z"
+  "created_at": "2026-06-30T19:03:17Z",
+  "original_filename": "Song_2.mp3",
+  "project_id": "2cc8153a-935d-4e1b-b729-0a2419223429",
+  "r2_key": "a/v1/2cc8153a-935d-4e1b-b729-0a2419223429/4e635189-b0fe-48c1-81d2-1ff2d2430b95/Song_2.mp3",
+  "size": 4060762,
+  "url": "/__l5e/assets-v1/4e635189-b0fe-48c1-81d2-1ff2d2430b95/Song_2.mp3",
+  "version": 1
 }
