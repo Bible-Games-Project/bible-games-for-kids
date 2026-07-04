@@ -55,6 +55,70 @@ interface ActiveState {
 
 type Screen = "home" | "select" | "more" | "premium";
 
+interface GameDef {
+  id: string;
+  labelKey: string;
+  icon?: string;
+  emoji?: string;
+  tint: string;
+  playable: boolean;
+}
+
+const GAMES: GameDef[] = [
+  { id: "puzzles", labelKey: "game.puzzles", icon: puzzleIcon.url, tint: "oklch(0.9 0.05 150)", playable: true },
+  { id: "coloring", labelKey: "game.coloring", emoji: "🎨", tint: "oklch(0.92 0.06 20)", playable: false },
+  { id: "dragdrop", labelKey: "game.dragdrop", emoji: "✋", tint: "oklch(0.92 0.06 90)", playable: false },
+  { id: "memory", labelKey: "game.memory", emoji: "🧠", tint: "oklch(0.9 0.06 320)", playable: false },
+  { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.9 0.06 220)", playable: false },
+  { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.9 0.06 260)", playable: false },
+  { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.92 0.06 60)", playable: false },
+];
+
+function GameTile({
+  game,
+  label,
+  comingLabel,
+  onPlay,
+}: {
+  game: GameDef;
+  label: string;
+  comingLabel: string;
+  onPlay: () => void;
+}) {
+  return (
+    <button
+      onClick={() => game.playable && onPlay()}
+      disabled={!game.playable}
+      aria-label={label}
+      className="paper-card group relative flex aspect-square w-full flex-col overflow-hidden p-2 transition active:scale-[0.97] disabled:active:scale-100"
+    >
+      <div
+        className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl"
+        style={{ backgroundColor: game.tint }}
+      >
+        {game.icon ? (
+          <img src={game.icon} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <span className="text-4xl sm:text-5xl" aria-hidden>
+            {game.emoji}
+          </span>
+        )}
+        {!game.playable && (
+          <span className="absolute right-1.5 top-1.5 rounded-full bg-[oklch(0.3_0.03_60/0.75)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[oklch(0.98_0.02_80)] shadow">
+            {comingLabel}
+          </span>
+        )}
+        {!game.playable && (
+          <div className="pointer-events-none absolute inset-0 bg-[oklch(0.96_0.03_60/0.35)]" />
+        )}
+      </div>
+      <span className="mt-1.5 line-clamp-2 px-0.5 text-center text-[11px] font-semibold leading-tight text-foreground sm:text-xs">
+        {label}
+      </span>
+    </button>
+  );
+}
+
 function Home() {
   const { onboarded, devMode, premium, t } = useSettings();
   const [progress, setProgress] = useState<Progress>({});
