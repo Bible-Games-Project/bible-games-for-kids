@@ -24,6 +24,7 @@ import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
 import { isFreePuzzle } from "@/lib/freemium";
 import menuBg from "@/assets/menu-background.jpg";
+import puzzleIcon from "@/assets/icon-puzzle.png.asset.json";
 
 
 export const Route = createFileRoute("/")({
