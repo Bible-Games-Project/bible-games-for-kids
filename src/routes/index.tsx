@@ -173,6 +173,13 @@ function Home() {
 
   if (screen === "more") return <MoreGamesScreen onBack={() => setScreen("home")} />;
   if (screen === "premium") return <PremiumScreen onBack={() => setScreen("home")} />;
+  if (screen === "dragdrop")
+    return (
+      <DragDropGame
+        onBack={() => setScreen("home")}
+        onOpenPremium={() => setScreen("premium")}
+      />
+    );
 
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
 
@@ -213,7 +220,13 @@ function Home() {
 
             <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
               {GAMES.map((g) => (
-                <GameTile key={g.id} game={g} label={t(g.labelKey)} comingLabel={t("game.comingSoon")} onPlay={() => setScreen("select")} />
+                <GameTile
+                  key={g.id}
+                  game={g}
+                  label={t(g.labelKey)}
+                  comingLabel={t("game.comingSoon")}
+                  onPlay={() => setScreen(g.id === "dragdrop" ? "dragdrop" : "select")}
+                />
               ))}
             </div>
 
