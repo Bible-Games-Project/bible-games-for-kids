@@ -22,6 +22,7 @@ import { OnboardingLanguage } from "@/components/OnboardingLanguage";
 import { SettingsModal } from "@/components/SettingsModal";
 import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
+import { DragDropGame } from "@/components/DragDropGame";
 import { isFreePuzzle } from "@/lib/freemium";
 import menuBg from "@/assets/menu-background.jpg";
 import puzzleIcon from "@/assets/icon-puzzle.png.asset.json";
@@ -53,7 +54,7 @@ interface ActiveState {
   difficultyId: Difficulty["id"];
 }
 
-type Screen = "home" | "select" | "more" | "premium";
+type Screen = "home" | "select" | "more" | "premium" | "dragdrop";
 
 interface GameDef {
   id: string;
@@ -67,7 +68,7 @@ interface GameDef {
 const GAMES: GameDef[] = [
   { id: "puzzles", labelKey: "game.puzzles", icon: puzzleIcon.url, tint: "oklch(0.9 0.05 150)", playable: true },
   { id: "coloring", labelKey: "game.coloring", emoji: "🎨", tint: "oklch(0.92 0.06 20)", playable: false },
-  { id: "dragdrop", labelKey: "game.dragdrop", emoji: "✋", tint: "oklch(0.92 0.06 90)", playable: false },
+  { id: "dragdrop", labelKey: "game.dragdrop", emoji: "✋", tint: "oklch(0.92 0.06 90)", playable: true },
   { id: "memory", labelKey: "game.memory", emoji: "🧠", tint: "oklch(0.9 0.06 320)", playable: false },
   { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.9 0.06 220)", playable: false },
   { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.9 0.06 260)", playable: false },
@@ -172,6 +173,13 @@ function Home() {
 
   if (screen === "more") return <MoreGamesScreen onBack={() => setScreen("home")} />;
   if (screen === "premium") return <PremiumScreen onBack={() => setScreen("home")} />;
+  if (screen === "dragdrop")
+    return (
+      <DragDropGame
+        onBack={() => setScreen("home")}
+        onOpenPremium={() => setScreen("premium")}
+      />
+    );
 
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
 
@@ -212,7 +220,13 @@ function Home() {
 
             <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
               {GAMES.map((g) => (
-                <GameTile key={g.id} game={g} label={t(g.labelKey)} comingLabel={t("game.comingSoon")} onPlay={() => setScreen("select")} />
+                <GameTile
+                  key={g.id}
+                  game={g}
+                  label={t(g.labelKey)}
+                  comingLabel={t("game.comingSoon")}
+                  onPlay={() => setScreen(g.id === "dragdrop" ? "dragdrop" : "select")}
+                />
               ))}
             </div>
 
