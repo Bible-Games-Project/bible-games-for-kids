@@ -7,15 +7,43 @@ import babel from "@/assets/dragdrop-babel.jpg";
 import abrahamStars from "@/assets/puzzle-abraham-stars.jpg";
 import josephCoat from "@/assets/puzzle-joseph-coat.jpg";
 
+// Painted, transparent object artwork — each piece is a real illustration cut
+// from the same soft watercolor storybook style as the scenes. The very same
+// artwork is rendered as a soft silhouette in its target spot, so the piece
+// always fits its outline perfectly.
+import artSun from "@/assets/dd/sun.png";
+import artMoon from "@/assets/dd/moon.png";
+import artStars from "@/assets/dd/stars.png";
+import artElephant from "@/assets/dd/elephant.png";
+import artLion from "@/assets/dd/lion.png";
+import artGiraffe from "@/assets/dd/giraffe.png";
+import artDove from "@/assets/dd/dove.png";
+import artBricks from "@/assets/dd/bricks.png";
+import artBeams from "@/assets/dd/beams.png";
+import artWorker from "@/assets/dd/worker.png";
+import artLadder from "@/assets/dd/ladder.png";
+import artBasket from "@/assets/dd/basket.png";
+import artTent from "@/assets/dd/tent.png";
+import artCamel from "@/assets/dd/camel.png";
+import artStaff from "@/assets/dd/staff.png";
+import artCampfire from "@/assets/dd/campfire.png";
+import artSheep from "@/assets/dd/sheep.png";
+import artJar from "@/assets/dd/jar.png";
+import artCoat from "@/assets/dd/coat.png";
+import artGrain from "@/assets/dd/grain.png";
+import artSheaf from "@/assets/dd/sheaf.png";
+
 export type CollectionId = "old-testament" | "life-of-jesus";
 
 export interface DragItem {
   id: string; // stable, unique within a story
-  emoji: string; // child-friendly visual token
+  art: string; // painted transparent illustration of the missing object
   labelKey: string; // dd-i18n key for accessible / caption text
   // Target position as a percentage of the scene (center of the drop zone).
   x: number;
   y: number;
+  // Rendered width as a percentage of the scene width (height keeps aspect).
+  w: number;
 }
 
 export interface DragStory {
@@ -41,9 +69,9 @@ const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
     slug: "creation",
     image: creation,
     items: [
-      { id: "sun", emoji: "☀️", labelKey: "dd.item.sun", x: 26, y: 20 },
-      { id: "moon", emoji: "🌙", labelKey: "dd.item.moon", x: 74, y: 22 },
-      { id: "stars", emoji: "✨", labelKey: "dd.item.stars", x: 50, y: 13 },
+      { id: "sun", art: artSun, labelKey: "dd.item.sun", x: 26, y: 21, w: 24 },
+      { id: "moon", art: artMoon, labelKey: "dd.item.moon", x: 76, y: 22, w: 19 },
+      { id: "stars", art: artStars, labelKey: "dd.item.stars", x: 50, y: 12, w: 20 },
     ],
   },
   {
@@ -51,9 +79,10 @@ const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
     slug: "noah",
     image: noahsArk,
     items: [
-      { id: "elephant", emoji: "🐘", labelKey: "dd.item.elephant", x: 28, y: 70 },
-      { id: "lion", emoji: "🦁", labelKey: "dd.item.lion", x: 52, y: 74 },
-      { id: "giraffe", emoji: "🦒", labelKey: "dd.item.giraffe", x: 74, y: 58 },
+      { id: "elephant", art: artElephant, labelKey: "dd.item.elephant", x: 28, y: 70, w: 30 },
+      { id: "lion", art: artLion, labelKey: "dd.item.lion", x: 53, y: 76, w: 26 },
+      { id: "giraffe", art: artGiraffe, labelKey: "dd.item.giraffe", x: 76, y: 55, w: 22 },
+      { id: "dove", art: artDove, labelKey: "dd.item.dove", x: 60, y: 22, w: 18 },
     ],
   },
   {
@@ -61,9 +90,11 @@ const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
     slug: "babel",
     image: babel,
     items: [
-      { id: "bricks", emoji: "🧱", labelKey: "dd.item.bricks", x: 34, y: 66 },
-      { id: "beams", emoji: "🪵", labelKey: "dd.item.beams", x: 64, y: 58 },
-      { id: "workers", emoji: "👷", labelKey: "dd.item.workers", x: 50, y: 80 },
+      { id: "bricks", art: artBricks, labelKey: "dd.item.bricks", x: 30, y: 70, w: 22 },
+      { id: "beams", art: artBeams, labelKey: "dd.item.beams", x: 66, y: 62, w: 26 },
+      { id: "workers", art: artWorker, labelKey: "dd.item.workers", x: 48, y: 82, w: 18 },
+      { id: "ladder", art: artLadder, labelKey: "dd.item.ladder", x: 78, y: 44, w: 15 },
+      { id: "basket", art: artBasket, labelKey: "dd.item.basket", x: 19, y: 78, w: 19 },
     ],
   },
   {
@@ -71,9 +102,12 @@ const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
     slug: "abraham",
     image: abrahamStars,
     items: [
-      { id: "tent", emoji: "⛺", labelKey: "dd.item.tent", x: 28, y: 74 },
-      { id: "camel", emoji: "🐫", labelKey: "dd.item.camel", x: 70, y: 72 },
-      { id: "stick", emoji: "🦯", labelKey: "dd.item.stick", x: 50, y: 82 },
+      { id: "tent", art: artTent, labelKey: "dd.item.tent", x: 27, y: 68, w: 28 },
+      { id: "camel", art: artCamel, labelKey: "dd.item.camel", x: 75, y: 70, w: 26 },
+      { id: "stick", art: artStaff, labelKey: "dd.item.stick", x: 50, y: 78, w: 11 },
+      { id: "campfire", art: artCampfire, labelKey: "dd.item.campfire", x: 42, y: 84, w: 16 },
+      { id: "sheep", art: artSheep, labelKey: "dd.item.sheep", x: 62, y: 86, w: 16 },
+      { id: "jar", art: artJar, labelKey: "dd.item.jar", x: 15, y: 62, w: 13 },
     ],
   },
   {
@@ -81,9 +115,13 @@ const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
     slug: "joseph",
     image: josephCoat,
     items: [
-      { id: "coat", emoji: "🧥", labelKey: "dd.item.coat", x: 50, y: 48 },
-      { id: "grain", emoji: "🌾", labelKey: "dd.item.grain", x: 28, y: 74 },
-      { id: "dreamstars", emoji: "⭐", labelKey: "dd.item.dreamstars", x: 72, y: 24 },
+      { id: "coat", art: artCoat, labelKey: "dd.item.coat", x: 48, y: 50, w: 26 },
+      { id: "grain", art: artGrain, labelKey: "dd.item.grain", x: 25, y: 76, w: 20 },
+      { id: "sun", art: artSun, labelKey: "dd.item.sun", x: 22, y: 19, w: 18 },
+      { id: "moon", art: artMoon, labelKey: "dd.item.moon", x: 77, y: 19, w: 16 },
+      { id: "star1", art: artStars, labelKey: "dd.item.stars", x: 40, y: 13, w: 15 },
+      { id: "star2", art: artStars, labelKey: "dd.item.stars", x: 62, y: 15, w: 12 },
+      { id: "sheaf", art: artSheaf, labelKey: "dd.item.sheaf", x: 76, y: 74, w: 18 },
     ],
   },
 ];
