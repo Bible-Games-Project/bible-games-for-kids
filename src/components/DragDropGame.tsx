@@ -258,7 +258,14 @@ function DragDropBoard({
 
   const beginDrag = (id: string, e: React.PointerEvent) => {
     if (placed.has(id)) return;
-    (e.target as Element).setPointerCapture?.(e.pointerId);
+    // Capture on the button itself so every following pointer event routes back
+    // here, even if the finger/cursor leaves the tile. Guarded so a rejected
+    // capture never prevents the drag from starting.
+    try {
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+    } catch {
+      /* capture is best-effort */
+    }
     setDrag({ id, x: e.clientX, y: e.clientY });
   };
 
@@ -276,7 +283,9 @@ function DragDropBoard({
       const zoneX = rect.left + (item.x / 100) * rect.width;
       const zoneY = rect.top + (item.y / 100) * rect.height;
       const dist = Math.hypot(drag.x - zoneX, drag.y - zoneY);
-      const threshold = Math.max(rect.width, rect.height) * 0.16;
+      // Snap tolerance scales with the piece size so bigger pieces feel just as
+      // easy to place as small ones.
+      const threshold = Math.max((item.w / 100) * rect.width * 0.85, rect.width * 0.13);
       if (dist <= threshold) {
         const next = new Set(placed);
         next.add(item.id);
@@ -332,32 +341,39 @@ function DragDropBoard({
             return (
               <div
                 key={item.id}
-                className="pointer-events-none absolute grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full transition"
-                style={{
-                  left: `${item.x}%`,
-                  top: `${item.y}%`,
-                  width: "22%",
-                  aspectRatio: "1 / 1",
-                }}
+                className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+                style={{ left: `${item.x}%`, top: `${item.y}%`, width: `${item.w}%` }}
               >
                 {isPlaced ? (
-                  <span className="grid h-full w-full place-items-center rounded-full bg-[oklch(1_0_0/0.55)] text-4xl shadow-md sm:text-5xl">
-                    {item.emoji}
-                  </span>
+                  // The real painted piece, snapped into place.
+                  <img
+                    src={item.art}
+                    alt={dt(item.labelKey)}
+                    className="h-auto w-full animate-scale-in drop-shadow-[0_8px_12px_oklch(0.4_0.03_60/0.28)]"
+                  />
                 ) : (
-                  <span className="h-full w-full rounded-full border-[3px] border-dashed border-[oklch(1_0_0/0.85)] bg-[oklch(0.4_0.02_60/0.18)]" />
+                  // Exact silhouette of the missing artwork — a soft painted shadow.
+                  <img
+                    src={item.art}
+                    alt=""
+                    aria-hidden
+                    className="h-auto w-full opacity-[0.28]"
+                    style={{ filter: "brightness(0) saturate(0)" }}
+                  />
                 )}
               </div>
             );
           })}
         </div>
 
-        {/* Tray */}
-        <div className="mt-auto flex flex-wrap items-start justify-center gap-3 pt-5">
-          {remaining.map((id) => {
+        {/* Tray — pieces waiting to be placed, scattered with a natural tilt */}
+        <div className="mt-auto flex flex-wrap items-end justify-center gap-x-4 gap-y-2 px-2 pt-6">
+          {remaining.map((id, idx) => {
             const item = story.items.find((it) => it.id === id)!;
             const isDragging = drag?.id === id;
             const isWrong = wrongId === id;
+            // Stable, gentle tilt so pieces feel hand-placed, not lined up.
+            const rot = ((id.charCodeAt(0) + idx * 5) % 9) - 4;
             return (
               <button
                 key={id}
@@ -365,15 +381,24 @@ function DragDropBoard({
                 onPointerMove={moveDrag}
                 onPointerUp={endDrag}
                 onPointerCancel={endDrag}
-                className={`flex w-20 touch-none select-none flex-col items-center gap-1 rounded-2xl bg-card p-2 shadow-md transition ${
-                  isDragging ? "opacity-30" : "active:scale-95"
-                } ${isWrong ? "animate-pulse ring-2 ring-[oklch(0.7_0.15_25)]" : ""}`}
+                className={`group flex w-[22vw] max-w-24 touch-none select-none flex-col items-center gap-1 transition active:scale-95 ${
+                  isDragging ? "opacity-25" : ""
+                }`}
                 style={{ touchAction: "none" }}
               >
-                <span className="grid h-14 w-14 place-items-center rounded-xl bg-[var(--color-sage-soft)] text-3xl" aria-hidden>
-                  {item.emoji}
+                <span
+                  className="grid aspect-square w-full place-items-center transition-transform duration-200 group-hover:-translate-y-1"
+                  style={{ transform: `rotate(${rot}deg)` }}
+                >
+                  <img
+                    src={item.art}
+                    alt={dt(item.labelKey)}
+                    className={`h-auto max-h-full w-full object-contain drop-shadow-[0_6px_9px_oklch(0.4_0.03_60/0.25)] transition ${
+                      isWrong ? "animate-pulse" : "group-hover:drop-shadow-[0_12px_16px_oklch(0.4_0.03_60/0.32)]"
+                    }`}
+                  />
                 </span>
-                <span className="line-clamp-1 text-[11px] font-semibold text-foreground">
+                <span className="line-clamp-1 text-[11px] font-semibold text-foreground/70">
                   {dt(item.labelKey)}
                 </span>
               </button>
@@ -382,15 +407,25 @@ function DragDropBoard({
         </div>
       </div>
 
-      {/* Floating dragged token */}
-      {drag && (
-        <div
-          className="pointer-events-none fixed z-50 grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-2xl bg-card text-4xl shadow-xl"
-          style={{ left: drag.x, top: drag.y }}
-        >
-          {story.items.find((it) => it.id === drag.id)?.emoji}
-        </div>
-      )}
+      {/* Floating dragged piece — enlarged and lifted above the painting */}
+      {drag &&
+        (() => {
+          const item = story.items.find((it) => it.id === drag.id);
+          if (!item) return null;
+          return (
+            <div
+              className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2"
+              style={{ left: drag.x, top: drag.y, width: "min(40vw, 190px)" }}
+            >
+              <img
+                src={item.art}
+                alt=""
+                aria-hidden
+                className="h-auto w-full scale-110 drop-shadow-[0_20px_26px_oklch(0.35_0.04_60/0.42)]"
+              />
+            </div>
+          );
+        })()}
 
       {done && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
