@@ -12,11 +12,8 @@ import josephCoat from "@/assets/puzzle-joseph-coat.jpg";
 // artwork is rendered as a soft silhouette in its target spot, so the piece
 // always fits its outline perfectly.
 import artSun from "@/assets/dd/sun.png";
-import artMoon from "@/assets/dd/moon.png";
 import artStars from "@/assets/dd/stars.png";
 import artElephant from "@/assets/dd/elephant.png";
-import artLion from "@/assets/dd/lion.png";
-import artGiraffe from "@/assets/dd/giraffe.png";
 import artDove from "@/assets/dd/dove.png";
 import artBricks from "@/assets/dd/bricks.png";
 import artBeams from "@/assets/dd/beams.png";
@@ -24,14 +21,7 @@ import artWorker from "@/assets/dd/worker.png";
 import artLadder from "@/assets/dd/ladder.png";
 import artBasket from "@/assets/dd/basket.png";
 import artTent from "@/assets/dd/tent.png";
-import artCamel from "@/assets/dd/camel.png";
-import artStaff from "@/assets/dd/staff.png";
-import artCampfire from "@/assets/dd/campfire.png";
 import artSheep from "@/assets/dd/sheep.png";
-import artJar from "@/assets/dd/jar.png";
-import artCoat from "@/assets/dd/coat.png";
-import artGrain from "@/assets/dd/grain.png";
-import artSheaf from "@/assets/dd/sheaf.png";
 
 export type CollectionId = "old-testament" | "life-of-jesus";
 
@@ -63,74 +53,74 @@ export interface DragCollection {
 }
 
 // --- Old Testament (first 5 stories only for now) ---
+//
+// Each scene is treated as a finished storybook painting: we only lift out
+// objects that are genuinely part of that illustration and drop them back onto
+// their real spot, so a completed board simply looks like the original artwork.
 const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
   {
     id: "ot-1-creation",
     slug: "creation",
     image: creation,
+    // Peaceful meadow at first light: the sun glows behind the clouds, a dove
+    // crosses the sky, and a lamb grazes among the flowers in the foreground.
     items: [
-      { id: "sun", art: artSun, labelKey: "dd.item.sun", x: 26, y: 21, w: 24 },
-      { id: "moon", art: artMoon, labelKey: "dd.item.moon", x: 76, y: 22, w: 19 },
-      { id: "stars", art: artStars, labelKey: "dd.item.stars", x: 50, y: 12, w: 20 },
+      { id: "sun", art: artSun, labelKey: "dd.item.sun", x: 57, y: 21, w: 22 },
+      { id: "dove", art: artDove, labelKey: "dd.item.dove", x: 62, y: 35, w: 13 },
+      { id: "sheep", art: artSheep, labelKey: "dd.item.sheep", x: 31, y: 77, w: 23 },
     ],
   },
   {
     id: "ot-2-noah",
     slug: "noah",
     image: noahsArk,
+    // Two doves rest on the bow railing, a little elephant walks down the ramp,
+    // and a sheep waits on the grassy shore beside the ark.
     items: [
-      // Big grazer stands on the ground at left; lion sits lower-centre; the
-      // tall giraffe rises higher on the right so its neck clears the others;
-      // the dove floats free in the open sky above the scene.
-      { id: "elephant", art: artElephant, labelKey: "dd.item.elephant", x: 25, y: 78, w: 28 },
-      { id: "lion", art: artLion, labelKey: "dd.item.lion", x: 50, y: 83, w: 22 },
-      { id: "giraffe", art: artGiraffe, labelKey: "dd.item.giraffe", x: 78, y: 62, w: 20 },
-      { id: "dove", art: artDove, labelKey: "dd.item.dove", x: 60, y: 17, w: 14 },
+      { id: "dove-1", art: artDove, labelKey: "dd.item.dove", x: 15, y: 44, w: 11 },
+      { id: "dove-2", art: artDove, labelKey: "dd.item.dove", x: 22, y: 41, w: 11 },
+      { id: "elephant", art: artElephant, labelKey: "dd.item.elephant", x: 67, y: 76, w: 16 },
+      { id: "sheep", art: artSheep, labelKey: "dd.item.sheep", x: 88, y: 81, w: 14 },
     ],
   },
   {
     id: "ot-3-babel",
     slug: "babel",
     image: babel,
+    // A busy building site: cut stone blocks stacked on the ground, a basket
+    // by the workbench, the wooden hoisting crane at the left, a ladder on the
+    // tower's scaffold, and builders working in the courtyard.
     items: [
-      // Building materials rest on the ground; the ladder leans against the
-      // tower; heavy beams sit up on the structure being built.
-      { id: "bricks", art: artBricks, labelKey: "dd.item.bricks", x: 22, y: 82, w: 20 },
-      { id: "basket", art: artBasket, labelKey: "dd.item.basket", x: 80, y: 83, w: 16 },
-      { id: "workers", art: artWorker, labelKey: "dd.item.workers", x: 50, y: 85, w: 16 },
-      { id: "ladder", art: artLadder, labelKey: "dd.item.ladder", x: 34, y: 56, w: 14 },
-      { id: "beams", art: artBeams, labelKey: "dd.item.beams", x: 66, y: 52, w: 24 },
+      { id: "bricks", art: artBricks, labelKey: "dd.item.bricks", x: 20, y: 90, w: 18 },
+      { id: "basket", art: artBasket, labelKey: "dd.item.basket", x: 64, y: 92, w: 11 },
+      { id: "beams", art: artBeams, labelKey: "dd.item.beams", x: 12, y: 66, w: 15 },
+      { id: "ladder", art: artLadder, labelKey: "dd.item.ladder", x: 80, y: 52, w: 11 },
+      { id: "workers", art: artWorker, labelKey: "dd.item.workers", x: 36, y: 71, w: 11 },
     ],
   },
   {
     id: "ot-4-abraham",
     slug: "abraham",
     image: abrahamStars,
+    // A starry twilight over the plains: countless stars fill the sky above
+    // Abraham while his family's tents sit on the horizon left and right.
     items: [
-      // A grounded desert camp: tent pitched left, camel resting right, the
-      // campfire and belongings spread naturally across the sandy foreground.
-      { id: "tent", art: artTent, labelKey: "dd.item.tent", x: 24, y: 70, w: 28 },
-      { id: "camel", art: artCamel, labelKey: "dd.item.camel", x: 78, y: 72, w: 24 },
-      { id: "campfire", art: artCampfire, labelKey: "dd.item.campfire", x: 46, y: 85, w: 15 },
-      { id: "sheep", art: artSheep, labelKey: "dd.item.sheep", x: 62, y: 87, w: 15 },
-      { id: "stick", art: artStaff, labelKey: "dd.item.stick", x: 33, y: 84, w: 10 },
-      { id: "jar", art: artJar, labelKey: "dd.item.jar", x: 15, y: 86, w: 12 },
+      { id: "stars-1", art: artStars, labelKey: "dd.item.stars", x: 22, y: 14, w: 20 },
+      { id: "stars-2", art: artStars, labelKey: "dd.item.stars", x: 74, y: 16, w: 18 },
+      { id: "tent-1", art: artTent, labelKey: "dd.item.tent", x: 84, y: 66, w: 15 },
+      { id: "tent-2", art: artTent, labelKey: "dd.item.tent", x: 13, y: 80, w: 11 },
     ],
   },
   {
     id: "ot-5-joseph",
     slug: "joseph",
     image: josephCoat,
+    // Joseph the young shepherd keeps his colorful coat on; his little flock
+    // grazes around him — two sheep in the meadow and a lamb resting at his side.
     items: [
-      // Joseph's dream: sun, moon and stars arch across the top sky; the coat
-      // hangs at centre; sheaves of grain stand bundled on the ground below.
-      { id: "sun", art: artSun, labelKey: "dd.item.sun", x: 22, y: 17, w: 16 },
-      { id: "star1", art: artStars, labelKey: "dd.item.stars", x: 42, y: 12, w: 12 },
-      { id: "star2", art: artStars, labelKey: "dd.item.stars", x: 60, y: 13, w: 10 },
-      { id: "moon", art: artMoon, labelKey: "dd.item.moon", x: 78, y: 17, w: 14 },
-      { id: "coat", art: artCoat, labelKey: "dd.item.coat", x: 48, y: 52, w: 24 },
-      { id: "grain", art: artGrain, labelKey: "dd.item.grain", x: 24, y: 82, w: 18 },
-      { id: "sheaf", art: artSheaf, labelKey: "dd.item.sheaf", x: 76, y: 82, w: 18 },
+      { id: "sheep-1", art: artSheep, labelKey: "dd.item.sheep", x: 14, y: 55, w: 22 },
+      { id: "sheep-2", art: artSheep, labelKey: "dd.item.sheep", x: 83, y: 57, w: 18 },
+      { id: "sheep-3", art: artSheep, labelKey: "dd.item.sheep", x: 73, y: 83, w: 17 },
     ],
   },
 ];
