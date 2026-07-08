@@ -277,18 +277,28 @@ function DragDropBoard({
   const endDrag = () => {
     if (!drag) return;
     const board = boardRef.current;
-    const item = story.items.find((it) => it.id === drag.id);
-    if (board && item) {
+    const dragItem = story.items.find((it) => it.id === drag.id);
+    if (board && dragItem) {
       const rect = board.getBoundingClientRect();
-      const zoneX = rect.left + (item.x / 100) * rect.width;
-      const zoneY = rect.top + (item.y / 100) * rect.height;
-      const dist = Math.hypot(drag.x - zoneX, drag.y - zoneY);
-      // Snap tolerance scales with the piece size so bigger pieces feel just as
-      // easy to place as small ones.
-      const threshold = Math.max((item.w / 100) * rect.width * 0.85, rect.width * 0.13);
-      if (dist <= threshold) {
+      // Snap to the nearest still-empty spot that expects this same artwork.
+      // For unique pieces this is simply their own target; for repeated pieces
+      // (a flock of sheep, stars in the sky, a pair of doves) the child can
+      // place any identical piece into any of its matching spots without being
+      // punished for picking a look-alike.
+      let best: { id: string; dist: number } | null = null;
+      for (const it of story.items) {
+        if (placed.has(it.id) || it.art !== dragItem.art) continue;
+        const zoneX = rect.left + (it.x / 100) * rect.width;
+        const zoneY = rect.top + (it.y / 100) * rect.height;
+        const dist = Math.hypot(drag.x - zoneX, drag.y - zoneY);
+        // Snap tolerance scales with the piece size so bigger pieces feel just
+        // as easy to place as small ones.
+        const threshold = Math.max((it.w / 100) * rect.width * 0.85, rect.width * 0.13);
+        if (dist <= threshold && (!best || dist < best.dist)) best = { id: it.id, dist };
+      }
+      if (best) {
         const next = new Set(placed);
-        next.add(item.id);
+        next.add(best.id);
         setPlaced(next);
         playCorrect();
         if (next.size === story.items.length) {
