@@ -48,6 +48,10 @@ const en: Dict = {
   "dd.item.sheep": "Sheep",
   "dd.item.jar": "Water jar",
   "dd.item.sheaf": "Sheaf of wheat",
+  "dd.item.deer": "Deer",
+  "dd.item.crane": "Wooden crane",
+  "dd.item.tree": "Tree",
+  "dd.item.flowers": "Flowers",
 };
 
 const es: Dict = {
