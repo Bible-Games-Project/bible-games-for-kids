@@ -389,19 +389,22 @@ function DragDropBoard({
                     className="h-auto w-full animate-scale-in drop-shadow-[0_8px_12px_oklch(0.4_0.03_60/0.28)]"
                   />
                 ) : (
-                  // Keep the target almost invisible: a faint soft-focus echo that
-                  // helps alignment without breaking the painting illusion.
-                  <div className="relative">
-                    <img
-                      src={item.art}
-                      alt=""
-                      aria-hidden
-                      draggable={false}
-                      className="h-auto w-full opacity-[0.08]"
-                      style={{ filter: "saturate(0.7) blur(0.5px)" }}
-                    />
-                    <div className="absolute inset-0 rounded-[40%] bg-[oklch(1_0_0/0.08)] blur-[10px]" />
-                  </div>
+                  // Soft, dark-grey painted silhouette of the exact missing piece:
+                  // slightly transparent, gently blurred and blended into the
+                  // painting like a shadow. No glow, no outline, no circle — just a
+                  // hint of where the object belongs.
+                  <img
+                    src={item.art}
+                    alt=""
+                    aria-hidden
+                    draggable={false}
+                    className="h-auto w-full"
+                    style={{
+                      filter: "brightness(0) blur(1.2px)",
+                      opacity: 0.26,
+                      mixBlendMode: "multiply",
+                    }}
+                  />
                 )}
               </div>
             );
