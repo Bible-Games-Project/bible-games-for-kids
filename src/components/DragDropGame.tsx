@@ -349,6 +349,7 @@ function DragDropBoard({
                   <img
                     src={item.art}
                     alt={dt(item.labelKey)}
+                    draggable={false}
                     className="h-auto w-full animate-scale-in drop-shadow-[0_8px_12px_oklch(0.4_0.03_60/0.28)]"
                   />
                 ) : (
@@ -357,6 +358,7 @@ function DragDropBoard({
                     src={item.art}
                     alt=""
                     aria-hidden
+                    draggable={false}
                     className="h-auto w-full opacity-[0.28]"
                     style={{ filter: "brightness(0) saturate(0)" }}
                   />
@@ -381,6 +383,7 @@ function DragDropBoard({
                 onPointerMove={moveDrag}
                 onPointerUp={endDrag}
                 onPointerCancel={endDrag}
+                onDragStart={(e) => e.preventDefault()}
                 className={`group flex w-[22vw] max-w-24 touch-none select-none flex-col items-center gap-1 transition active:scale-95 ${
                   isDragging ? "opacity-25" : ""
                 }`}
@@ -393,6 +396,7 @@ function DragDropBoard({
                   <img
                     src={item.art}
                     alt={dt(item.labelKey)}
+                    draggable={false}
                     className={`h-auto max-h-full w-full object-contain drop-shadow-[0_6px_9px_oklch(0.4_0.03_60/0.25)] transition ${
                       isWrong ? "animate-pulse" : "group-hover:drop-shadow-[0_12px_16px_oklch(0.4_0.03_60/0.32)]"
                     }`}
@@ -407,7 +411,8 @@ function DragDropBoard({
         </div>
       </div>
 
-      {/* Floating dragged piece — enlarged and lifted above the painting */}
+      {/* Floating dragged piece — lifted above the painting, kept close to its
+          natural size so it feels controllable (only a hair larger). */}
       {drag &&
         (() => {
           const item = story.items.find((it) => it.id === drag.id);
@@ -415,13 +420,14 @@ function DragDropBoard({
           return (
             <div
               className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2"
-              style={{ left: drag.x, top: drag.y, width: "min(40vw, 190px)" }}
+              style={{ left: drag.x, top: drag.y, width: "min(22vw, 96px)" }}
             >
               <img
                 src={item.art}
                 alt=""
                 aria-hidden
-                className="h-auto w-full scale-110 drop-shadow-[0_20px_26px_oklch(0.35_0.04_60/0.42)]"
+                draggable={false}
+                className="h-auto w-full scale-[1.04] drop-shadow-[0_16px_22px_oklch(0.35_0.04_60/0.4)]"
               />
             </div>
           );
