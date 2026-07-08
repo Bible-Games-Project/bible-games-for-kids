@@ -344,8 +344,8 @@ function DragDropBoard({
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
         >
-          {/* Soft wash so the scene reads as "to be completed". */}
-          <div className="pointer-events-none absolute inset-0 bg-[oklch(0.98_0.02_80/0.28)]" />
+          {/* Very light wash so the scene still feels like a finished painting. */}
+          <div className="pointer-events-none absolute inset-0 bg-[oklch(0.98_0.02_80/0.08)]" />
           {story.items.map((item) => {
             const isPlaced = placed.has(item.id);
             return (
@@ -363,15 +363,19 @@ function DragDropBoard({
                     className="h-auto w-full animate-scale-in drop-shadow-[0_8px_12px_oklch(0.4_0.03_60/0.28)]"
                   />
                 ) : (
-                  // Exact silhouette of the missing artwork — a soft painted shadow.
-                  <img
-                    src={item.art}
-                    alt=""
-                    aria-hidden
-                    draggable={false}
-                    className="h-auto w-full opacity-[0.28]"
-                    style={{ filter: "brightness(0) saturate(0)" }}
-                  />
+                  // Keep the target almost invisible: a faint soft-focus echo that
+                  // helps alignment without breaking the painting illusion.
+                  <div className="relative">
+                    <img
+                      src={item.art}
+                      alt=""
+                      aria-hidden
+                      draggable={false}
+                      className="h-auto w-full opacity-[0.08]"
+                      style={{ filter: "saturate(0.7) blur(0.5px)" }}
+                    />
+                    <div className="absolute inset-0 rounded-[40%] bg-[oklch(1_0_0/0.08)] blur-[10px]" />
+                  </div>
                 )}
               </div>
             );
