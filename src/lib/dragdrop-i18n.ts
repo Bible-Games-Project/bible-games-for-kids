@@ -52,6 +52,8 @@ const en: Dict = {
   "dd.item.crane": "Wooden crane",
   "dd.item.tree": "Tree",
   "dd.item.flowers": "Flowers",
+  "dd.item.man": "Abraham",
+  "dd.item.boy": "Joseph",
 };
 
 const es: Dict = {
