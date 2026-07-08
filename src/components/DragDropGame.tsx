@@ -486,7 +486,7 @@ function DragDropBoard({
             <p className="mt-2 text-base text-muted-foreground">{dt(`dd.msg.${story.slug}`)}</p>
             <button
               onClick={() => {
-                setPlaced(new Set());
+                setPlaced(new Set(preplacedIds));
                 setDone(false);
               }}
               className="mt-5 w-full rounded-2xl bg-card px-5 py-3 text-base font-semibold text-foreground/80 shadow-sm transition active:scale-95"
