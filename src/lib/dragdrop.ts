@@ -79,10 +79,13 @@ const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
     slug: "noah",
     image: noahsArk,
     items: [
-      { id: "elephant", art: artElephant, labelKey: "dd.item.elephant", x: 28, y: 70, w: 30 },
-      { id: "lion", art: artLion, labelKey: "dd.item.lion", x: 53, y: 76, w: 26 },
-      { id: "giraffe", art: artGiraffe, labelKey: "dd.item.giraffe", x: 76, y: 55, w: 22 },
-      { id: "dove", art: artDove, labelKey: "dd.item.dove", x: 60, y: 22, w: 18 },
+      // Big grazer stands on the ground at left; lion sits lower-centre; the
+      // tall giraffe rises higher on the right so its neck clears the others;
+      // the dove floats free in the open sky above the scene.
+      { id: "elephant", art: artElephant, labelKey: "dd.item.elephant", x: 25, y: 78, w: 28 },
+      { id: "lion", art: artLion, labelKey: "dd.item.lion", x: 50, y: 83, w: 22 },
+      { id: "giraffe", art: artGiraffe, labelKey: "dd.item.giraffe", x: 78, y: 62, w: 20 },
+      { id: "dove", art: artDove, labelKey: "dd.item.dove", x: 60, y: 17, w: 14 },
     ],
   },
   {
@@ -90,11 +93,13 @@ const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
     slug: "babel",
     image: babel,
     items: [
-      { id: "bricks", art: artBricks, labelKey: "dd.item.bricks", x: 30, y: 70, w: 22 },
-      { id: "beams", art: artBeams, labelKey: "dd.item.beams", x: 66, y: 62, w: 26 },
-      { id: "workers", art: artWorker, labelKey: "dd.item.workers", x: 48, y: 82, w: 18 },
-      { id: "ladder", art: artLadder, labelKey: "dd.item.ladder", x: 78, y: 44, w: 15 },
-      { id: "basket", art: artBasket, labelKey: "dd.item.basket", x: 19, y: 78, w: 19 },
+      // Building materials rest on the ground; the ladder leans against the
+      // tower; heavy beams sit up on the structure being built.
+      { id: "bricks", art: artBricks, labelKey: "dd.item.bricks", x: 22, y: 82, w: 20 },
+      { id: "basket", art: artBasket, labelKey: "dd.item.basket", x: 80, y: 83, w: 16 },
+      { id: "workers", art: artWorker, labelKey: "dd.item.workers", x: 50, y: 85, w: 16 },
+      { id: "ladder", art: artLadder, labelKey: "dd.item.ladder", x: 34, y: 56, w: 14 },
+      { id: "beams", art: artBeams, labelKey: "dd.item.beams", x: 66, y: 52, w: 24 },
     ],
   },
   {
@@ -102,12 +107,14 @@ const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
     slug: "abraham",
     image: abrahamStars,
     items: [
-      { id: "tent", art: artTent, labelKey: "dd.item.tent", x: 27, y: 68, w: 28 },
-      { id: "camel", art: artCamel, labelKey: "dd.item.camel", x: 75, y: 70, w: 26 },
-      { id: "stick", art: artStaff, labelKey: "dd.item.stick", x: 50, y: 78, w: 11 },
-      { id: "campfire", art: artCampfire, labelKey: "dd.item.campfire", x: 42, y: 84, w: 16 },
-      { id: "sheep", art: artSheep, labelKey: "dd.item.sheep", x: 62, y: 86, w: 16 },
-      { id: "jar", art: artJar, labelKey: "dd.item.jar", x: 15, y: 62, w: 13 },
+      // A grounded desert camp: tent pitched left, camel resting right, the
+      // campfire and belongings spread naturally across the sandy foreground.
+      { id: "tent", art: artTent, labelKey: "dd.item.tent", x: 24, y: 70, w: 28 },
+      { id: "camel", art: artCamel, labelKey: "dd.item.camel", x: 78, y: 72, w: 24 },
+      { id: "campfire", art: artCampfire, labelKey: "dd.item.campfire", x: 46, y: 85, w: 15 },
+      { id: "sheep", art: artSheep, labelKey: "dd.item.sheep", x: 62, y: 87, w: 15 },
+      { id: "stick", art: artStaff, labelKey: "dd.item.stick", x: 33, y: 84, w: 10 },
+      { id: "jar", art: artJar, labelKey: "dd.item.jar", x: 15, y: 86, w: 12 },
     ],
   },
   {
@@ -115,13 +122,15 @@ const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
     slug: "joseph",
     image: josephCoat,
     items: [
-      { id: "coat", art: artCoat, labelKey: "dd.item.coat", x: 48, y: 50, w: 26 },
-      { id: "grain", art: artGrain, labelKey: "dd.item.grain", x: 25, y: 76, w: 20 },
-      { id: "sun", art: artSun, labelKey: "dd.item.sun", x: 22, y: 19, w: 18 },
-      { id: "moon", art: artMoon, labelKey: "dd.item.moon", x: 77, y: 19, w: 16 },
-      { id: "star1", art: artStars, labelKey: "dd.item.stars", x: 40, y: 13, w: 15 },
-      { id: "star2", art: artStars, labelKey: "dd.item.stars", x: 62, y: 15, w: 12 },
-      { id: "sheaf", art: artSheaf, labelKey: "dd.item.sheaf", x: 76, y: 74, w: 18 },
+      // Joseph's dream: sun, moon and stars arch across the top sky; the coat
+      // hangs at centre; sheaves of grain stand bundled on the ground below.
+      { id: "sun", art: artSun, labelKey: "dd.item.sun", x: 22, y: 17, w: 16 },
+      { id: "star1", art: artStars, labelKey: "dd.item.stars", x: 42, y: 12, w: 12 },
+      { id: "star2", art: artStars, labelKey: "dd.item.stars", x: 60, y: 13, w: 10 },
+      { id: "moon", art: artMoon, labelKey: "dd.item.moon", x: 78, y: 17, w: 14 },
+      { id: "coat", art: artCoat, labelKey: "dd.item.coat", x: 48, y: 52, w: 24 },
+      { id: "grain", art: artGrain, labelKey: "dd.item.grain", x: 24, y: 82, w: 18 },
+      { id: "sheaf", art: artSheaf, labelKey: "dd.item.sheaf", x: 76, y: 82, w: 18 },
     ],
   },
 ];
