@@ -374,8 +374,8 @@ function DragDropBoard({
                     alt=""
                     aria-hidden
                     draggable={false}
-                    className="h-auto w-full opacity-[0.6]"
-                    style={{ filter: "grayscale(1) brightness(0.32)" }}
+                    className="h-auto w-full opacity-[0.72]"
+                    style={{ filter: "grayscale(1) brightness(0.28) contrast(1.05)" }}
                   />
                 )}
               </div>
