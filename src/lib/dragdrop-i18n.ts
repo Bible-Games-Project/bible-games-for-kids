@@ -46,8 +46,6 @@ const en: Dict = {
   "dd.item.basket": "Basket",
   "dd.item.campfire": "Campfire",
   "dd.item.sheep": "Sheep",
-  "dd.item.deer": "Deer",
-  "dd.item.stone": "Stone block",
   "dd.item.jar": "Water jar",
   "dd.item.sheaf": "Sheaf of wheat",
 };
