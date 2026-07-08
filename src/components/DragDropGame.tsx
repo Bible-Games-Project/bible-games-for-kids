@@ -335,17 +335,21 @@ function DragDropBoard({
 
         <p className="pb-2 text-center text-sm text-muted-foreground">{dt("dd.instruction")}</p>
 
-        {/* Scene with drop zones */}
+        {/* The finished painting stays fully intact; a soft grey shadow marks
+            each spot until its identical piece is dropped back on top. */}
         <div
           ref={boardRef}
-          className="relative mx-auto aspect-[7/9] w-full max-w-sm overflow-hidden rounded-3xl shadow-lg"
-          style={{ backgroundImage: `url(${story.image})`, backgroundSize: "cover", backgroundPosition: "center" }}
+          className="relative mx-auto w-full max-w-sm overflow-hidden rounded-3xl shadow-lg"
           onPointerMove={moveDrag}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
         >
-          {/* Soft wash so the scene reads as "to be completed". */}
-          <div className="pointer-events-none absolute inset-0 bg-[oklch(0.98_0.02_80/0.28)]" />
+          <img
+            src={story.image}
+            alt=""
+            draggable={false}
+            className="block h-auto w-full select-none"
+          />
           {story.items.map((item) => {
             const isPlaced = placed.has(item.id);
             return (
@@ -355,22 +359,23 @@ function DragDropBoard({
                 style={{ left: `${item.x}%`, top: `${item.y}%`, width: `${item.w}%` }}
               >
                 {isPlaced ? (
-                  // The real painted piece, snapped into place.
+                  // The identical crop, snapped seamlessly back into the painting.
                   <img
                     src={item.art}
                     alt={dt(item.labelKey)}
                     draggable={false}
-                    className="h-auto w-full animate-scale-in drop-shadow-[0_8px_12px_oklch(0.4_0.03_60/0.28)]"
+                    className="h-auto w-full animate-scale-in"
                   />
                 ) : (
-                  // Exact silhouette of the missing artwork — a soft painted shadow.
+                  // Soft dark-grey painted shadow of the same object, partially
+                  // covering it so the child can still tell what belongs here.
                   <img
                     src={item.art}
                     alt=""
                     aria-hidden
                     draggable={false}
-                    className="h-auto w-full opacity-[0.28]"
-                    style={{ filter: "brightness(0) saturate(0)" }}
+                    className="h-auto w-full opacity-[0.72]"
+                    style={{ filter: "grayscale(1) brightness(0.28) contrast(1.05)" }}
                   />
                 )}
               </div>
@@ -427,10 +432,14 @@ function DragDropBoard({
         (() => {
           const item = story.items.find((it) => it.id === drag.id);
           if (!item) return null;
+          // Match the floating piece to the on-screen size of its target slot
+          // so it reads as the very same object being carried into place.
+          const boardW = boardRef.current?.getBoundingClientRect().width ?? 320;
+          const px = (item.w / 100) * boardW;
           return (
             <div
               className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2"
-              style={{ left: drag.x, top: drag.y, width: "min(22vw, 96px)" }}
+              style={{ left: drag.x, top: drag.y, width: px }}
             >
               <img
                 src={item.art}

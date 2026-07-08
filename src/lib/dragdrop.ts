@@ -1,33 +1,53 @@
 // Drag & Drop game — data model. Designed to scale to 25 Old Testament +
 // 25 Life of Jesus stories across two independent collections without any
 // structural changes: just append entries to the arrays below.
+//
+// NEW APPROACH: the scene painting is kept 100% intact. Every draggable piece
+// is a pixel-identical crop lifted straight from the finished illustration, so
+// perspective, scale, colours and painting style always match perfectly. Each
+// crop is placed back exactly where it came from; until then, a soft grey
+// painted shadow of that same crop marks its spot on top of the untouched art.
 import creation from "@/assets/puzzle-creation.jpg";
 import noahsArk from "@/assets/puzzle-noahs-ark.jpg";
 import babel from "@/assets/dragdrop-babel.jpg";
 import abrahamStars from "@/assets/puzzle-abraham-stars.jpg";
 import josephCoat from "@/assets/puzzle-joseph-coat.jpg";
 
-// Painted, transparent object artwork — each piece is a real illustration cut
-// from the same soft watercolor storybook style as the scenes. The very same
-// artwork is rendered as a soft silhouette in its target spot, so the piece
-// always fits its outline perfectly.
-import artSun from "@/assets/dd/sun.png";
-import artStars from "@/assets/dd/stars.png";
-import artElephant from "@/assets/dd/elephant.png";
-import artDove from "@/assets/dd/dove.png";
-import artBricks from "@/assets/dd/bricks.png";
-import artBeams from "@/assets/dd/beams.png";
-import artWorker from "@/assets/dd/worker.png";
-import artLadder from "@/assets/dd/ladder.png";
-import artBasket from "@/assets/dd/basket.png";
-import artTent from "@/assets/dd/tent.png";
-import artSheep from "@/assets/dd/sheep.png";
+// Feather-masked object crops taken directly from the scenes above.
+import creation_sheep from "@/assets/dd/crops/creation-sheep.png";
+import creation_deer from "@/assets/dd/crops/creation-deer.png";
+import creation_dove_hi from "@/assets/dd/crops/creation-dove-hi.png";
+import creation_dove_lo from "@/assets/dd/crops/creation-dove-lo.png";
+import noah_dove_1 from "@/assets/dd/crops/noah-dove-1.png";
+import noah_dove_2 from "@/assets/dd/crops/noah-dove-2.png";
+import noah_giraffes from "@/assets/dd/crops/noah-giraffes.png";
+import noah_eleph_win from "@/assets/dd/crops/noah-eleph-win.png";
+import noah_eleph_ramp from "@/assets/dd/crops/noah-eleph-ramp.png";
+import noah_ram from "@/assets/dd/crops/noah-ram.png";
+import noah_lamb from "@/assets/dd/crops/noah-lamb.png";
+import babel_crane from "@/assets/dd/crops/babel-crane.png";
+import babel_blocks from "@/assets/dd/crops/babel-blocks.png";
+import babel_carrier from "@/assets/dd/crops/babel-carrier.png";
+import babel_basket from "@/assets/dd/crops/babel-basket.png";
+import babel_sawhorse from "@/assets/dd/crops/babel-sawhorse.png";
+import babel_tree from "@/assets/dd/crops/babel-tree.png";
+import abraham_tents_r from "@/assets/dd/crops/abraham-tents-r.png";
+import abraham_tent_l from "@/assets/dd/crops/abraham-tent-l.png";
+import abraham_flowers_l from "@/assets/dd/crops/abraham-flowers-l.png";
+import abraham_flowers_r from "@/assets/dd/crops/abraham-flowers-r.png";
+import abraham_flowers_m from "@/assets/dd/crops/abraham-flowers-m.png";
+import joseph_lamb_r from "@/assets/dd/crops/joseph-lamb-r.png";
+import joseph_sheep_lf from "@/assets/dd/crops/joseph-sheep-lf.png";
+import joseph_sheep_lb from "@/assets/dd/crops/joseph-sheep-lb.png";
+import joseph_sheep_r1 from "@/assets/dd/crops/joseph-sheep-r1.png";
+import joseph_sheep_r2 from "@/assets/dd/crops/joseph-sheep-r2.png";
+import joseph_flowers_l from "@/assets/dd/crops/joseph-flowers-l.png";
 
 export type CollectionId = "old-testament" | "life-of-jesus";
 
 export interface DragItem {
   id: string; // stable, unique within a story
-  art: string; // painted transparent illustration of the missing object
+  art: string; // pixel-identical crop of the object taken from the scene
   labelKey: string; // dd-i18n key for accessible / caption text
   // Target position as a percentage of the scene (center of the drop zone).
   x: number;
@@ -54,73 +74,78 @@ export interface DragCollection {
 
 // --- Old Testament (first 5 stories only for now) ---
 //
-// Each scene is treated as a finished storybook painting: we only lift out
-// objects that are genuinely part of that illustration and drop them back onto
-// their real spot, so a completed board simply looks like the original artwork.
+// Every piece below is a real crop of an object already painted in the scene,
+// dropped back onto its exact original spot. A finished board is therefore
+// visually identical to the untouched storybook painting.
 const OLD_TESTAMENT_STORIES: Omit<DragStory, "collectionId" | "index">[] = [
   {
     id: "ot-1-creation",
     slug: "creation",
     image: creation,
-    // Peaceful meadow at first light: the sun glows behind the clouds, a dove
-    // crosses the sky, and a lamb grazes among the flowers in the foreground.
+    // Sunlit meadow: a grazing lamb, a deer on the far bank, two doves in flight.
     items: [
-      { id: "sun", art: artSun, labelKey: "dd.item.sun", x: 57, y: 21, w: 22 },
-      { id: "dove", art: artDove, labelKey: "dd.item.dove", x: 62, y: 35, w: 13 },
-      { id: "sheep", art: artSheep, labelKey: "dd.item.sheep", x: 31, y: 77, w: 23 },
+      { id: "sheep", art: creation_sheep, labelKey: "dd.item.sheep", x: 30.8, y: 75.5, w: 26.5 },
+      { id: "deer", art: creation_deer, labelKey: "dd.item.deer", x: 84.8, y: 54.5, w: 11.5 },
+      { id: "dove-hi", art: creation_dove_hi, labelKey: "dd.item.dove", x: 68.5, y: 33.8, w: 10.0 },
+      { id: "dove-lo", art: creation_dove_lo, labelKey: "dd.item.dove", x: 61.5, y: 39.0, w: 10.0 },
     ],
   },
   {
     id: "ot-2-noah",
     slug: "noah",
     image: noahsArk,
-    // Two doves rest on the bow railing, a little elephant walks down the ramp,
-    // and a sheep waits on the grassy shore beside the ark.
+    // Doves on the bow, giraffes and elephants at the windows and ramp, and the
+    // little flock of sheep on the grassy shore.
     items: [
-      { id: "dove-1", art: artDove, labelKey: "dd.item.dove", x: 15, y: 44, w: 11 },
-      { id: "dove-2", art: artDove, labelKey: "dd.item.dove", x: 22, y: 41, w: 11 },
-      { id: "elephant", art: artElephant, labelKey: "dd.item.elephant", x: 67, y: 76, w: 16 },
-      { id: "sheep", art: artSheep, labelKey: "dd.item.sheep", x: 88, y: 81, w: 14 },
+      { id: "dove-1", art: noah_dove_1, labelKey: "dd.item.dove", x: 14.8, y: 43.0, w: 10.5 },
+      { id: "dove-2", art: noah_dove_2, labelKey: "dd.item.dove", x: 23.5, y: 42.5, w: 10.0 },
+      { id: "giraffes", art: noah_giraffes, labelKey: "dd.item.giraffe", x: 43.0, y: 58.2, w: 15.0 },
+      { id: "eleph-win", art: noah_eleph_win, labelKey: "dd.item.elephant", x: 62.5, y: 54.8, w: 15.0 },
+      { id: "eleph-ramp", art: noah_eleph_ramp, labelKey: "dd.item.elephant", x: 65.0, y: 67.5, w: 15.0 },
+      { id: "ram", art: noah_ram, labelKey: "dd.item.sheep", x: 89.8, y: 79.2, w: 13.5 },
+      { id: "lamb", art: noah_lamb, labelKey: "dd.item.sheep", x: 59.8, y: 83.2, w: 13.5 },
     ],
   },
   {
     id: "ot-3-babel",
     slug: "babel",
     image: babel,
-    // A busy building site: cut stone blocks stacked on the ground, a basket
-    // by the workbench, the wooden hoisting crane at the left, a ladder on the
-    // tower's scaffold, and builders working in the courtyard.
+    // The building site: the wooden crane, stacked stone blocks, a builder
+    // carrying a block, a basket, a laden sawhorse and the tree on the right.
     items: [
-      { id: "bricks", art: artBricks, labelKey: "dd.item.bricks", x: 20, y: 90, w: 18 },
-      { id: "basket", art: artBasket, labelKey: "dd.item.basket", x: 64, y: 92, w: 11 },
-      { id: "beams", art: artBeams, labelKey: "dd.item.beams", x: 12, y: 66, w: 15 },
-      { id: "ladder", art: artLadder, labelKey: "dd.item.ladder", x: 80, y: 52, w: 11 },
-      { id: "workers", art: artWorker, labelKey: "dd.item.workers", x: 36, y: 71, w: 11 },
+      { id: "crane", art: babel_crane, labelKey: "dd.item.crane", x: 12.8, y: 64.0, w: 21.5 },
+      { id: "blocks", art: babel_blocks, labelKey: "dd.item.bricks", x: 22.0, y: 91.8, w: 24.0 },
+      { id: "carrier", art: babel_carrier, labelKey: "dd.item.workers", x: 52.5, y: 87.8, w: 15.0 },
+      { id: "basket", art: babel_basket, labelKey: "dd.item.basket", x: 67.2, y: 93.5, w: 11.5 },
+      { id: "sawhorse", art: babel_sawhorse, labelKey: "dd.item.bricks", x: 84.7, y: 92.2, w: 21.5 },
+      { id: "tree", art: babel_tree, labelKey: "dd.item.tree", x: 91.8, y: 62.3, w: 14.5 },
     ],
   },
   {
     id: "ot-4-abraham",
     slug: "abraham",
     image: abrahamStars,
-    // A starry twilight over the plains: countless stars fill the sky above
-    // Abraham while his family's tents sit on the horizon left and right.
+    // Tents on the horizon and clusters of wildflowers along the meadow's edge.
     items: [
-      { id: "stars-1", art: artStars, labelKey: "dd.item.stars", x: 22, y: 14, w: 20 },
-      { id: "stars-2", art: artStars, labelKey: "dd.item.stars", x: 74, y: 16, w: 18 },
-      { id: "tent-1", art: artTent, labelKey: "dd.item.tent", x: 84, y: 66, w: 15 },
-      { id: "tent-2", art: artTent, labelKey: "dd.item.tent", x: 13, y: 80, w: 11 },
+      { id: "tents-r", art: abraham_tents_r, labelKey: "dd.item.tent", x: 86.8, y: 65.8, w: 17.5 },
+      { id: "tent-l", art: abraham_tent_l, labelKey: "dd.item.tent", x: 13.5, y: 77.5, w: 13.0 },
+      { id: "flowers-l", art: abraham_flowers_l, labelKey: "dd.item.flowers", x: 12.2, y: 91.0, w: 22.5 },
+      { id: "flowers-r", art: abraham_flowers_r, labelKey: "dd.item.flowers", x: 86.5, y: 92.5, w: 25.0 },
+      { id: "flowers-m", art: abraham_flowers_m, labelKey: "dd.item.flowers", x: 70.0, y: 94.2, w: 20.0 },
     ],
   },
   {
     id: "ot-5-joseph",
     slug: "joseph",
     image: josephCoat,
-    // Joseph the young shepherd keeps his colorful coat on; his little flock
-    // grazes around him — two sheep in the meadow and a lamb resting at his side.
+    // Joseph's flock grazing around him and a cluster of meadow flowers.
     items: [
-      { id: "sheep-1", art: artSheep, labelKey: "dd.item.sheep", x: 14, y: 55, w: 22 },
-      { id: "sheep-2", art: artSheep, labelKey: "dd.item.sheep", x: 83, y: 57, w: 18 },
-      { id: "sheep-3", art: artSheep, labelKey: "dd.item.sheep", x: 73, y: 83, w: 17 },
+      { id: "lamb-r", art: joseph_lamb_r, labelKey: "dd.item.sheep", x: 74.2, y: 77.2, w: 24.5 },
+      { id: "sheep-lf", art: joseph_sheep_lf, labelKey: "dd.item.sheep", x: 13.8, y: 55.0, w: 23.5 },
+      { id: "sheep-lb", art: joseph_sheep_lb, labelKey: "dd.item.sheep", x: 24.2, y: 46.5, w: 14.5 },
+      { id: "sheep-r1", art: joseph_sheep_r1, labelKey: "dd.item.sheep", x: 79.8, y: 50.7, w: 17.5 },
+      { id: "sheep-r2", art: joseph_sheep_r2, labelKey: "dd.item.sheep", x: 90.8, y: 52.5, w: 11.5 },
+      { id: "flowers-l", art: joseph_flowers_l, labelKey: "dd.item.flowers", x: 12.0, y: 89.8, w: 22.0 },
     ],
   },
 ];
