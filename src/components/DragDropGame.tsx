@@ -239,14 +239,40 @@ function DragDropBoard({
   const dt = (k: string) => ddText(lang, k);
 
   const boardRef = useRef<HTMLDivElement | null>(null);
-  const [placed, setPlaced] = useState<Set<string>>(new Set());
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [wrongId, setWrongId] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  // Stable shuffled tray order for this mount.
+  // Deterministic, per-story seeded selection. Each story naturally uses a
+  // different number of draggable pieces (between 3 and 10, never more than the
+  // scene offers). The pieces that are NOT chosen stay painted into the finished
+  // scene, so the illustration is never left with an empty hole.
+  const { activeIds, preplacedIds } = useMemo(() => {
+    let seed = 0;
+    for (let i = 0; i < story.id.length; i++) seed = (seed * 31 + story.id.charCodeAt(i)) >>> 0;
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 0xffffffff;
+    };
+    const ids = story.items.map((it) => it.id);
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    const want = 3 + Math.floor(rand() * 8); // 3..10
+    const count = Math.min(Math.max(want, Math.min(3, ids.length)), ids.length);
+    const active = new Set(ids.slice(0, count));
+    return {
+      activeIds: ids.filter((id) => active.has(id)),
+      preplacedIds: ids.filter((id) => !active.has(id)),
+    };
+  }, [story.id]);
+
+  const [placed, setPlaced] = useState<Set<string>>(() => new Set(preplacedIds));
+
+  // Stable shuffled tray order for this mount (only the draggable pieces).
   const trayOrder = useMemo(() => {
-    const a = story.items.map((it) => it.id);
+    const a = [...activeIds];
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [a[i], a[j]] = [a[j], a[i]];
@@ -363,19 +389,22 @@ function DragDropBoard({
                     className="h-auto w-full animate-scale-in drop-shadow-[0_8px_12px_oklch(0.4_0.03_60/0.28)]"
                   />
                 ) : (
-                  // Keep the target almost invisible: a faint soft-focus echo that
-                  // helps alignment without breaking the painting illusion.
-                  <div className="relative">
-                    <img
-                      src={item.art}
-                      alt=""
-                      aria-hidden
-                      draggable={false}
-                      className="h-auto w-full opacity-[0.08]"
-                      style={{ filter: "saturate(0.7) blur(0.5px)" }}
-                    />
-                    <div className="absolute inset-0 rounded-[40%] bg-[oklch(1_0_0/0.08)] blur-[10px]" />
-                  </div>
+                  // Soft, dark-grey painted silhouette of the exact missing piece:
+                  // slightly transparent, gently blurred and blended into the
+                  // painting like a shadow. No glow, no outline, no circle — just a
+                  // hint of where the object belongs.
+                  <img
+                    src={item.art}
+                    alt=""
+                    aria-hidden
+                    draggable={false}
+                    className="h-auto w-full"
+                    style={{
+                      filter: "brightness(0) blur(1.2px)",
+                      opacity: 0.26,
+                      mixBlendMode: "multiply",
+                    }}
+                  />
                 )}
               </div>
             );
@@ -457,7 +486,7 @@ function DragDropBoard({
             <p className="mt-2 text-base text-muted-foreground">{dt(`dd.msg.${story.slug}`)}</p>
             <button
               onClick={() => {
-                setPlaced(new Set());
+                setPlaced(new Set(preplacedIds));
                 setDone(false);
               }}
               className="mt-5 w-full rounded-2xl bg-card px-5 py-3 text-base font-semibold text-foreground/80 shadow-sm transition active:scale-95"
