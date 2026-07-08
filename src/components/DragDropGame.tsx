@@ -432,10 +432,14 @@ function DragDropBoard({
         (() => {
           const item = story.items.find((it) => it.id === drag.id);
           if (!item) return null;
+          // Match the floating piece to the on-screen size of its target slot
+          // so it reads as the very same object being carried into place.
+          const boardW = boardRef.current?.getBoundingClientRect().width ?? 320;
+          const px = (item.w / 100) * boardW;
           return (
             <div
               className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2"
-              style={{ left: drag.x, top: drag.y, width: "min(22vw, 96px)" }}
+              style={{ left: drag.x, top: drag.y, width: px }}
             >
               <img
                 src={item.art}
