@@ -13,35 +13,30 @@ import babel from "@/assets/dragdrop-babel.jpg";
 import abrahamStars from "@/assets/puzzle-abraham-stars.jpg";
 import josephCoat from "@/assets/puzzle-joseph-coat.jpg";
 
-// Feather-masked object crops taken directly from the scenes above.
-import creation_sheep from "@/assets/dd/crops/creation-sheep.png";
-import creation_deer from "@/assets/dd/crops/creation-deer.png";
-import creation_dove_hi from "@/assets/dd/crops/creation-dove-hi.png";
-import creation_dove_lo from "@/assets/dd/crops/creation-dove-lo.png";
-import noah_dove_1 from "@/assets/dd/crops/noah-dove-1.png";
-import noah_dove_2 from "@/assets/dd/crops/noah-dove-2.png";
-import noah_giraffes from "@/assets/dd/crops/noah-giraffes.png";
-import noah_eleph_win from "@/assets/dd/crops/noah-eleph-win.png";
-import noah_eleph_ramp from "@/assets/dd/crops/noah-eleph-ramp.png";
-import noah_ram from "@/assets/dd/crops/noah-ram.png";
-import noah_lamb from "@/assets/dd/crops/noah-lamb.png";
-import babel_crane from "@/assets/dd/crops/babel-crane.png";
-import babel_blocks from "@/assets/dd/crops/babel-blocks.png";
-import babel_carrier from "@/assets/dd/crops/babel-carrier.png";
-import babel_basket from "@/assets/dd/crops/babel-basket.png";
-import babel_sawhorse from "@/assets/dd/crops/babel-sawhorse.png";
-import babel_tree from "@/assets/dd/crops/babel-tree.png";
-import abraham_tents_r from "@/assets/dd/crops/abraham-tents-r.png";
-import abraham_tent_l from "@/assets/dd/crops/abraham-tent-l.png";
-import abraham_flowers_l from "@/assets/dd/crops/abraham-flowers-l.png";
-import abraham_flowers_r from "@/assets/dd/crops/abraham-flowers-r.png";
-import abraham_flowers_m from "@/assets/dd/crops/abraham-flowers-m.png";
-import joseph_lamb_r from "@/assets/dd/crops/joseph-lamb-r.png";
-import joseph_sheep_lf from "@/assets/dd/crops/joseph-sheep-lf.png";
-import joseph_sheep_lb from "@/assets/dd/crops/joseph-sheep-lb.png";
-import joseph_sheep_r1 from "@/assets/dd/crops/joseph-sheep-r1.png";
-import joseph_sheep_r2 from "@/assets/dd/crops/joseph-sheep-r2.png";
-import joseph_flowers_l from "@/assets/dd/crops/joseph-flowers-l.png";
+// True object cut-outs — each PNG is a single object lifted from the scene
+// with a tight alpha silhouette (background fully removed, "cut with
+// scissors"), so both the draggable piece and its shaped placeholder match
+// the object's exact outline. Each one drops back onto its original spot.
+import creation_sheep from "@/assets/dd/objects/creation-sheep.png";
+import creation_deer from "@/assets/dd/objects/creation-deer.png";
+import creation_flowers from "@/assets/dd/objects/creation-flowers-l.png";
+import noah_giraffes from "@/assets/dd/objects/noah-giraffes.png";
+import noah_eleph_ramp from "@/assets/dd/objects/noah-eleph-ramp.png";
+import noah_eleph_win from "@/assets/dd/objects/noah-eleph-win.png";
+import noah_ram from "@/assets/dd/objects/noah-ram.png";
+import noah_lamb_r from "@/assets/dd/objects/noah-lamb-r.png";
+import babel_crane from "@/assets/dd/objects/babel-crane.png";
+import babel_carrier from "@/assets/dd/objects/babel-carrier.png";
+import babel_block from "@/assets/dd/objects/babel-block.png";
+import babel_blocks_r from "@/assets/dd/objects/babel-blocks-r.png";
+import babel_tree from "@/assets/dd/objects/babel-tree.png";
+import abraham_figure from "@/assets/dd/objects/abraham-abraham.png";
+import abraham_flowers_l from "@/assets/dd/objects/abraham-flowers-l.png";
+import abraham_flowers_r from "@/assets/dd/objects/abraham-flowers-r.png";
+import joseph_figure from "@/assets/dd/objects/joseph-joseph.png";
+import joseph_lamb_r from "@/assets/dd/objects/joseph-lamb-r.png";
+import joseph_sheep_l from "@/assets/dd/objects/joseph-sheep-l.png";
+import joseph_sheep_r from "@/assets/dd/objects/joseph-sheep-r.png";
 
 export type CollectionId = "old-testament" | "life-of-jesus";
 
