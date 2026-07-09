@@ -335,8 +335,9 @@ function DragDropBoard({
 
         <p className="pb-2 text-center text-sm text-muted-foreground">{dt("dd.instruction")}</p>
 
-        {/* The finished painting stays fully intact; a soft grey shadow marks
-            each spot until its identical piece is dropped back on top. */}
+        {/* The finished painting stays fully intact; an object-shaped socket
+            (same silhouette, clean contour outline) marks each spot until its
+            matching piece is dropped into it. */}
         <div
           ref={boardRef}
           className="relative mx-auto w-full max-w-sm overflow-hidden rounded-3xl shadow-lg"
@@ -367,15 +368,16 @@ function DragDropBoard({
                     className="h-auto w-full animate-scale-in"
                   />
                 ) : (
-                  // Soft dark-grey painted shadow of the same object, partially
-                  // covering it so the child can still tell what belongs here.
+                  // Object-shaped socket: exact silhouette with a clean contour
+                  // outline and a softly recessed interior, so the empty spot
+                  // reads like a wooden-puzzle socket while the painting stays
+                  // visible through it.
                   <img
-                    src={item.art}
+                    src={item.socket}
                     alt=""
                     aria-hidden
                     draggable={false}
-                    className="h-auto w-full opacity-[0.72]"
-                    style={{ filter: "grayscale(1) brightness(0.28) contrast(1.05)" }}
+                    className="h-auto w-full"
                   />
                 )}
               </div>
