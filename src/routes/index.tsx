@@ -23,6 +23,7 @@ import { SettingsModal } from "@/components/SettingsModal";
 import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
 import { DragDropGame } from "@/components/DragDropGame";
+import { MemoryGame } from "@/components/MemoryGame";
 import { isFreePuzzle } from "@/lib/freemium";
 import menuBg from "@/assets/menu-background.jpg";
 import puzzleIcon from "@/assets/icon-puzzle.png.asset.json";
@@ -54,7 +55,7 @@ interface ActiveState {
   difficultyId: Difficulty["id"];
 }
 
-type Screen = "home" | "select" | "more" | "premium" | "dragdrop";
+type Screen = "home" | "select" | "more" | "premium" | "dragdrop" | "memory";
 
 interface GameDef {
   id: string;
@@ -69,7 +70,7 @@ const GAMES: GameDef[] = [
   { id: "puzzles", labelKey: "game.puzzles", icon: puzzleIcon.url, tint: "oklch(0.9 0.05 150)", playable: true },
   { id: "coloring", labelKey: "game.coloring", emoji: "🎨", tint: "oklch(0.92 0.06 20)", playable: false },
   { id: "dragdrop", labelKey: "game.dragdrop", emoji: "✋", tint: "oklch(0.92 0.06 90)", playable: true },
-  { id: "memory", labelKey: "game.memory", emoji: "🧠", tint: "oklch(0.9 0.06 320)", playable: false },
+  { id: "memory", labelKey: "game.memory", emoji: "🧠", tint: "oklch(0.9 0.06 320)", playable: true },
   { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.9 0.06 220)", playable: false },
   { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.9 0.06 260)", playable: false },
   { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.92 0.06 60)", playable: false },
@@ -180,6 +181,7 @@ function Home() {
         onOpenPremium={() => setScreen("premium")}
       />
     );
+  if (screen === "memory") return <MemoryGame onBack={() => setScreen("home")} />;
 
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
 
@@ -225,7 +227,9 @@ function Home() {
                   game={g}
                   label={t(g.labelKey)}
                   comingLabel={t("game.comingSoon")}
-                  onPlay={() => setScreen(g.id === "dragdrop" ? "dragdrop" : "select")}
+                  onPlay={() =>
+                    setScreen(g.id === "dragdrop" || g.id === "memory" ? g.id : "select")
+                  }
                 />
               ))}
             </div>

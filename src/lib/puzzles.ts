@@ -71,7 +71,7 @@ export interface Difficulty {
   puzzles: Puzzle[];
 }
 
-interface Scene {
+export interface Scene {
   slug: string;
   title: string;
   verse: string;
@@ -80,7 +80,7 @@ interface Scene {
 
 // Pool of New Testament scenes. Adding more here automatically becomes
 // available for puzzle slots — the progression system is content-agnostic.
-const SCENES: Scene[] = [
+export const SCENES: Scene[] = [
   { slug: "blessing-children", title: "Jesus Blesses the Children", verse: "Matthew 19:14", image: blessingChildren },
   { slug: "walking-water", title: "Jesus Walks on Water", verse: "Matthew 14:25", image: walkingWater },
   { slug: "feeding-5000", title: "Jesus Feeds the 5,000", verse: "John 6:11", image: feeding5000 },
