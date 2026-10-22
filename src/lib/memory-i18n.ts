@@ -13,6 +13,8 @@ const en: Dict = {
   "mem.replay": "Play Again",
   "mem.levels": "Levels",
   "mem.hidden": "Hidden card",
+  "mem.scrollDown": "Show more cards",
+  "mem.scrollUp": "Back to top",
 };
 
 const es: Dict = {
@@ -25,6 +27,8 @@ const es: Dict = {
   "mem.replay": "Jugar de Nuevo",
   "mem.levels": "Niveles",
   "mem.hidden": "Carta oculta",
+  "mem.scrollDown": "Ver más cartas",
+  "mem.scrollUp": "Volver arriba",
 };
 
 const de: Dict = {
@@ -37,6 +41,8 @@ const de: Dict = {
   "mem.replay": "Nochmal spielen",
   "mem.levels": "Level",
   "mem.hidden": "Verdeckte Karte",
+  "mem.scrollDown": "Mehr Karten zeigen",
+  "mem.scrollUp": "Nach oben",
 };
 
 const fr: Dict = {
@@ -49,6 +55,8 @@ const fr: Dict = {
   "mem.replay": "Rejouer",
   "mem.levels": "Niveaux",
   "mem.hidden": "Carte cachée",
+  "mem.scrollDown": "Voir plus de cartes",
+  "mem.scrollUp": "Revenir en haut",
 };
 
 const it: Dict = {
@@ -61,6 +69,8 @@ const it: Dict = {
   "mem.replay": "Gioca Ancora",
   "mem.levels": "Livelli",
   "mem.hidden": "Carta coperta",
+  "mem.scrollDown": "Mostra altre carte",
+  "mem.scrollUp": "Torna su",
 };
 
 const pt: Dict = {
@@ -73,6 +83,8 @@ const pt: Dict = {
   "mem.replay": "Jogar de Novo",
   "mem.levels": "Níveis",
   "mem.hidden": "Carta virada",
+  "mem.scrollDown": "Ver mais cartas",
+  "mem.scrollUp": "Voltar ao topo",
 };
 
 const pl: Dict = {
@@ -85,6 +97,8 @@ const pl: Dict = {
   "mem.replay": "Zagraj Ponownie",
   "mem.levels": "Poziomy",
   "mem.hidden": "Zakryta karta",
+  "mem.scrollDown": "Pokaż więcej kart",
+  "mem.scrollUp": "Wróć na górę",
 };
 
 const ru: Dict = {
@@ -97,6 +111,8 @@ const ru: Dict = {
   "mem.replay": "Играть Снова",
   "mem.levels": "Уровни",
   "mem.hidden": "Закрытая карточка",
+  "mem.scrollDown": "Показать ещё карточки",
+  "mem.scrollUp": "Наверх",
 };
 
 const ja: Dict = {
@@ -109,6 +125,8 @@ const ja: Dict = {
   "mem.replay": "もう一度あそぶ",
   "mem.levels": "レベル",
   "mem.hidden": "ふせたカード",
+  "mem.scrollDown": "もっとカードを見る",
+  "mem.scrollUp": "上にもどる",
 };
 
 const ko: Dict = {
@@ -121,6 +139,8 @@ const ko: Dict = {
   "mem.replay": "다시 하기",
   "mem.levels": "레벨",
   "mem.hidden": "뒤집힌 카드",
+  "mem.scrollDown": "카드 더 보기",
+  "mem.scrollUp": "위로 가기",
 };
 
 const ar: Dict = {
@@ -133,6 +153,8 @@ const ar: Dict = {
   "mem.replay": "العب مرة أخرى",
   "mem.levels": "المستويات",
   "mem.hidden": "بطاقة مقلوبة",
+  "mem.scrollDown": "عرض المزيد من البطاقات",
+  "mem.scrollUp": "العودة إلى الأعلى",
 };
 
 const tr: Dict = {
@@ -145,6 +167,8 @@ const tr: Dict = {
   "mem.replay": "Tekrar Oyna",
   "mem.levels": "Seviyeler",
   "mem.hidden": "Kapalı kart",
+  "mem.scrollDown": "Daha fazla kart göster",
+  "mem.scrollUp": "Yukarı dön",
 };
 
 export const MEM_STRINGS: Record<Lang, Dict> = {
