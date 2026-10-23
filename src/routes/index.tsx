@@ -24,9 +24,10 @@ import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
 import { DragDropGame } from "@/components/DragDropGame";
 import { MemoryGame } from "@/components/MemoryGame";
+import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { isFreePuzzle } from "@/lib/freemium";
-import menuBg from "@/assets/menu-background.jpg";
 import homeBg from "@/assets/home-bedtime.webp";
+import puzzlesBg from "@/assets/puzzles-bedtime.webp";
 import puzzleIcon from "@/assets/icon-puzzle.png.asset.json";
 
 
@@ -199,24 +200,13 @@ function Home() {
     </button>
   );
 
-  const bgStyle = {
-    backgroundImage: `linear-gradient(180deg, oklch(0.98 0.015 80 / 0.4), oklch(0.96 0.03 60 / 0.85)), url(${menuBg})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center top",
-  } as const;
-
   if (screen === "home") {
-    // Cream fade at the top keeps the title readable; the family scene in the
-    // middle of the painting stays at full color behind the frosted tiles.
-    const homeBgStyle = {
-      backgroundImage: `linear-gradient(180deg, oklch(0.975 0.025 85 / 0.88) 0%, oklch(0.975 0.025 85 / 0.5) 22%, oklch(0.975 0.025 85 / 0) 45%), url(${homeBg})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center 38%",
-    } as const;
-
     return (
-      <div className="theme-bedtime min-h-[100dvh] w-full">
-        <div className="relative min-h-[100dvh] w-full" style={homeBgStyle}>
+      <div className="theme-bedtime relative isolate min-h-[100dvh] w-full">
+        {/* The family scene in the middle of the painting stays at full color
+            behind the frosted tiles. */}
+        <BedtimeBackdrop image={homeBg} position="center 38%" fadeEnd={45} />
+        <div className="relative min-h-[100dvh] w-full">
           {settingsButton}
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-5 py-14 text-center sm:py-16">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -268,8 +258,9 @@ function Home() {
 
   // screen === "select"
   return (
-    <div className="min-h-[100dvh] w-full">
-      <div className="relative w-full" style={bgStyle}>
+    <div className="theme-bedtime relative isolate min-h-[100dvh] w-full">
+      <BedtimeBackdrop image={puzzlesBg} position="center 40%" fadeEnd={30} />
+      <div className="relative w-full">
         {settingsButton}
 
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
@@ -464,7 +455,7 @@ function DifficultyList({
               if (premiumLocked) return onLocked();
               if (unlocked) onPlay(p);
             }}
-            className="paper-card group relative grid w-full grid-cols-[96px_minmax(0,1fr)] items-center gap-4 overflow-hidden p-3 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:grid-cols-[120px_minmax(0,1fr)]"
+            className="glass-card group relative grid w-full grid-cols-[96px_minmax(0,1fr)] items-center gap-4 overflow-hidden p-3 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:grid-cols-[120px_minmax(0,1fr)]"
           >
             <div
               className="relative aspect-[7/9] overflow-hidden rounded-xl"
@@ -505,14 +496,14 @@ function DifficultyList({
                     </span>
                   )}
                   {canResume && (
-                    <span className="rounded-full bg-[var(--color-sage-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[oklch(0.35_0.05_150)]">
+                    <span className="rounded-full bg-[var(--color-sky-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-foreground">
                       {t("home.resume")}
                     </span>
                   )}
                   {!premiumLocked && (
                     <span className="text-base tracking-wider" aria-label={`${stars} of 3 stars`}>
                       <span className="text-[var(--color-gold)]">{"★".repeat(stars)}</span>
-                      <span className="text-[oklch(0.85_0.02_75)]">{"★".repeat(3 - stars)}</span>
+                      <span className="text-foreground/20">{"★".repeat(3 - stars)}</span>
                     </span>
                   )}
                 </span>

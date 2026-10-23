@@ -14,7 +14,8 @@ import {
   type MemoryLevel,
 } from "@/lib/memory";
 
-import menuBg from "@/assets/menu-background.jpg";
+import memoryBg from "@/assets/memory-bedtime.webp";
+import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 
 const formatTime = (sec: number) =>
   `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
@@ -75,16 +76,11 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
     );
   }
 
-  const bgStyle = {
-    backgroundImage: `linear-gradient(180deg, oklch(0.98 0.015 80 / 0.4), oklch(0.96 0.03 60 / 0.85)), url(${menuBg})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center top",
-  } as const;
-
   // ---------- Level select ----------
   return (
-    <div className="min-h-[100dvh] w-full">
-      <div className="relative min-h-[100dvh] w-full" style={bgStyle}>
+    <div className="theme-bedtime relative isolate min-h-[100dvh] w-full">
+      <BedtimeBackdrop image={memoryBg} position="center 30%" fadeEnd={30} />
+      <div className="relative min-h-[100dvh] w-full">
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
           <button
             onClick={onBack}
@@ -109,7 +105,7 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                   window.scrollTo(0, 0);
                   setLevel(lv);
                 }}
-                className="paper-card group flex w-full items-center gap-4 overflow-hidden p-3 pr-4 text-left transition active:scale-[0.99]"
+                className="glass-card group flex w-full items-center gap-4 overflow-hidden p-3 pr-4 text-left transition active:scale-[0.99]"
               >
                 {/* A small fan of game cards: one still face down and a
                     matched pair showing this level's painting. */}
@@ -141,7 +137,7 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                   </p>
                   <span className="mt-1.5 block text-base tracking-wider" aria-label={`${best} of 3 stars`}>
                     <span className="text-[var(--color-gold)]">{"★".repeat(best)}</span>
-                    <span className="text-[oklch(0.85_0.02_75)]">{"★".repeat(3 - best)}</span>
+                    <span className="text-foreground/20">{"★".repeat(3 - best)}</span>
                   </span>
                 </div>
               </button>

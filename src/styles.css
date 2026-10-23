@@ -130,7 +130,7 @@
   --muted-foreground: oklch(0.44 0.06 262);
   --border: oklch(0.88 0.04 62);
   --ring: oklch(0.45 0.115 258);
-  --gold: oklch(0.887 0.095 79);
+  --gold: oklch(0.79 0.135 76);
 
   /* @theme inline resolves the --color-* aliases on :root, so restate the
      ones this scope changes. */
@@ -145,6 +145,9 @@
   --color-border: var(--border);
   --color-ring: var(--ring);
   --color-gold: var(--gold);
+
+  /* Headings without a text color inherit from here, not from body. */
+  color: var(--color-foreground);
 }
 
 /* Frosted moonlit-cream card that lets the background painting glow through. */
