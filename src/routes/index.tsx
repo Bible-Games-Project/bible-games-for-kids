@@ -26,6 +26,7 @@ import { DragDropGame } from "@/components/DragDropGame";
 import { MemoryGame } from "@/components/MemoryGame";
 import { isFreePuzzle } from "@/lib/freemium";
 import menuBg from "@/assets/menu-background.jpg";
+import homeBg from "@/assets/home-bedtime.webp";
 import puzzleIcon from "@/assets/icon-puzzle.png.asset.json";
 
 
@@ -67,13 +68,13 @@ interface GameDef {
 }
 
 const GAMES: GameDef[] = [
-  { id: "puzzles", labelKey: "game.puzzles", icon: puzzleIcon.url, tint: "oklch(0.9 0.05 150)", playable: true },
-  { id: "coloring", labelKey: "game.coloring", emoji: "🎨", tint: "oklch(0.92 0.06 20)", playable: false },
-  { id: "dragdrop", labelKey: "game.dragdrop", emoji: "✋", tint: "oklch(0.92 0.06 90)", playable: true },
-  { id: "memory", labelKey: "game.memory", emoji: "🧠", tint: "oklch(0.9 0.06 320)", playable: true },
-  { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.9 0.06 220)", playable: false },
-  { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.9 0.06 260)", playable: false },
-  { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.92 0.06 60)", playable: false },
+  { id: "puzzles", labelKey: "game.puzzles", icon: puzzleIcon.url, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
+  { id: "coloring", labelKey: "game.coloring", emoji: "🎨", tint: "oklch(0.86 0.06 13 / 0.6)", playable: false },
+  { id: "dragdrop", labelKey: "game.dragdrop", emoji: "✋", tint: "oklch(0.9 0.08 79 / 0.6)", playable: true },
+  { id: "memory", labelKey: "game.memory", emoji: "🧠", tint: "oklch(0.84 0.06 262 / 0.6)", playable: true },
+  { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.87 0.07 62 / 0.6)", playable: false },
+  { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.85 0.045 6 / 0.6)", playable: false },
+  { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.8 0.07 258 / 0.6)", playable: false },
 ];
 
 function GameTile({
@@ -92,7 +93,7 @@ function GameTile({
       onClick={() => game.playable && onPlay()}
       disabled={!game.playable}
       aria-label={label}
-      className="paper-card group relative flex aspect-square w-full flex-col overflow-hidden p-2 transition active:scale-[0.97] disabled:active:scale-100"
+      className="glass-card group relative flex aspect-square w-full flex-col overflow-hidden p-2 transition active:scale-[0.97] disabled:active:scale-100"
     >
       <div
         className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl"
@@ -106,12 +107,12 @@ function GameTile({
           </span>
         )}
         {!game.playable && (
-          <span className="absolute right-1.5 top-1.5 rounded-full bg-[oklch(0.3_0.03_60/0.75)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[oklch(0.98_0.02_80)] shadow">
+          <span className="absolute right-1.5 top-1.5 z-10 rounded-full bg-[oklch(0.31_0.08_262/0.8)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--color-primary-foreground)] shadow">
             {comingLabel}
           </span>
         )}
         {!game.playable && (
-          <div className="pointer-events-none absolute inset-0 bg-[oklch(0.96_0.03_60/0.35)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[oklch(0.975_0.025_85/0.3)]" />
         )}
       </div>
       <span className="mt-1.5 line-clamp-2 px-0.5 text-center text-[11px] font-semibold leading-tight text-foreground sm:text-xs">
@@ -205,9 +206,17 @@ function Home() {
   } as const;
 
   if (screen === "home") {
+    // Cream fade at the top keeps the title readable; the family scene in the
+    // middle of the painting stays at full color behind the frosted tiles.
+    const homeBgStyle = {
+      backgroundImage: `linear-gradient(180deg, oklch(0.975 0.025 85 / 0.88) 0%, oklch(0.975 0.025 85 / 0.5) 22%, oklch(0.975 0.025 85 / 0) 45%), url(${homeBg})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center 38%",
+    } as const;
+
     return (
-      <div className="min-h-[100dvh] w-full">
-        <div className="relative min-h-[100dvh] w-full" style={bgStyle}>
+      <div className="theme-bedtime min-h-[100dvh] w-full">
+        <div className="relative min-h-[100dvh] w-full" style={homeBgStyle}>
           {settingsButton}
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-5 py-14 text-center sm:py-16">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -237,14 +246,14 @@ function Home() {
             <div className="mt-6 w-full space-y-3">
               <button
                 onClick={() => setScreen("premium")}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.78_0.13_55)] px-5 py-4 text-lg font-semibold text-[oklch(0.25_0.05_50)] shadow-md transition active:scale-95"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[oklch(1_0_0/0.5)] bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] px-5 py-4 text-lg font-semibold text-foreground shadow-md transition active:scale-95"
               >
                 <span aria-hidden>⭐</span>
                 {t("home.premium")}
               </button>
               <button
                 onClick={() => setScreen("more")}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-card px-5 py-4 text-lg font-semibold text-foreground shadow-md transition active:scale-95"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-5 py-4 text-lg font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
               >
                 <span aria-hidden>🎮</span>
                 {t("home.moreGames")}
