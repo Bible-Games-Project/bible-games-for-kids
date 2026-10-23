@@ -30,9 +30,8 @@ export interface MemoryCard {
   scene: Scene;
 }
 
-// Some stories have two different paintings ("calming-storm" and
-// "calming-storm-2"). Keep one painting per story so two look-alike cards
-// never count as different pairs.
+// Keep one painting per story title so, if a story ever gets a second
+// painting, two look-alike cards never count as different pairs.
 const UNIQUE_SCENES: Scene[] = SCENES.filter(
   (s, i) => SCENES.findIndex((o) => o.title === s.title) === i,
 );

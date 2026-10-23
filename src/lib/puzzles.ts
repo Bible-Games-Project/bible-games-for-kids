@@ -8,12 +8,12 @@ import creation from "@/assets/puzzle-creation.jpg";
 import mosesBasket from "@/assets/puzzle-moses-basket.jpg";
 import davidShepherd from "@/assets/puzzle-david-shepherd.jpg";
 import nativity from "@/assets/puzzle-nativity.jpg";
-import calmingStormTwo from "@/assets/puzzle-calming-storm-2.jpg";
-import blessingChildrenTwo from "@/assets/puzzle-blessing-children-2.jpg";
-import feeding5000Two from "@/assets/puzzle-feeding-5000-2.jpg";
-import noahsArkTwo from "@/assets/puzzle-noahs-ark-2.jpg";
-import creationTwo from "@/assets/puzzle-creation-2.jpg";
-import mosesBasketTwo from "@/assets/puzzle-moses-basket-2.jpg";
+import redSea from "@/assets/puzzle-red-sea.jpg";
+import davidGoliath from "@/assets/puzzle-david-goliath.jpg";
+import burningBush from "@/assets/puzzle-burning-bush.jpg";
+import rainbowPromise from "@/assets/puzzle-rainbow-promise.jpg";
+import towerBabel from "@/assets/puzzle-tower-babel.jpg";
+import passoverSupper from "@/assets/puzzle-passover-supper.jpg";
 import weddingCana from "@/assets/puzzle-wedding-cana.jpg";
 import prodigalSon from "@/assets/puzzle-prodigal-son.jpg";
 import zacchaeus from "@/assets/puzzle-zacchaeus.jpg";
@@ -86,17 +86,17 @@ export const SCENES: Scene[] = [
   { slug: "feeding-5000", title: "Jesus Feeds the 5,000", verse: "John 6:11", image: feeding5000 },
   { slug: "calming-storm", title: "Jesus Calms the Storm", verse: "Mark 4:39", image: calmingStorm },
   { slug: "good-samaritan", title: "The Good Samaritan", verse: "Luke 10:33", image: goodSamaritan },
-  { slug: "noahs-ark", title: "Noah's Ark", verse: "Genesis 9:13", image: noahsArk },
+  { slug: "noahs-ark", title: "Noah's Ark", verse: "Genesis 6:22", image: noahsArk },
   { slug: "creation", title: "The Creation", verse: "Genesis 1:31", image: creation },
   { slug: "moses-basket", title: "Baby Moses in the Basket", verse: "Exodus 2:3", image: mosesBasket },
   { slug: "david-shepherd", title: "David the Shepherd Boy", verse: "1 Samuel 16:11", image: davidShepherd },
   { slug: "nativity", title: "The Nativity", verse: "Luke 2:7", image: nativity },
-  { slug: "calming-storm-2", title: "Jesus Calms the Storm", verse: "Mark 4:39", image: calmingStormTwo },
-  { slug: "blessing-children-2", title: "Jesus Blesses the Children", verse: "Matthew 19:14", image: blessingChildrenTwo },
-  { slug: "feeding-5000-2", title: "Jesus Feeds the 5,000", verse: "John 6:11", image: feeding5000Two },
-  { slug: "noahs-ark-2", title: "Noah's Ark", verse: "Genesis 9:13", image: noahsArkTwo },
-  { slug: "creation-2", title: "The Creation", verse: "Genesis 1:31", image: creationTwo },
-  { slug: "moses-basket-2", title: "Baby Moses in the Basket", verse: "Exodus 2:3", image: mosesBasketTwo },
+  { slug: "red-sea", title: "Moses Parts the Red Sea", verse: "Exodus 14:21", image: redSea },
+  { slug: "david-goliath", title: "David and Goliath", verse: "1 Samuel 17:49", image: davidGoliath },
+  { slug: "burning-bush", title: "Moses and the Burning Bush", verse: "Exodus 3:2", image: burningBush },
+  { slug: "rainbow-promise", title: "God's Rainbow Promise", verse: "Genesis 9:13", image: rainbowPromise },
+  { slug: "tower-babel", title: "The Tower of Babel", verse: "Genesis 11:4", image: towerBabel },
+  { slug: "passover-supper", title: "The Passover Supper", verse: "Luke 22:15", image: passoverSupper },
   { slug: "wedding-cana", title: "The Wedding at Cana", verse: "John 2:9", image: weddingCana },
   { slug: "prodigal-son", title: "The Prodigal Son", verse: "Luke 15:20", image: prodigalSon },
   { slug: "zacchaeus", title: "Zacchaeus in the Tree", verse: "Luke 19:5", image: zacchaeus },
@@ -107,7 +107,7 @@ export const SCENES: Scene[] = [
   { slug: "baptism-jesus", title: "The Baptism of Jesus", verse: "Matthew 3:16", image: baptismJesus },
   { slug: "palm-sunday", title: "The Triumphal Entry", verse: "Matthew 21:9", image: palmSunday },
   { slug: "adam-animals", title: "Adam Names the Animals", verse: "Genesis 2:19", image: adamAnimals },
-  { slug: "ruth-fields", title: "Ruth in the Fields", verse: "Ruth 2:3", image: ruthFields },
+  { slug: "ruth-fields", title: "Ruth, Naomi and Orpah", verse: "Ruth 1:16", image: ruthFields },
   { slug: "abraham-stars", title: "Abraham Counts the Stars", verse: "Genesis 15:5", image: abrahamStars },
   { slug: "annunciation", title: "The Annunciation", verse: "Luke 1:30", image: annunciation },
   { slug: "wise-men", title: "The Wise Men Visit Jesus", verse: "Matthew 2:11", image: wiseMen },
