@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1",
       },
       { name: "theme-color", content: "#f7f1e6" },
-      { title: "Storybook Puzzles — Stories of Jesus" },
+      { title: "SeedFun: Bible Games for Kids" },
       {
         name: "description",
         content:

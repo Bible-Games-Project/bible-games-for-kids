@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   DIFFICULTIES,
   pieceCount,
@@ -28,19 +28,20 @@ import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { isFreePuzzle } from "@/lib/freemium";
 import homeBg from "@/assets/home-bedtime.webp";
 import puzzlesBg from "@/assets/puzzles-bedtime.webp";
-import puzzleIcon from "@/assets/icon-puzzle.png.asset.json";
+import puzzlesIcon from "@/assets/icon-puzzles.webp";
+import memoryIcon from "@/assets/icon-memory.webp";
 
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Storybook Puzzles — Stories of Jesus for Kids" },
+      { title: "SeedFun: Bible Games for Kids" },
       {
         name: "description",
         content:
           "A peaceful watercolor jigsaw puzzle app for children, illustrating gentle stories from the life of Jesus and the New Testament.",
       },
-      { property: "og:title", content: "Storybook Puzzles — Stories of Jesus for Kids" },
+      { property: "og:title", content: "SeedFun: Bible Games for Kids" },
       {
         property: "og:description",
         content:
@@ -68,11 +69,12 @@ interface GameDef {
   playable: boolean;
 }
 
+// Playable games first so they sit in the first view of the shelf.
 const GAMES: GameDef[] = [
-  { id: "puzzles", labelKey: "game.puzzles", icon: puzzleIcon.url, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
-  { id: "coloring", labelKey: "game.coloring", emoji: "🎨", tint: "oklch(0.86 0.06 13 / 0.6)", playable: false },
+  { id: "puzzles", labelKey: "game.puzzles", icon: puzzlesIcon, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
+  { id: "memory", labelKey: "game.memory", icon: memoryIcon, tint: "oklch(0.84 0.06 262 / 0.6)", playable: true },
   { id: "dragdrop", labelKey: "game.dragdrop", emoji: "✋", tint: "oklch(0.9 0.08 79 / 0.6)", playable: true },
-  { id: "memory", labelKey: "game.memory", emoji: "🧠", tint: "oklch(0.84 0.06 262 / 0.6)", playable: true },
+  { id: "coloring", labelKey: "game.coloring", emoji: "🎨", tint: "oklch(0.86 0.06 13 / 0.6)", playable: false },
   { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.87 0.07 62 / 0.6)", playable: false },
   { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.85 0.045 6 / 0.6)", playable: false },
   { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.8 0.07 258 / 0.6)", playable: false },
@@ -94,7 +96,7 @@ function GameTile({
       onClick={() => game.playable && onPlay()}
       disabled={!game.playable}
       aria-label={label}
-      className="glass-card group relative flex aspect-square w-full flex-col overflow-hidden p-2 transition active:scale-[0.97] disabled:active:scale-100"
+      className="glass-card group relative flex aspect-[4/5] w-full flex-col overflow-hidden p-2 transition active:scale-[0.97] disabled:active:scale-100"
     >
       <div
         className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl"
@@ -108,7 +110,7 @@ function GameTile({
           </span>
         )}
         {!game.playable && (
-          <span className="absolute right-1.5 top-1.5 z-10 rounded-full bg-[oklch(0.31_0.08_262/0.8)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--color-primary-foreground)] shadow">
+          <span className="absolute inset-x-1 top-1.5 z-10 mx-auto w-fit max-w-full truncate rounded-full bg-[oklch(0.31_0.08_262/0.8)] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[var(--color-primary-foreground)] shadow">
             {comingLabel}
           </span>
         )}
@@ -120,6 +122,66 @@ function GameTile({
         {label}
       </span>
     </button>
+  );
+}
+
+// One row of game tiles that scrolls sideways: about three tiles show at a
+// time with the next one peeking in, so more games can be added without
+// covering the background painting. Arrow buttons help mouse users.
+function GameShelf({ children, prevLabel, nextLabel }: { children: ReactNode; prevLabel: string; nextLabel: string }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [edges, setEdges] = useState({ start: true, end: false });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => {
+      // scrollLeft is negative in right-to-left layouts.
+      const pos = Math.abs(el.scrollLeft);
+      setEdges({ start: pos < 8, end: pos + el.clientWidth >= el.scrollWidth - 8 });
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  const page = (dir: 1 | -1) => {
+    const el = ref.current;
+    if (!el) return;
+    const rtl = getComputedStyle(el).direction === "rtl";
+    el.scrollBy({ left: dir * (rtl ? -1 : 1) * el.clientWidth * 0.9, behavior: "smooth" });
+  };
+
+  const arrow = (dir: 1 | -1, hidden: boolean, label: string) => (
+    <button
+      onClick={() => page(dir)}
+      aria-label={label}
+      hidden={hidden}
+      className={`absolute top-[42%] z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-card text-foreground shadow-md transition active:scale-90 ${
+        dir === 1 ? "-right-2 rtl:-left-2 rtl:right-auto" : "-left-2 rtl:-right-2 rtl:left-auto"
+      }`}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden className={dir === -1 ? "rotate-180 rtl:rotate-0" : "rtl:rotate-180"}>
+        <path d="M9 6l6 6-6 6" />
+      </svg>
+    </button>
+  );
+
+  return (
+    <div className="relative w-full">
+      <div
+        ref={ref}
+        className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {children}
+      </div>
+      {arrow(-1, edges.start, prevLabel)}
+      {arrow(1, edges.end, nextLabel)}
+    </div>
   );
 }
 
@@ -208,42 +270,40 @@ function Home() {
         <BedtimeBackdrop image={homeBg} position="center 38%" fadeEnd={45} />
         <div className="relative min-h-[100dvh] w-full">
           {settingsButton}
-          <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-5 py-14 text-center sm:py-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              {t("app.tagline")}
-            </p>
-            <h1 className="mt-2 font-display text-4xl leading-tight text-foreground sm:text-5xl">
-              {t("app.title")}
-            </h1>
-            <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-              {t("home.welcome")}
-            </p>
+          <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-5 pt-14 pb-6 text-center sm:pt-16">
+            <h1 className="font-display text-5xl leading-none text-foreground sm:text-6xl">SeedFun</h1>
+            <p className="mt-2 font-display text-lg text-foreground/85 sm:text-xl">{t("app.title")}</p>
+            <p className="mt-2 max-w-xs text-sm text-muted-foreground">{t("home.welcome")}</p>
 
-            <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            {/* Open space so the painting shows between the title and the games. */}
+            <div className="min-h-8 flex-1" />
+
+            <GameShelf prevLabel={t("home.prevGames")} nextLabel={t("home.nextGames")}>
               {GAMES.map((g) => (
-                <GameTile
-                  key={g.id}
-                  game={g}
-                  label={t(g.labelKey)}
-                  comingLabel={t("game.comingSoon")}
-                  onPlay={() =>
-                    setScreen(g.id === "dragdrop" || g.id === "memory" ? g.id : "select")
-                  }
-                />
+                <div key={g.id} className="w-[calc((100%-1.5rem)/3.25)] shrink-0 snap-start">
+                  <GameTile
+                    game={g}
+                    label={t(g.labelKey)}
+                    comingLabel={t("game.comingSoon")}
+                    onPlay={() =>
+                      setScreen(g.id === "dragdrop" || g.id === "memory" ? g.id : "select")
+                    }
+                  />
+                </div>
               ))}
-            </div>
+            </GameShelf>
 
-            <div className="mt-6 w-full space-y-3">
+            <div className="mt-4 grid w-full grid-cols-2 gap-3">
               <button
                 onClick={() => setScreen("premium")}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[oklch(1_0_0/0.5)] bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] px-5 py-4 text-lg font-semibold text-foreground shadow-md transition active:scale-95"
+                className="flex items-center justify-center gap-2 rounded-2xl border border-[oklch(1_0_0/0.5)] bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] px-3 py-3 text-base font-semibold text-foreground shadow-md transition active:scale-95"
               >
                 <span aria-hidden>⭐</span>
                 {t("home.premium")}
               </button>
               <button
                 onClick={() => setScreen("more")}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-5 py-4 text-lg font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-3 py-3 text-base font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
               >
                 <span aria-hidden>🎮</span>
                 {t("home.moreGames")}

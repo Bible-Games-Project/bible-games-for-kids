@@ -36,6 +36,8 @@ export type Dict = Record<string, string>;
 
 const en: Dict = {
   "app.title": "Bible Games for Kids",
+  "home.prevGames": "Previous games",
+  "home.nextGames": "More games",
   "app.tagline": "Storybook Puzzles",
   "app.subtitle": "Piece together gentle paintings of stories from the New Testament.",
   "tutorial.title": "Great!",
@@ -123,6 +125,8 @@ const en: Dict = {
 
 const es: Dict = {
   "app.title": "Juegos Bíblicos para Niños",
+  "home.prevGames": "Juegos anteriores",
+  "home.nextGames": "Más juegos",
   "app.tagline": "Puzles del Libro de Cuentos",
   "app.subtitle": "Arma con calma pinturas suaves de historias del Nuevo Testamento.",
   "tutorial.title": "¡Genial!",
@@ -210,6 +214,8 @@ const es: Dict = {
 
 const de: Dict = {
   "app.title": "Bibel-Spiele für Kinder",
+  "home.prevGames": "Vorherige Spiele",
+  "home.nextGames": "Weitere Spiele",
   "app.tagline": "Bilderbuch-Puzzles",
   "app.subtitle": "Setze ruhige Aquarellbilder mit Geschichten aus dem Neuen Testament zusammen.",
   "tutorial.title": "Toll!",
@@ -297,6 +303,8 @@ const de: Dict = {
 
 const fr: Dict = {
   "app.title": "Jeux Bibliques pour Enfants",
+  "home.prevGames": "Jeux précédents",
+  "home.nextGames": "Autres jeux",
   "app.tagline": "Puzzles d'Album",
   "app.subtitle": "Assemble en douceur des aquarelles d'histoires du Nouveau Testament.",
   "tutorial.title": "Bravo !",
@@ -384,6 +392,8 @@ const fr: Dict = {
 
 const it: Dict = {
   "app.title": "Giochi Biblici per Bambini",
+  "home.prevGames": "Giochi precedenti",
+  "home.nextGames": "Altri giochi",
   "app.tagline": "Puzzle del Libro Illustrato",
   "app.subtitle": "Componi delicati acquerelli con storie del Nuovo Testamento.",
   "tutorial.title": "Bravo!",
@@ -471,6 +481,8 @@ const it: Dict = {
 
 const pt: Dict = {
   "app.title": "Jogos Bíblicos para Crianças",
+  "home.prevGames": "Jogos anteriores",
+  "home.nextGames": "Mais jogos",
   "app.tagline": "Quebra-Cabeças Ilustrados",
   "app.subtitle": "Monte aquarelas suaves de histórias do Novo Testamento.",
   "tutorial.title": "Muito bem!",
@@ -558,6 +570,8 @@ const pt: Dict = {
 
 const pl: Dict = {
   "app.title": "Biblijne Gry dla Dzieci",
+  "home.prevGames": "Poprzednie gry",
+  "home.nextGames": "Więcej gier",
   "app.tagline": "Puzzle z Książeczki",
   "app.subtitle": "Układaj delikatne akwarele z historiami z Nowego Testamentu.",
   "tutorial.title": "Świetnie!",
@@ -645,6 +659,8 @@ const pl: Dict = {
 
 const ru: Dict = {
   "app.title": "Библейские Игры для Детей",
+  "home.prevGames": "Предыдущие игры",
+  "home.nextGames": "Ещё игры",
   "app.tagline": "Пазлы из Книги Сказок",
   "app.subtitle": "Складывайте мягкие акварельные истории Нового Завета.",
   "tutorial.title": "Отлично!",
@@ -732,6 +748,8 @@ const ru: Dict = {
 
 const ja: Dict = {
   "app.title": "子供のための聖書ゲーム",
+  "home.prevGames": "前のゲーム",
+  "home.nextGames": "ほかのゲーム",
   "app.tagline": "絵本パズル",
   "app.subtitle": "新約聖書の物語を、やさしい水彩画でつなげましょう。",
   "tutorial.title": "よくできました!",
@@ -819,6 +837,8 @@ const ja: Dict = {
 
 const ko: Dict = {
   "app.title": "어린이를 위한 성경 게임",
+  "home.prevGames": "이전 게임",
+  "home.nextGames": "더 많은 게임",
   "app.tagline": "그림책 퍼즐",
   "app.subtitle": "신약 성경 이야기의 부드러운 수채화를 맞춰 보세요.",
   "tutorial.title": "잘했어요!",
@@ -906,6 +926,8 @@ const ko: Dict = {
 
 const ar: Dict = {
   "app.title": "ألعاب الكتاب المقدس للأطفال",
+  "home.prevGames": "الألعاب السابقة",
+  "home.nextGames": "المزيد من الألعاب",
   "app.tagline": "أحاجي كتاب القصص",
   "app.subtitle": "ركّب لوحات مائية لطيفة لقصص من العهد الجديد.",
   "tutorial.title": "أحسنت!",
@@ -993,6 +1015,8 @@ const ar: Dict = {
 
 const tr: Dict = {
   "app.title": "Çocuklar için İncil Oyunları",
+  "home.prevGames": "Önceki oyunlar",
+  "home.nextGames": "Diğer oyunlar",
   "app.tagline": "Resimli Kitap Yapbozları",
   "app.subtitle": "Yeni Ahit'ten hikâyelerin yumuşak suluboya resimlerini birleştir.",
   "tutorial.title": "Harika!",
