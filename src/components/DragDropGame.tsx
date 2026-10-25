@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
 import { useAudio } from "@/lib/audio";
 import { ddText } from "@/lib/dragdrop-i18n";
+import { useBackButton } from "@/lib/back-button";
 import {
   COLLECTIONS,
   isFreeStory,
@@ -35,6 +36,12 @@ export function DragDropGame({
   const [view, setView] = useState<View>({ screen: "collections" });
   const [progress, setProgress] = useState(() => loadDDProgress());
   const [showLock, setShowLock] = useState(false);
+
+  // Phone / browser back: activity → story list → collections.
+  useBackButton(view.screen !== "collections", () => setView({ screen: "collections" }));
+  useBackButton(view.screen === "play", () =>
+    setView((v) => (v.screen === "play" ? { screen: "stories", collectionId: v.story.collectionId } : v)),
+  );
 
   const dt = (k: string) => ddText(lang, k);
 

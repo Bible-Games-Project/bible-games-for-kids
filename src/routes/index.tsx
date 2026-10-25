@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DIFFICULTIES,
   pieceCount,
@@ -25,9 +25,12 @@ import { PremiumScreen } from "@/components/PremiumScreen";
 import { DragDropGame } from "@/components/DragDropGame";
 import { MemoryGame } from "@/components/MemoryGame";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
+import { useAudio } from "@/lib/audio";
+import { useBackButton } from "@/lib/back-button";
 import { isFreePuzzle } from "@/lib/freemium";
 import homeBg from "@/assets/home-bedtime.webp";
 import puzzlesBg from "@/assets/puzzles-bedtime.webp";
+import memoryBg from "@/assets/memory-bedtime.webp";
 import puzzlesIcon from "@/assets/icon-puzzles.webp";
 import memoryIcon from "@/assets/icon-memory.webp";
 
@@ -35,13 +38,13 @@ import memoryIcon from "@/assets/icon-memory.webp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SeedFun: Bible Games for Kids" },
+      { title: "FaithFun: Bible Games for Kids" },
       {
         name: "description",
         content:
           "A peaceful watercolor jigsaw puzzle app for children, illustrating gentle stories from the life of Jesus and the New Testament.",
       },
-      { property: "og:title", content: "SeedFun: Bible Games for Kids" },
+      { property: "og:title", content: "FaithFun: Bible Games for Kids" },
       {
         property: "og:description",
         content:
@@ -84,11 +87,13 @@ function GameTile({
   game,
   label,
   comingLabel,
+  highlighted = false,
   onPlay,
 }: {
   game: GameDef;
   label: string;
   comingLabel: string;
+  highlighted?: boolean;
   onPlay: () => void;
 }) {
   return (
@@ -96,7 +101,9 @@ function GameTile({
       onClick={() => game.playable && onPlay()}
       disabled={!game.playable}
       aria-label={label}
-      className="glass-card group relative flex aspect-[4/5] w-full flex-col overflow-hidden p-2 transition active:scale-[0.97] disabled:active:scale-100"
+      className={`glass-card group relative flex aspect-[4/5] w-full flex-col overflow-hidden p-1.5 transition active:scale-[0.97] disabled:active:scale-100 ${
+        highlighted ? "scale-[1.04] ring-4 ring-[var(--color-gold)]" : ""
+      }`}
     >
       <div
         className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl"
@@ -118,19 +125,39 @@ function GameTile({
           <div className="pointer-events-none absolute inset-0 bg-[oklch(0.975_0.025_85/0.3)]" />
         )}
       </div>
-      <span className="mt-1.5 line-clamp-2 px-0.5 text-center text-[11px] font-semibold leading-tight text-foreground sm:text-xs">
+      <span className="mt-1 line-clamp-2 hyphens-auto text-center text-[10px] font-semibold leading-tight tracking-tight text-foreground sm:text-xs">
         {label}
       </span>
     </button>
   );
 }
 
-// One row of game tiles that scrolls sideways: about three tiles show at a
-// time with the next one peeking in, so more games can be added without
-// covering the background painting. Arrow buttons help mouse users.
-function GameShelf({ children, prevLabel, nextLabel }: { children: ReactNode; prevLabel: string; nextLabel: string }) {
+// One row of game tiles that scrolls sideways, exactly three at a time,
+// with an arrow on each side that moves one game. The dice under the right
+// arrow spins the row like a roulette and opens a random playable game.
+function GameShelf({
+  games,
+  labelFor,
+  comingLabel,
+  prevLabel,
+  nextLabel,
+  randomLabel,
+  onPlay,
+}: {
+  games: GameDef[];
+  labelFor: (g: GameDef) => string;
+  comingLabel: string;
+  prevLabel: string;
+  nextLabel: string;
+  randomLabel: string;
+  onPlay: (g: GameDef) => void;
+}) {
+  const audio = useAudio();
   const ref = useRef<HTMLDivElement | null>(null);
   const [edges, setEdges] = useState({ start: true, end: false });
+  const [spinning, setSpinning] = useState(false);
+  const [highlight, setHighlight] = useState<number | null>(null);
+  const timers = useRef<number[]>([]);
 
   useEffect(() => {
     const el = ref.current;
@@ -143,44 +170,117 @@ function GameShelf({ children, prevLabel, nextLabel }: { children: ReactNode; pr
     update();
     el.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
+    const pending = timers.current;
     return () => {
       el.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
+      pending.forEach((id) => window.clearTimeout(id));
     };
   }, []);
 
-  const page = (dir: 1 | -1) => {
+  // Distance between the starts of two neighbouring tiles.
+  const stepSize = () => {
     const el = ref.current;
-    if (!el) return;
-    const rtl = getComputedStyle(el).direction === "rtl";
-    el.scrollBy({ left: dir * (rtl ? -1 : 1) * el.clientWidth * 0.9, behavior: "smooth" });
+    const tiles = el?.children;
+    if (!el || !tiles || tiles.length < 2) return 0;
+    return Math.abs((tiles[1] as HTMLElement).offsetLeft - (tiles[0] as HTMLElement).offsetLeft);
+  };
+  const dirSign = () => (ref.current && getComputedStyle(ref.current).direction === "rtl" ? -1 : 1);
+
+  const move = (dir: 1 | -1) => {
+    ref.current?.scrollBy({ left: dir * dirSign() * stepSize(), behavior: "smooth" });
   };
 
-  const arrow = (dir: 1 | -1, hidden: boolean, label: string) => (
-    <button
-      onClick={() => page(dir)}
-      aria-label={label}
-      hidden={hidden}
-      className={`absolute top-[42%] z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-card text-foreground shadow-md transition active:scale-90 ${
-        dir === 1 ? "-right-2 rtl:-left-2 rtl:right-auto" : "-left-2 rtl:-right-2 rtl:left-auto"
-      }`}
-    >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden className={dir === -1 ? "rotate-180 rtl:rotate-0" : "rtl:rotate-180"}>
-        <path d="M9 6l6 6-6 6" />
-      </svg>
-    </button>
+  // Keep tile `i` in view, in the middle slot when possible.
+  const showTile = (i: number, smooth: boolean) => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const left = Math.min(max, Math.max(0, (i - 1) * stepSize()));
+    el.scrollTo({ left: left * dirSign(), behavior: smooth ? "smooth" : "auto" });
+  };
+
+  const spin = () => {
+    if (spinning) return;
+    const playable = games.map((g, i) => (g.playable ? i : -1)).filter((i) => i >= 0);
+    const target = playable[Math.floor(Math.random() * playable.length)];
+    // Two laps through every game, then on to the winner, slowing down.
+    const steps = games.length * 2 + target;
+    setSpinning(true);
+    let t = 0;
+    for (let k = 0; k <= steps; k++) {
+      const i = k % games.length;
+      const last = k === steps;
+      t += 45 + 230 * Math.pow(k / steps, 3);
+      timers.current.push(
+        window.setTimeout(() => {
+          setHighlight(i);
+          showTile(i, last);
+          if (last) audio.playCorrect();
+          else audio.playClick();
+        }, t),
+      );
+    }
+    timers.current.push(
+      window.setTimeout(() => {
+        setSpinning(false);
+        setHighlight(null);
+        onPlay(games[target]);
+      }, t + 750),
+    );
+  };
+
+  const roundButton =
+    "grid h-8 w-8 place-items-center rounded-full bg-card text-foreground shadow-md transition active:scale-90 disabled:opacity-35 disabled:active:scale-100";
+
+  const chevron = (flip: boolean) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden className={flip ? "rotate-180 rtl:rotate-0" : "rtl:rotate-180"}>
+      <path d="M9 6l6 6-6 6" />
+    </svg>
   );
 
   return (
-    <div className="relative w-full">
+    <div className="flex w-full items-center gap-1.5">
+      <button onClick={() => move(-1)} disabled={edges.start || spinning} aria-label={prevLabel} className={`${roundButton} shrink-0`}>
+        {chevron(true)}
+      </button>
+
       <div
         ref={ref}
-        className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex min-w-0 flex-1 snap-x snap-mandatory scroll-px-1 gap-3 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {children}
+        {games.map((g, i) => (
+          <div key={g.id} className="w-[calc((100%-1.5rem)/3)] shrink-0 snap-start">
+            <GameTile
+              game={g}
+              label={labelFor(g)}
+              comingLabel={comingLabel}
+              highlighted={highlight === i}
+              onPlay={() => !spinning && onPlay(g)}
+            />
+          </div>
+        ))}
       </div>
-      {arrow(-1, edges.start, prevLabel)}
-      {arrow(1, edges.end, nextLabel)}
+
+      {/* The arrow lines up with the left one; the dice sits just below it. */}
+      <div className="relative shrink-0">
+        <button onClick={() => move(1)} disabled={edges.end || spinning} aria-label={nextLabel} className={roundButton}>
+          {chevron(false)}
+        </button>
+        <button
+          onClick={spin}
+          disabled={spinning}
+          aria-label={randomLabel}
+          className="absolute left-1/2 top-full mt-2 grid h-8 w-8 -translate-x-1/2 place-items-center rounded-xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] text-foreground shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden className={spinning ? "animate-spin" : ""}>
+            <rect x="3" y="3" width="18" height="18" rx="4.5" fill="oklch(0.99 0.012 85)" stroke="currentColor" strokeWidth="1.6" />
+            {[[8, 8], [16, 8], [12, 12], [8, 16], [16, 16]].map(([cx, cy]) => (
+              <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="1.6" fill="currentColor" />
+            ))}
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
@@ -197,9 +297,18 @@ function Home() {
   const [pendingTutorial, setPendingTutorial] = useState<Difficulty["id"] | null>(null);
   const [showPremiumLock, setShowPremiumLock] = useState(false);
 
+  // Phone / browser back: puzzle board → story list → home.
+  useBackButton(screen !== "home", () => setScreen("home"));
+  useBackButton(active !== null, () => setActive(null));
 
   useEffect(() => {
     setProgress(loadProgress());
+    // Warm the cache so the game screens open with their painting already
+    // loaded instead of fading it in.
+    for (const src of [puzzlesBg, memoryBg]) {
+      const img = new Image();
+      img.src = src;
+    }
   }, []);
 
   if (!onboarded) {
@@ -267,33 +376,30 @@ function Home() {
       <div className="theme-bedtime relative isolate min-h-[100dvh] w-full">
         {/* The family scene in the middle of the painting stays at full color
             behind the frosted tiles. */}
-        <BedtimeBackdrop image={homeBg} position="center 38%" fadeEnd={45} />
+        <BedtimeBackdrop image={homeBg} position="center top" fadeEnd={0} keepWhole />
         <div className="relative min-h-[100dvh] w-full">
           {settingsButton}
-          <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-5 pt-14 pb-6 text-center sm:pt-16">
-            <h1 className="font-display text-5xl leading-none text-foreground sm:text-6xl">SeedFun</h1>
-            <p className="mt-2 font-display text-lg text-foreground/85 sm:text-xl">{t("app.title")}</p>
-            <p className="mt-2 max-w-xs text-sm text-muted-foreground">{t("home.welcome")}</p>
+          {/* As wide as the painting on wide screens, full width on phones. */}
+          <div
+            className="mx-auto flex min-h-[100dvh] w-full flex-col items-center px-4 pt-14 pb-6 text-center"
+            style={{ maxWidth: "min(32rem, max(22rem, calc(100dvh * 0.5635)))" }}
+          >
+            {/* The painting carries the FaithFun title and subtitle. */}
+            <h1 className="sr-only">FaithFun: {t("app.title")}</h1>
 
-            {/* Open space so the painting shows between the title and the games. */}
             <div className="min-h-8 flex-1" />
 
-            <GameShelf prevLabel={t("home.prevGames")} nextLabel={t("home.nextGames")}>
-              {GAMES.map((g) => (
-                <div key={g.id} className="w-[calc((100%-1.5rem)/3.25)] shrink-0 snap-start">
-                  <GameTile
-                    game={g}
-                    label={t(g.labelKey)}
-                    comingLabel={t("game.comingSoon")}
-                    onPlay={() =>
-                      setScreen(g.id === "dragdrop" || g.id === "memory" ? g.id : "select")
-                    }
-                  />
-                </div>
-              ))}
-            </GameShelf>
+            <GameShelf
+              games={GAMES}
+              labelFor={(g) => t(g.labelKey)}
+              comingLabel={t("game.comingSoon")}
+              prevLabel={t("home.prevGames")}
+              nextLabel={t("home.nextGames")}
+              randomLabel={t("home.randomGame")}
+              onPlay={(g) => setScreen(g.id === "dragdrop" || g.id === "memory" ? g.id : "select")}
+            />
 
-            <div className="mt-4 grid w-full grid-cols-2 gap-3">
+            <div className="mt-6 grid w-full grid-cols-2 gap-3">
               <button
                 onClick={() => setScreen("premium")}
                 className="flex items-center justify-center gap-2 rounded-2xl border border-[oklch(1_0_0/0.5)] bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] px-3 py-3 text-base font-semibold text-foreground shadow-md transition active:scale-95"

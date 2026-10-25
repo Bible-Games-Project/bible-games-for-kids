@@ -16,6 +16,7 @@ import {
 
 import memoryBg from "@/assets/memory-bedtime.webp";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
+import { useBackButton } from "@/lib/back-button";
 
 const formatTime = (sec: number) =>
   `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
@@ -62,6 +63,10 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
 
   // Open at the top even if the home screen was scrolled to reach the tile.
   useEffect(() => window.scrollTo(0, 0), []);
+  useBackButton(level !== null, () => {
+    window.scrollTo(0, 0);
+    setLevel(null);
+  });
 
   if (level) {
     return (
