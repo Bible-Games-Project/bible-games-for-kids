@@ -10,8 +10,12 @@ let listening = false;
 
 function pushGuard() {
   if (guardInHistory || typeof window === "undefined") return;
-  window.history.pushState({ faithfunBack: true }, "");
-  guardInHistory = true;
+  try {
+    window.history.pushState({ faithfunBack: true }, "");
+    guardInHistory = true;
+  } catch {
+    // Some embedded viewers block history changes; the in-app ← still works.
+  }
 }
 
 function onPopState() {

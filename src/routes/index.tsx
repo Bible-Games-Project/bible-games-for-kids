@@ -29,6 +29,7 @@ import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
 import { isFreePuzzle } from "@/lib/freemium";
 import homeBg from "@/assets/home-bedtime.webp";
+import titleImg from "@/assets/title-faithfun.webp";
 import puzzlesBg from "@/assets/puzzles-bedtime.webp";
 import memoryBg from "@/assets/memory-bedtime.webp";
 import puzzlesIcon from "@/assets/icon-puzzles.webp";
@@ -133,7 +134,8 @@ function GameTile({
 }
 
 // One row of game tiles that scrolls sideways, exactly three at a time,
-// with an arrow on each side that moves one game. The dice under the right
+// with an arrow on each side that moves one game and wraps around at the
+// ends, so both arrows always work. The dice under the right
 // arrow spins the row like a roulette and opens a random playable game.
 function GameShelf({
   games,
@@ -154,28 +156,13 @@ function GameShelf({
 }) {
   const audio = useAudio();
   const ref = useRef<HTMLDivElement | null>(null);
-  const [edges, setEdges] = useState({ start: true, end: false });
   const [spinning, setSpinning] = useState(false);
   const [highlight, setHighlight] = useState<number | null>(null);
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const update = () => {
-      // scrollLeft is negative in right-to-left layouts.
-      const pos = Math.abs(el.scrollLeft);
-      setEdges({ start: pos < 8, end: pos + el.clientWidth >= el.scrollWidth - 8 });
-    };
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
     const pending = timers.current;
-    return () => {
-      el.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      pending.forEach((id) => window.clearTimeout(id));
-    };
+    return () => pending.forEach((id) => window.clearTimeout(id));
   }, []);
 
   // Distance between the starts of two neighbouring tiles.
@@ -188,7 +175,15 @@ function GameShelf({
   const dirSign = () => (ref.current && getComputedStyle(ref.current).direction === "rtl" ? -1 : 1);
 
   const move = (dir: 1 | -1) => {
-    ref.current?.scrollBy({ left: dir * dirSign() * stepSize(), behavior: "smooth" });
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const pos = Math.abs(el.scrollLeft);
+    // Past the last game, go back to the first one, and the other way round.
+    let next = pos + dir * stepSize();
+    if (dir === 1 && pos >= max - 8) next = 0;
+    else if (dir === -1 && pos <= 8) next = max;
+    el.scrollTo({ left: Math.min(max, Math.max(0, next)) * dirSign(), behavior: "smooth" });
   };
 
   // Keep tile `i` in view, in the middle slot when possible.
@@ -241,7 +236,7 @@ function GameShelf({
 
   return (
     <div className="flex w-full items-center gap-1.5">
-      <button onClick={() => move(-1)} disabled={edges.start || spinning} aria-label={prevLabel} className={`${roundButton} shrink-0`}>
+      <button onClick={() => move(-1)} disabled={spinning} aria-label={prevLabel} className={`${roundButton} shrink-0`}>
         {chevron(true)}
       </button>
 
@@ -264,7 +259,7 @@ function GameShelf({
 
       {/* The arrow lines up with the left one; the dice sits just below it. */}
       <div className="relative shrink-0">
-        <button onClick={() => move(1)} disabled={edges.end || spinning} aria-label={nextLabel} className={roundButton}>
+        <button onClick={() => move(1)} disabled={spinning} aria-label={nextLabel} className={roundButton}>
           {chevron(false)}
         </button>
         <button
@@ -376,16 +371,18 @@ function Home() {
       <div className="theme-bedtime relative isolate min-h-[100dvh] w-full">
         {/* The family scene in the middle of the painting stays at full color
             behind the frosted tiles. */}
-        <BedtimeBackdrop image={homeBg} position="center top" fadeEnd={0} keepWhole />
+        <BedtimeBackdrop image={homeBg} position="center 40%" fadeEnd={0} />
         <div className="relative min-h-[100dvh] w-full">
           {settingsButton}
-          {/* As wide as the painting on wide screens, full width on phones. */}
-          <div
-            className="mx-auto flex min-h-[100dvh] w-full flex-col items-center px-4 pt-14 pb-6 text-center"
-            style={{ maxWidth: "min(32rem, max(22rem, calc(100dvh * 0.5635)))" }}
-          >
-            {/* The painting carries the FaithFun title and subtitle. */}
-            <h1 className="sr-only">FaithFun: {t("app.title")}</h1>
+          <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-4 pt-16 pb-6 text-center">
+            <h1 className="w-[82%] max-w-sm">
+              <img
+                src={titleImg}
+                alt={`FaithFun: ${t("app.title")}`}
+                draggable={false}
+                className="h-auto w-full select-none drop-shadow-[0_4px_10px_oklch(0.4_0.08_50/0.35)]"
+              />
+            </h1>
 
             <div className="min-h-8 flex-1" />
 
