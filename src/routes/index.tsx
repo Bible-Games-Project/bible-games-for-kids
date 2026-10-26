@@ -636,7 +636,9 @@ function DifficultyList({
 }) {
   const { t, lang } = useSettings();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
 
   const resumeFlags = useMemo(

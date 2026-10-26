@@ -19,12 +19,14 @@ import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { useBackButton } from "@/lib/back-button";
 
 // Up to four players share the board, each with their own color for the
-// turn marker, the scoreboard and the pairs they find.
+// turn marker, the scoreboard and the pairs they find. Each is a deeper shade
+// of a color in the Memory painting: the lavender cards, the girl's pink
+// pajamas, the lamp's gold and the plant's leaves.
 const PLAYER_COLORS = [
-  "oklch(0.45 0.115 258)",
-  "oklch(0.6 0.16 15)",
-  "oklch(0.62 0.13 70)",
-  "oklch(0.55 0.1 165)",
+  "oklch(0.52 0.1 275)",
+  "oklch(0.58 0.13 355)",
+  "oklch(0.62 0.12 75)",
+  "oklch(0.53 0.09 135)",
 ];
 const PLAYERS_KEY = "memory-players";
 
@@ -82,7 +84,9 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
   const mt = (k: string) => memText(lang, k);
 
   // Open at the top even if the home screen was scrolled to reach the tile.
-  useEffect(() => window.scrollTo(0, 0), []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const backToLevels = () => {
     window.scrollTo(0, 0);
     setPlayers(null);
