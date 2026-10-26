@@ -145,10 +145,11 @@ function GameTile({
   );
 }
 
-// One row of game tiles, exactly three at a time. Each arrow (or a swipe)
-// glides to the previous or next three, and the row loops endlessly in both
-// directions. The dice under the right arrow spins the row like a roulette
-// and opens a random playable game.
+// One row of game tiles, exactly three at a time, the middle one larger.
+// Each arrow (or a swipe) glides to the previous or next three, and the row
+// loops endlessly in both directions. Tapping a side game first slides it to
+// the middle (it grows as it arrives), then opens it. The dice under the
+// right arrow spins the row like a roulette and opens a random playable game.
 //
 // The loop works by rendering the games several times in a row and quietly
 // re-centering on the middle copy after each move; copies look identical,
@@ -195,10 +196,26 @@ function GameShelf({
     setPos((p) => n + ((((p - n) % n) + n) % n));
   };
 
-  const move = (dir: 1 | -1) => {
+  const move = (dir: 1 | -1, step = 3) => {
     if (spinning) return;
     setSlideMs(300);
-    setPos((p) => p + dir * 3);
+    setPos((p) => p + dir * step);
+  };
+
+  // Tile k of the repeated row was tapped.
+  const choose = (k: number) => {
+    if (spinning) return;
+    const g = games[k % n];
+    const offset = k - (pos + 1); // -1 left, 0 middle, 1 right
+    if (offset === 0) return onPlay(g);
+    move(offset < 0 ? -1 : 1, 1);
+    setSpinning(true); // hold other taps until the game opens
+    timers.current.push(
+      window.setTimeout(() => {
+        setSpinning(false);
+        onPlay(g);
+      }, 480),
+    );
   };
 
   const spin = () => {
@@ -255,7 +272,7 @@ function GameShelf({
       </button>
 
       <div
-        className="min-w-0 flex-1 overflow-hidden px-1 py-2"
+        className="min-w-0 flex-1 overflow-hidden px-1 py-4"
         style={{ touchAction: "pan-y" }}
         onPointerDown={(e) => {
           swipe.current = { x: e.clientX, moved: false };
@@ -283,22 +300,32 @@ function GameShelf({
             transform: `translateX(calc(${rtl ? pos : -pos} * (100% + 0.75rem) / 3))`,
             transition: slideMs ? `transform ${slideMs}ms ease-out` : "none",
           }}
-          onTransitionEnd={() => {
-            if (!spinning) recenter();
+          onTransitionEnd={(e) => {
+            // Only the row's own slide, not a tile growing or shrinking.
+            if (e.target === e.currentTarget && !spinning) recenter();
           }}
         >
           {tiles.map((k) => {
             const i = k % n;
             const g = games[i];
             const visible = k >= pos && k < pos + 3;
+            const middle = k === pos + 1;
             return (
-              <div key={k} className="w-[calc((100%-1.5rem)/3)] shrink-0" inert={!visible} aria-hidden={!visible}>
+              <div
+                key={k}
+                className={`relative w-[calc((100%-1.5rem)/3)] shrink-0 transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                  middle ? "z-10" : ""
+                }`}
+                style={{ transform: middle ? "scale(1.14)" : "scale(0.88)" }}
+                inert={!visible}
+                aria-hidden={!visible}
+              >
                 <GameTile
                   game={g}
                   label={labelFor(g)}
                   comingLabel={comingLabel}
                   highlighted={highlight === i}
-                  onPlay={() => !spinning && onPlay(g)}
+                  onPlay={() => choose(k)}
                 />
               </div>
             );
@@ -329,6 +356,10 @@ function GameShelf({
   );
 }
 
+// The title floats down and fades in once each time the app is opened, not
+// every time the player comes back to the home screen.
+let titleIntroPlayed = false;
+
 function Home() {
   const { onboarded, devMode, premium, t } = useSettings();
   const [progress, setProgress] = useState<Progress>({});
@@ -340,6 +371,14 @@ function Home() {
   );
   const [pendingTutorial, setPendingTutorial] = useState<Difficulty["id"] | null>(null);
   const [showPremiumLock, setShowPremiumLock] = useState(false);
+  const [titleIntro, setTitleIntro] = useState(() => !titleIntroPlayed);
+  useEffect(() => {
+    titleIntroPlayed = true;
+    // Home stays mounted while games are open; drop the animation once it
+    // has played so coming back to home doesn't replay it.
+    const id = window.setTimeout(() => setTitleIntro(false), 1600);
+    return () => window.clearTimeout(id);
+  }, []);
 
   // Phone / browser back: puzzle board → story list → home.
   useBackButton(screen !== "home", () => setScreen("home"));
@@ -421,7 +460,11 @@ function Home() {
         <div className="relative z-10 min-h-[100dvh] w-full">
           {settingsButton}
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-4 pt-16 pb-6 text-center">
-            <h1 className="w-[82%] max-w-sm">
+            <h1
+              className={`w-[82%] max-w-sm ${
+                titleIntro ? "animate-in fade-in slide-in-from-top-10 duration-[1400ms] ease-out motion-reduce:animate-none" : ""
+              }`}
+            >
               <img
                 src={titleImg}
                 alt={`FaithFun: ${t("app.title")}`}
