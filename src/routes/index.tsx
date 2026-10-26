@@ -24,6 +24,9 @@ import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
 import { DragDropGame } from "@/components/DragDropGame";
 import { MemoryGame } from "@/components/MemoryGame";
+import { SeekGame } from "@/components/SeekGame";
+import { OrderGame } from "@/components/OrderGame";
+import { ColoringGame } from "@/components/ColoringGame";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
@@ -34,6 +37,10 @@ import puzzlesBg from "@/assets/puzzles-bedtime.webp";
 import memoryBg from "@/assets/memory-bedtime.webp";
 import puzzlesIcon from "@/assets/icon-puzzles.webp";
 import memoryIcon from "@/assets/icon-memory.webp";
+import dragdropIcon from "@/assets/icon-dragdrop.webp";
+import coloringIcon from "@/assets/icon-coloring.webp";
+import seekIcon from "@/assets/icon-seek.webp";
+import orderIcon from "@/assets/icon-order.webp";
 
 
 export const Route = createFileRoute("/")({
@@ -62,7 +69,10 @@ interface ActiveState {
   difficultyId: Difficulty["id"];
 }
 
-type Screen = "home" | "select" | "more" | "premium" | "dragdrop" | "memory";
+type Screen = "home" | "select" | "more" | "premium" | GameScreen;
+// Games with their own screen; Puzzles uses the story list ("select").
+type GameScreen = "dragdrop" | "memory" | "seek" | "order" | "coloring";
+const GAME_SCREENS: string[] = ["dragdrop", "memory", "seek", "order", "coloring"];
 
 interface GameDef {
   id: string;
@@ -77,8 +87,10 @@ interface GameDef {
 const GAMES: GameDef[] = [
   { id: "puzzles", labelKey: "game.puzzles", icon: puzzlesIcon, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
   { id: "memory", labelKey: "game.memory", icon: memoryIcon, tint: "oklch(0.84 0.06 262 / 0.6)", playable: true },
-  { id: "dragdrop", labelKey: "game.dragdrop", emoji: "✋", tint: "oklch(0.9 0.08 79 / 0.6)", playable: true },
-  { id: "coloring", labelKey: "game.coloring", emoji: "🎨", tint: "oklch(0.86 0.06 13 / 0.6)", playable: false },
+  { id: "dragdrop", labelKey: "game.dragdrop", icon: dragdropIcon, tint: "oklch(0.9 0.08 79 / 0.6)", playable: true },
+  { id: "coloring", labelKey: "game.coloring", icon: coloringIcon, tint: "oklch(0.86 0.06 13 / 0.6)", playable: true },
+  { id: "seek", labelKey: "game.seek", icon: seekIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
+  { id: "order", labelKey: "game.order", icon: orderIcon, tint: "oklch(0.8 0.07 258 / 0.6)", playable: true },
   { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.87 0.07 62 / 0.6)", playable: false },
   { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.85 0.045 6 / 0.6)", playable: false },
   { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.8 0.07 258 / 0.6)", playable: false },
@@ -379,14 +391,11 @@ function Home() {
 
   if (screen === "more") return <MoreGamesScreen onBack={() => setScreen("home")} />;
   if (screen === "premium") return <PremiumScreen onBack={() => setScreen("home")} />;
-  if (screen === "dragdrop")
-    return (
-      <DragDropGame
-        onBack={() => setScreen("home")}
-        onOpenPremium={() => setScreen("premium")}
-      />
-    );
+  if (screen === "dragdrop") return <DragDropGame onBack={() => setScreen("home")} />;
   if (screen === "memory") return <MemoryGame onBack={() => setScreen("home")} />;
+  if (screen === "seek") return <SeekGame onBack={() => setScreen("home")} />;
+  if (screen === "order") return <OrderGame onBack={() => setScreen("home")} />;
+  if (screen === "coloring") return <ColoringGame onBack={() => setScreen("home")} />;
 
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
 
@@ -430,7 +439,7 @@ function Home() {
               prevLabel={t("home.prevGames")}
               nextLabel={t("home.nextGames")}
               randomLabel={t("home.randomGame")}
-              onPlay={(g) => setScreen(g.id === "dragdrop" || g.id === "memory" ? g.id : "select")}
+              onPlay={(g) => setScreen(GAME_SCREENS.includes(g.id) ? (g.id as GameScreen) : "select")}
             />
 
             <div className="mt-6 grid w-full grid-cols-2 gap-3">

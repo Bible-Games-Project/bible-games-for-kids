@@ -1,524 +1,267 @@
 import { useMemo, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
 import { useAudio } from "@/lib/audio";
-import { ddText } from "@/lib/dragdrop-i18n";
-import { useBackButton } from "@/lib/back-button";
+import { gameText } from "@/lib/games-i18n";
+import { localizeSceneTitle, localizeVerse } from "@/lib/scenes-i18n";
 import {
-  COLLECTIONS,
-  isFreeStory,
-  type CollectionId,
-  type DragCollection,
+  DRAG_STORIES,
+  PAINTING_RATIO,
+  loadDoneStories,
+  markStoryDone,
+  pieceBackground,
   type DragStory,
 } from "@/lib/dragdrop";
-import {
-  completedCount,
-  isStoryCompleted,
-  isStoryUnlocked,
-  loadDDProgress,
-  markStoryComplete,
-} from "@/lib/dragdrop-progress";
+import { useBackButton } from "@/lib/back-button";
+import { BackButton, MenuScreen, ResultCard } from "@/components/GameShell";
 
-import menuBg from "@/assets/menu-background.jpg";
+import homeBg from "@/assets/home-bedtime.webp";
 
-type View =
-  | { screen: "collections" }
-  | { screen: "stories"; collectionId: CollectionId }
-  | { screen: "play"; story: DragStory };
+export function DragDropGame({ onBack }: { onBack: () => void }) {
+  const { lang, t } = useSettings();
+  const [story, setStory] = useState<DragStory | null>(null);
+  const [done, setDone] = useState(() => loadDoneStories());
+  const dt = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
 
-export function DragDropGame({
-  onBack,
-  onOpenPremium,
-}: {
-  onBack: () => void;
-  onOpenPremium: () => void;
-}) {
-  const { lang, premium, devMode, t } = useSettings();
-  const [view, setView] = useState<View>({ screen: "collections" });
-  const [progress, setProgress] = useState(() => loadDDProgress());
-  const [showLock, setShowLock] = useState(false);
+  useBackButton(story !== null, () => setStory(null));
 
-  // Phone / browser back: activity → story list → collections.
-  useBackButton(view.screen !== "collections", () => setView({ screen: "collections" }));
-  useBackButton(view.screen === "play", () =>
-    setView((v) => (v.screen === "play" ? { screen: "stories", collectionId: v.story.collectionId } : v)),
-  );
-
-  const dt = (k: string) => ddText(lang, k);
-
-  const bgStyle = {
-    backgroundImage: `linear-gradient(180deg, oklch(0.98 0.015 80 / 0.4), oklch(0.96 0.03 60 / 0.85)), url(${menuBg})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center top",
-  } as const;
-
-  const BackButton = ({ onClick, label }: { onClick: () => void; label: string }) => (
-    <button
-      onClick={onClick}
-      className="grid h-10 w-10 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
-      aria-label={label}
-    >
-      ←
-    </button>
-  );
-
-  // ---------- Play screen ----------
-  if (view.screen === "play") {
+  if (story) {
     return (
       <DragDropBoard
-        key={view.story.id}
-        story={view.story}
-        onExit={() => setView({ screen: "stories", collectionId: view.story.collectionId })}
-        onComplete={() => {
-          setProgress(markStoryComplete(view.story.collectionId, view.story.id));
-        }}
+        key={story.story.slug}
+        item={story}
+        onExit={() => setStory(null)}
+        onComplete={() => setDone(markStoryDone(story.story.slug))}
       />
     );
   }
 
-  // ---------- Stories list ----------
-  if (view.screen === "stories") {
-    const collection = COLLECTIONS.find((c) => c.id === view.collectionId)!;
-    return (
-      <div className="min-h-[100dvh] w-full">
-        <div className="relative min-h-[100dvh] w-full" style={bgStyle}>
-          <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
-            <BackButton onClick={() => setView({ screen: "collections" })} label={dt("dd.backStories")} />
-            <h1 className="font-display text-2xl sm:text-3xl">{dt(collection.labelKey)}</h1>
-          </header>
-          <main className="mx-auto max-w-3xl space-y-4 px-4 pb-12 pt-3">
-            {collection.stories.length === 0 ? (
-              <p className="mt-16 text-center text-base italic text-muted-foreground">
-                {dt("dd.emptyCollection")}
-              </p>
-            ) : (
-              <StoryList
-                collection={collection}
-                progress={progress}
-                premium={premium}
-                devMode={devMode}
-                dt={dt}
-                onPlay={(story) => setView({ screen: "play", story })}
-                onLocked={() => setShowLock(true)}
-              />
-            )}
-          </main>
-        </div>
-        {showLock && (
-          <LockModal
-            t={t}
-            onClose={() => setShowLock(false)}
-            onUnlock={() => {
-              setShowLock(false);
-              onOpenPremium();
-            }}
-          />
-        )}
-      </div>
-    );
-  }
-
-  // ---------- Collection select ----------
   return (
-    <div className="min-h-[100dvh] w-full">
-      <div className="relative min-h-[100dvh] w-full" style={bgStyle}>
-        <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
-          <BackButton onClick={onBack} label={t("select.back")} />
-          <h1 className="font-display text-2xl sm:text-3xl">{dt("dd.chooseCollection")}</h1>
-        </header>
-        <main className="mx-auto grid max-w-3xl gap-4 px-4 pb-12 pt-4">
-          {COLLECTIONS.map((c) => {
-            const done = completedCount(c.id, progress);
-            const total = c.stories.length;
-            return (
-              <button
-                key={c.id}
-                onClick={() => setView({ screen: "stories", collectionId: c.id })}
-                className="paper-card flex w-full items-center gap-4 p-5 text-left transition active:scale-[0.99]"
-              >
-                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[var(--color-sage-soft)] text-3xl">
-                  {c.id === "old-testament" ? "📜" : "✝️"}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <h2 className="font-display text-xl leading-snug">{dt(c.labelKey)}</h2>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{dt(c.descKey)}</p>
-                </div>
-                <span className="shrink-0 text-sm font-bold text-muted-foreground">
-                  {done}/{total || 25}
-                </span>
-              </button>
-            );
-          })}
-        </main>
-      </div>
-    </div>
-  );
-}
-
-function StoryList({
-  collection,
-  progress,
-  premium,
-  devMode,
-  dt,
-  onPlay,
-  onLocked,
-}: {
-  collection: DragCollection;
-  progress: ReturnType<typeof loadDDProgress>;
-  premium: boolean;
-  devMode: boolean;
-  dt: (k: string) => string;
-  onPlay: (s: DragStory) => void;
-  onLocked: () => void;
-}) {
-  return (
-    <>
-      {collection.stories.map((story, i) => {
-        const progressUnlocked = devMode || isStoryUnlocked(collection.stories, i, progress);
-        const premiumAllowed = devMode || premium || isFreeStory(i);
-        const premiumLocked = !premiumAllowed;
-        const unlocked = progressUnlocked && premiumAllowed;
-        const completed = isStoryCompleted(collection.id, story.id, progress);
-        const clickable = unlocked || premiumLocked;
-        return (
+    <MenuScreen
+      title={dt("dd.chooseStory")}
+      subtitle={dt("dd.instruction")}
+      background={homeBg}
+      onBack={onBack}
+      backLabel={t("select.back")}
+    >
+      <div className="grid gap-4">
+        {DRAG_STORIES.map((s) => (
           <button
-            key={story.id}
-            disabled={!clickable}
+            key={s.story.slug}
             onClick={() => {
-              if (premiumLocked) return onLocked();
-              if (unlocked) onPlay(story);
+              window.scrollTo(0, 0);
+              setStory(s);
             }}
-            className="paper-card group relative grid w-full grid-cols-[96px_minmax(0,1fr)] items-center gap-4 overflow-hidden p-3 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:grid-cols-[120px_minmax(0,1fr)]"
+            className="glass-card grid w-full grid-cols-[96px_minmax(0,1fr)] items-center gap-4 overflow-hidden p-3 text-left transition active:scale-[0.99] sm:grid-cols-[120px_minmax(0,1fr)]"
           >
-            <div
-              className="relative aspect-[7/9] overflow-hidden rounded-xl"
-              style={{ backgroundImage: `url(${story.image})`, backgroundSize: "cover", backgroundPosition: "center" }}
-            >
-              {premiumLocked ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[oklch(0.96_0.03_60/0.78)] text-2xl text-[var(--color-gold)]">
-                  ✨
-                </div>
-              ) : !unlocked ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[oklch(0.96_0.03_60/0.7)] text-2xl">
-                  🔒
-                </div>
-              ) : null}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-                {dt("dd.story")} {i + 1}
-              </p>
-              <h3 className="mt-1 truncate font-display text-lg leading-snug sm:text-xl">
-                {dt(`dd.title.${story.slug}`)}
-              </h3>
-              <div className="mt-2 flex items-center gap-2">
-                {premiumLocked && (
-                  <span className="rounded-full bg-[var(--color-gold)]/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[oklch(0.45_0.12_70)]">
-                    ✨
-                  </span>
-                )}
-                {completed && !premiumLocked && (
-                  <span className="text-base text-[var(--color-gold)]" aria-hidden>
-                    ★
-                  </span>
-                )}
-              </div>
-            </div>
+            <span className="relative aspect-[7/9] overflow-hidden rounded-xl" aria-hidden>
+              <img src={s.story.image} alt="" className="h-full w-full object-cover" />
+              {/* Two of the round pieces, lifted off the painting */}
+              {s.pieces.slice(0, 2).map((p, i) => (
+                <span
+                  key={i}
+                  className="absolute h-9 w-9 rounded-full border-2 border-white shadow-md"
+                  style={{ ...pieceBackground(s.story.image, p), right: 4 + i * 26, bottom: 6 + i * 14 }}
+                />
+              ))}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate font-display text-lg leading-snug sm:text-xl">
+                {localizeSceneTitle(s.story.slug, lang)}
+              </span>
+              <span className="mt-0.5 block text-xs italic text-muted-foreground">
+                {localizeVerse(s.story.verse, lang)}
+              </span>
+              <span className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                {dt("dd.piecesCount", { n: s.pieces.length })}
+                {done.includes(s.story.slug) && <span className="text-base text-[var(--color-gold)]">★</span>}
+              </span>
+            </span>
           </button>
-        );
-      })}
-    </>
+        ))}
+      </div>
+    </MenuScreen>
   );
 }
 
-// ---------- The drag & drop activity ----------
+// ---------- The board: drag the round pieces back into the painting ----------
 function DragDropBoard({
-  story,
+  item,
   onExit,
   onComplete,
 }: {
-  story: DragStory;
+  item: DragStory;
   onExit: () => void;
   onComplete: () => void;
 }) {
   const { lang } = useSettings();
   const { playCorrect, playIncorrect, playWin } = useAudio();
-  const dt = (k: string) => ddText(lang, k);
+  const dt = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
+  const { story, pieces } = item;
 
   const boardRef = useRef<HTMLDivElement | null>(null);
-  const [placed, setPlaced] = useState<Set<string>>(new Set());
-  const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
-  const [wrongId, setWrongId] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [placed, setPlaced] = useState<Set<number>>(new Set());
+  const [justPlaced, setJustPlaced] = useState<number | null>(null);
+  const [drag, setDrag] = useState<{ i: number; x: number; y: number } | null>(null);
+  const [wrong, setWrong] = useState<number | null>(null);
+  const [round, setRound] = useState(0);
+  const [finished, setFinished] = useState(false);
 
-  // Stable shuffled tray order for this mount.
-  const trayOrder = useMemo(() => {
-    const a = story.items.map((it) => it.id);
+  // Shuffled tray order, new each round.
+  const tray = useMemo(() => {
+    const a = pieces.map((_, i) => i);
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
-  }, [story.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [round, pieces]);
 
-  const remaining = trayOrder.filter((id) => !placed.has(id));
-
-  const beginDrag = (id: string, e: React.PointerEvent) => {
-    if (placed.has(id)) return;
-    // Capture on the button itself so every following pointer event routes back
-    // here, even if the finger/cursor leaves the tile. Guarded so a rejected
-    // capture never prevents the drag from starting.
+  const begin = (i: number, e: React.PointerEvent) => {
     try {
       e.currentTarget.setPointerCapture?.(e.pointerId);
     } catch {
       /* capture is best-effort */
     }
-    setDrag({ id, x: e.clientX, y: e.clientY });
+    setDrag({ i, x: e.clientX, y: e.clientY });
   };
 
-  const moveDrag = (e: React.PointerEvent) => {
-    if (!drag) return;
-    setDrag({ ...drag, x: e.clientX, y: e.clientY });
+  const moveTo = (e: React.PointerEvent) => {
+    if (drag) setDrag({ ...drag, x: e.clientX, y: e.clientY });
   };
 
-  const endDrag = () => {
+  const drop = () => {
     if (!drag) return;
     const board = boardRef.current;
-    const dragItem = story.items.find((it) => it.id === drag.id);
-    if (board && dragItem) {
+    const p = pieces[drag.i];
+    if (board) {
       const rect = board.getBoundingClientRect();
-      // Snap to the nearest still-empty spot that expects this same artwork.
-      // For unique pieces this is simply their own target; for repeated pieces
-      // (a flock of sheep, stars in the sky, a pair of doves) the child can
-      // place any identical piece into any of its matching spots without being
-      // punished for picking a look-alike.
-      let best: { id: string; dist: number } | null = null;
-      for (const it of story.items) {
-        if (placed.has(it.id) || it.art !== dragItem.art) continue;
-        const zoneX = rect.left + (it.x / 100) * rect.width;
-        const zoneY = rect.top + (it.y / 100) * rect.height;
-        const dist = Math.hypot(drag.x - zoneX, drag.y - zoneY);
-        // Snap tolerance scales with the piece size so bigger pieces feel just
-        // as easy to place as small ones.
-        const threshold = Math.max((it.w / 100) * rect.width * 0.85, rect.width * 0.13);
-        if (dist <= threshold && (!best || dist < best.dist)) best = { id: it.id, dist };
-      }
-      if (best) {
-        const next = new Set(placed);
-        next.add(best.id);
+      const cx = rect.left + (p.x / 100) * rect.width;
+      const cy = rect.top + (p.y / 100) * rect.height;
+      const radius = (p.r / 100) * rect.width;
+      // Generous snap: anywhere over the socket (and a bit around it).
+      if (Math.hypot(drag.x - cx, drag.y - cy) <= radius * 1.4) {
+        const next = new Set(placed).add(drag.i);
         setPlaced(next);
-        playCorrect();
-        if (next.size === story.items.length) {
-          setTimeout(() => {
-            playWin();
-            setDone(true);
-            onComplete();
-          }, 350);
-        }
+        setJustPlaced(drag.i);
         setDrag(null);
+        playCorrect();
+        if (next.size === pieces.length) {
+          window.setTimeout(() => {
+            playWin();
+            setFinished(true);
+            onComplete();
+          }, 500);
+        }
         return;
       }
     }
-    // Incorrect — gently return to tray.
     playIncorrect();
-    setWrongId(drag.id);
-    setTimeout(() => setWrongId(null), 400);
+    setWrong(drag.i);
+    window.setTimeout(() => setWrong(null), 450);
     setDrag(null);
   };
 
+  const replay = () => {
+    setPlaced(new Set());
+    setJustPlaced(null);
+    setFinished(false);
+    setRound((r) => r + 1);
+  };
+
+  const boardWidth = boardRef.current?.getBoundingClientRect().width ?? 320;
+
   return (
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
-      <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col px-4 py-4">
+      <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 py-4">
         <header className="flex items-center gap-3 pb-2">
-          <button
-            onClick={onExit}
-            className="grid h-10 w-10 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
-            aria-label={dt("dd.backStories")}
-          >
-            ←
-          </button>
-          <h1 className="truncate font-display text-xl">{dt(`dd.title.${story.slug}`)}</h1>
+          <BackButton onClick={onExit} label={dt("dd.backStories")} />
+          <h1 className="min-w-0 flex-1 truncate font-display text-xl">{localizeSceneTitle(story.slug, lang)}</h1>
+          <span className="shrink-0 text-sm font-semibold tabular-nums text-muted-foreground">
+            {placed.size}/{pieces.length}
+          </span>
         </header>
-
         <p className="pb-2 text-center text-sm text-muted-foreground">{dt("dd.instruction")}</p>
 
-        {/* The finished painting stays fully intact; an object-shaped socket
-            (same silhouette, clean contour outline) marks each spot until its
-            matching piece is dropped into it. */}
         <div
           ref={boardRef}
-          className="relative mx-auto w-full max-w-sm overflow-hidden rounded-3xl shadow-lg"
-          onPointerMove={moveDrag}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
+          className="relative w-full overflow-hidden rounded-3xl shadow-lg"
+          style={{ aspectRatio: `1 / ${PAINTING_RATIO}` }}
+          onPointerMove={moveTo}
+          onPointerUp={drop}
+          onPointerCancel={drop}
         >
-          <img
-            src={story.image}
-            alt=""
-            draggable={false}
-            className="block h-auto w-full select-none"
-          />
-          {story.items.map((item) => {
-            const isPlaced = placed.has(item.id);
+          <img src={story.image} alt="" draggable={false} className="absolute inset-0 h-full w-full select-none" />
+          {pieces.map((p, i) => {
+            const isPlaced = placed.has(i);
             return (
-              <div
-                key={item.id}
-                className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-                style={{ left: `${item.x}%`, top: `${item.y}%`, width: `${item.w}%` }}
-              >
-                {isPlaced ? (
-                  // The identical crop, snapped seamlessly back into the painting.
-                  <img
-                    src={item.art}
-                    alt={dt(item.labelKey)}
-                    draggable={false}
-                    className="h-auto w-full animate-scale-in"
-                  />
-                ) : (
-                  // Object-shaped socket: exact silhouette with a clean contour
-                  // outline and a softly recessed interior, so the empty spot
-                  // reads like a wooden-puzzle socket while the painting stays
-                  // visible through it.
-                  <img
-                    src={item.socket}
-                    alt=""
-                    aria-hidden
-                    draggable={false}
-                    className="h-auto w-full"
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Tray — pieces waiting to be placed, scattered with a natural tilt */}
-        <div className="mt-auto flex flex-wrap items-end justify-center gap-x-4 gap-y-2 px-2 pt-6">
-          {remaining.map((id, idx) => {
-            const item = story.items.find((it) => it.id === id)!;
-            const isDragging = drag?.id === id;
-            const isWrong = wrongId === id;
-            // Stable, gentle tilt so pieces feel hand-placed, not lined up.
-            const rot = ((id.charCodeAt(0) + idx * 5) % 9) - 4;
-            return (
-              <button
-                key={id}
-                onPointerDown={(e) => beginDrag(id, e)}
-                onPointerMove={moveDrag}
-                onPointerUp={endDrag}
-                onPointerCancel={endDrag}
-                onDragStart={(e) => e.preventDefault()}
-                className={`group flex w-[22vw] max-w-24 touch-none select-none flex-col items-center gap-1 transition active:scale-95 ${
-                  isDragging ? "opacity-25" : ""
+              <span
+                key={i}
+                className={`pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-500 ${
+                  isPlaced
+                    ? justPlaced === i
+                      ? "ring-4 ring-[oklch(0.84_0.115_78)]"
+                      : "ring-2 ring-white/70"
+                    : "border-[3px] border-dashed border-white bg-white/45 shadow-[inset_0_2px_10px_oklch(0.3_0.04_60/0.35)] backdrop-blur-[3px]"
                 }`}
-                style={{ touchAction: "none" }}
-              >
-                <span
-                  className="grid aspect-square w-full place-items-center transition-transform duration-200 group-hover:-translate-y-1"
-                  style={{ transform: `rotate(${rot}deg)` }}
-                >
-                  <img
-                    src={item.art}
-                    alt={dt(item.labelKey)}
-                    draggable={false}
-                    className={`h-auto max-h-full w-full object-contain drop-shadow-[0_6px_9px_oklch(0.4_0.03_60/0.25)] transition ${
-                      isWrong ? "animate-pulse" : "group-hover:drop-shadow-[0_12px_16px_oklch(0.4_0.03_60/0.32)]"
-                    }`}
-                  />
-                </span>
-                <span className="line-clamp-1 text-[11px] font-semibold text-foreground/70">
-                  {dt(item.labelKey)}
-                </span>
-              </button>
+                style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${2 * p.r}%`, aspectRatio: "1" }}
+              />
             );
           })}
         </div>
-      </div>
 
-      {/* Floating dragged piece — lifted above the painting, kept close to its
-          natural size so it feels controllable (only a hair larger). */}
-      {drag &&
-        (() => {
-          const item = story.items.find((it) => it.id === drag.id);
-          if (!item) return null;
-          // Match the floating piece to the on-screen size of its target slot
-          // so it reads as the very same object being carried into place.
-          const boardW = boardRef.current?.getBoundingClientRect().width ?? 320;
-          const px = (item.w / 100) * boardW;
-          return (
-            <div
-              className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2"
-              style={{ left: drag.x, top: drag.y, width: px }}
-            >
-              <img
-                src={item.art}
-                alt=""
-                aria-hidden
-                draggable={false}
-                className="h-auto w-full scale-[1.04] drop-shadow-[0_16px_22px_oklch(0.35_0.04_60/0.4)]"
+        {/* Tray: the pieces waiting to go back */}
+        <div className="mt-auto flex flex-wrap items-center justify-center gap-4 px-2 pt-6 pb-2">
+          {tray
+            .filter((i) => !placed.has(i))
+            .map((i, k) => (
+              <button
+                key={i}
+                aria-label={dt("dd.piece", { n: i + 1 })}
+                onPointerDown={(e) => begin(i, e)}
+                onPointerMove={moveTo}
+                onPointerUp={drop}
+                onPointerCancel={drop}
+                onDragStart={(e) => e.preventDefault()}
+                className={`h-20 w-20 shrink-0 touch-none select-none rounded-full border-4 border-white shadow-[0_8px_16px_oklch(0.35_0.04_60/0.3)] transition ${
+                  drag?.i === i ? "opacity-25" : ""
+                } ${wrong === i ? "piece-shake" : ""}`}
+                style={{
+                  ...pieceBackground(story.image, pieces[i]),
+                  transform: `rotate(${((i * 7 + k * 5) % 13) - 6}deg)`,
+                  touchAction: "none",
+                }}
               />
-            </div>
-          );
-        })()}
-
-      {done && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-          <div className="paper-card w-full max-w-sm p-6 text-center">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[var(--color-gold)]/25 text-3xl">
-              🎉
-            </div>
-            <h2 className="mt-3 font-display text-2xl text-foreground">{dt("dd.complete")}</h2>
-            <p className="mt-2 text-base text-muted-foreground">{dt(`dd.msg.${story.slug}`)}</p>
-            <button
-              onClick={() => {
-                setPlaced(new Set());
-                setDone(false);
-              }}
-              className="mt-5 w-full rounded-2xl bg-card px-5 py-3 text-base font-semibold text-foreground/80 shadow-sm transition active:scale-95"
-            >
-              {dt("dd.replay")}
-            </button>
-            <button
-              onClick={onExit}
-              className="mt-2 w-full rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-base font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
-            >
-              {dt("dd.backStories")}
-            </button>
-          </div>
+            ))}
         </div>
-      )}
-    </div>
-  );
-}
-
-function LockModal({
-  t,
-  onClose,
-  onUnlock,
-}: {
-  t: (k: string) => string;
-  onClose: () => void;
-  onUnlock: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6" onClick={onClose}>
-      <div className="paper-card w-full max-w-sm p-6 text-center" onClick={(e) => e.stopPropagation()}>
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--color-gold)]/30 text-2xl">✨</div>
-        <h2 className="mt-3 font-display text-2xl text-foreground">{t("lock.title")}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">{t("lock.body")}</p>
-        <button
-          onClick={onUnlock}
-          className="mt-5 w-full rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.78_0.13_55)] px-5 py-3 text-base font-semibold text-[oklch(0.25_0.05_50)] shadow-md transition active:scale-95"
-        >
-          {t("lock.cta")}
-        </button>
-        <button
-          onClick={onClose}
-          className="mt-2 w-full rounded-2xl bg-card px-5 py-2.5 text-sm font-semibold text-foreground/70 transition active:scale-95"
-        >
-          {t("lock.later")}
-        </button>
       </div>
+
+      {/* The piece being dragged, at the size of its spot on the painting */}
+      {drag && (
+        <span
+          aria-hidden
+          className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white shadow-[0_16px_24px_oklch(0.35_0.04_60/0.4)]"
+          style={{
+            ...pieceBackground(story.image, pieces[drag.i]),
+            left: drag.x,
+            top: drag.y,
+            width: Math.max(56, (2 * pieces[drag.i].r * boardWidth) / 100),
+            aspectRatio: "1",
+          }}
+        />
+      )}
+
+      {finished && (
+        <ResultCard
+          top="🎉"
+          title={dt("dd.complete")}
+          detail={<span className="italic">{localizeVerse(story.verse, lang)}</span>}
+          replayLabel={dt("dd.replay")}
+          onReplay={replay}
+          backLabel={dt("dd.backStories")}
+          onBack={onExit}
+        />
+      )}
     </div>
   );
 }
