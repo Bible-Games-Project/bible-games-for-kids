@@ -1,8 +1,11 @@
 // Drag & Drop: round pieces are cut from a story painting and the child
 // drags each one back to its spot. The painting stays visible under a frosted
-// socket, so the picture itself is the clue. Any story from stories.ts can
-// join by listing where its pieces are.
-import { findStory, type Story } from "./stories";
+// socket, so the picture itself is the clue. Every story with pieces in
+// dragdrop-pieces.ts (made by scripts/make-dragdrop.py) is playable on five
+// levels: 3, 5, 7, 9 or 11 pieces, smaller as the count grows.
+import type { DifficultyId } from "./puzzles";
+import { STORIES, type Story } from "./stories";
+import { DD_PIECES } from "./dragdrop-pieces";
 
 export interface DragPiece {
   // Centre of the piece: x in % of the painting's width, y in % of its height.
@@ -17,33 +20,25 @@ export interface DragStory {
   pieces: DragPiece[];
 }
 
-const DEFS: { slug: string; pieces: DragPiece[] }[] = [
-  {
-    slug: "david-goliath",
-    pieces: [
-      { x: 37, y: 34, r: 8 }, // David's face
-      { x: 81, y: 22, r: 8 }, // Goliath's helmet
-      { x: 67, y: 12, r: 6.5 }, // spear tip
-      { x: 91, y: 38, r: 8 }, // shield
-      { x: 7, y: 57, r: 6.5 }, // sling and stone
-    ],
-  },
-  {
-    slug: "rainbow-promise",
-    pieces: [
-      { x: 14, y: 40, r: 9 }, // giraffes
-      { x: 33, y: 53, r: 8 }, // elephant
-      { x: 42, y: 65, r: 7 }, // zebras
-      { x: 78, y: 47, r: 7.5 }, // Noah
-      { x: 52, y: 14, r: 8 }, // rainbow
-    ],
-  },
-];
+const LEVEL_INDEX: Record<DifficultyId, number> = {
+  easy: 0,
+  "easy-medium": 1,
+  medium: 2,
+  "medium-hard": 3,
+  hard: 4,
+};
 
-export const DRAG_STORIES: DragStory[] = DEFS.flatMap((d) => {
-  const story = findStory(d.slug);
-  return story ? [{ story, pieces: d.pieces }] : [];
-});
+// Must match LEVELS in scripts/make-dragdrop.py.
+export const PIECE_RADIUS = [11, 10, 9, 8, 7];
+
+export const DRAG_STORIES: Story[] = STORIES.filter((s) => DD_PIECES[s.slug]);
+
+export const piecesFor = (story: Story, level: DifficultyId): DragPiece[] => {
+  const i = LEVEL_INDEX[level];
+  return (DD_PIECES[story.slug]?.[i] ?? []).map(([x, y]) => ({ x, y, r: PIECE_RADIUS[i] }));
+};
+
+export const pieceCountFor = (level: DifficultyId) => [3, 5, 7, 9, 11][LEVEL_INDEX[level]];
 
 // The painting's height as a share of its width (896 x 1152).
 export const PAINTING_RATIO = 1152 / 896;
@@ -60,21 +55,25 @@ export function pieceBackground(image: string, p: DragPiece) {
   };
 }
 
-const KEY = "dd-progress-v2";
+const KEY = "dd-progress-v3";
 
-export const loadDoneStories = (): string[] => {
+// Finished stories per level.
+export type DoneStories = Record<string, string[]>;
+
+export const loadDoneStories = (): DoneStories => {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
+    return raw ? (JSON.parse(raw) as DoneStories) : {};
   } catch {
-    return [];
+    return {};
   }
 };
 
-export const markStoryDone = (slug: string): string[] => {
+export const markStoryDone = (level: DifficultyId, slug: string): DoneStories => {
   const done = loadDoneStories();
-  if (!done.includes(slug)) {
-    done.push(slug);
+  const list = done[level] ?? [];
+  if (!list.includes(slug)) {
+    done[level] = [...list, slug];
     try {
       localStorage.setItem(KEY, JSON.stringify(done));
     } catch {

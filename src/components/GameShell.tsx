@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { useSettings } from "@/lib/i18n";
 import type { DifficultyId } from "@/lib/puzzles";
+import type { Story } from "@/lib/stories";
+import { localizeSceneTitle } from "@/lib/scenes-i18n";
 
 export const LEVEL_IDS: DifficultyId[] = ["easy", "easy-medium", "medium", "medium-hard", "hard"];
 
@@ -26,6 +28,8 @@ export function MenuScreen({
   background,
   onBack,
   backLabel,
+  blur = false,
+  position = "center 35%",
   children,
 }: {
   title: string;
@@ -33,18 +37,22 @@ export function MenuScreen({
   background: string;
   onBack: () => void;
   backLabel: string;
+  blur?: boolean;
+  position?: string;
   children: ReactNode;
 }) {
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
-      <BedtimeBackdrop image={background} position="center 35%" fadeEnd={30} />
+      <BedtimeBackdrop image={background} position={position} fadeEnd={30} blur={blur} />
       <div className="relative z-10 min-h-[100dvh] w-full">
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
           <BackButton onClick={onBack} label={backLabel} />
           <h1 className="font-display text-2xl sm:text-3xl">{title}</h1>
         </header>
         {subtitle && (
-          <p className="mx-auto max-w-3xl px-6 pt-1 text-sm italic text-muted-foreground">{subtitle}</p>
+          <p className="mx-auto max-w-3xl px-6 pt-1 text-sm italic text-muted-foreground">
+            {subtitle}
+          </p>
         )}
         <main className="mx-auto max-w-3xl px-4 pb-12 pt-4">{children}</main>
       </div>
@@ -97,6 +105,70 @@ export function LevelList({
         </button>
       ))}
     </div>
+  );
+}
+
+// Five difficulty tabs over a grid of story paintings: pick a level, then a
+// story. `badge` shows progress for a story on the selected level.
+export function StoryPicker({
+  level,
+  onLevel,
+  describe,
+  stories,
+  badge,
+  onPick,
+}: {
+  level: DifficultyId;
+  onLevel: (id: DifficultyId) => void;
+  describe: (id: DifficultyId) => string;
+  stories: Story[];
+  badge: (story: Story) => ReactNode;
+  onPick: (story: Story) => void;
+}) {
+  const { t, lang } = useSettings();
+  return (
+    <>
+      <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+        {LEVEL_IDS.map((id) => {
+          const active = id === level;
+          return (
+            <button
+              key={id}
+              onClick={() => onLevel(id)}
+              aria-pressed={active}
+              className={`min-w-0 truncate rounded-xl px-1 py-2 text-[11px] font-semibold shadow-sm transition active:scale-95 sm:text-sm ${
+                active
+                  ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
+                  : "bg-card text-foreground/80"
+              }`}
+            >
+              {t(`diff.${id}`)}
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-center text-xs italic text-muted-foreground">{describe(level)}</p>
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {stories.map((s) => (
+          <button
+            key={s.slug}
+            onClick={() => {
+              window.scrollTo(0, 0);
+              onPick(s);
+            }}
+            className="glass-card flex flex-col overflow-hidden p-2 text-left transition active:scale-[0.98]"
+          >
+            <span className="relative aspect-[7/9] w-full overflow-hidden rounded-xl">
+              <img src={s.image} alt="" loading="lazy" className="h-full w-full object-cover" />
+              <span className="absolute right-1.5 top-1.5">{badge(s)}</span>
+            </span>
+            <span className="line-clamp-2 px-1 pt-1.5 text-center text-xs font-semibold leading-tight">
+              {localizeSceneTitle(s.slug, lang)}
+            </span>
+          </button>
+        ))}
+      </div>
+    </>
   );
 }
 

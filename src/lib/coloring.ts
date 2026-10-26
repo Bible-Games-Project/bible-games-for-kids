@@ -32,17 +32,11 @@ export const COLORING_PAGES: ColoringPage[] = [...STORIES]
     return lines && regions ? [{ story, lines, regions }] : [];
   });
 
-export const PALETTE = [
-  "#e53935", "#f06292", "#ffb3c7", "#fb8c00", "#fdd835",
-  "#43a047", "#9ccc65", "#00897b", "#1e88e5", "#81d4fa", "#3949ab",
-  "#8e24aa", "#ce93d8", "#8d6e63", "#d7a86e", "#f5c9a6", "#ffffff",
-  "#9e9e9e", "#212121",
-];
-
 // Colors chosen per area, saved per story so a picture can be finished later.
 export type Fills = Record<number, string>;
 
-const key = (slug: string) => `coloring-v1:${slug}`;
+// v2: paint by numbers (v1 was free coloring, whose fills no longer match).
+const key = (slug: string) => `coloring-v2:${slug}`;
 
 export function loadFills(slug: string): Fills {
   try {

@@ -5,13 +5,15 @@ import { gameText } from "@/lib/games-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import type { DifficultyId } from "@/lib/puzzles";
 import { PAINTING_RATIO } from "@/lib/dragdrop";
-import { SEEK_SCENES, itemsForLevel, seekStars, type SeekScene } from "@/lib/seek";
+import { SEEK_STORIES, itemsFor, seekCount, seekStars } from "@/lib/seek";
+import { wordEmoji, wordName } from "@/lib/seek-words";
+import type { Story } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
 import {
   BackButton,
-  LevelList,
   MenuScreen,
   ResultCard,
+  StoryPicker,
   loadBest,
   saveBest,
   starText,
@@ -19,26 +21,26 @@ import {
 
 import homeBg from "@/assets/home-bedtime.webp";
 
-const BEST_KEY = "seek-best-v1";
+// Best stars per "level:story".
+const BEST_KEY = "seek-best-v2";
 
 export function SeekGame({ onBack }: { onBack: () => void }) {
   const { lang, t } = useSettings();
-  const [level, setLevel] = useState<DifficultyId | null>(null);
+  const [level, setLevel] = useState<DifficultyId>("easy");
+  const [story, setStory] = useState<Story | null>(null);
   const [best, setBest] = useState(() => loadBest(BEST_KEY));
   const st = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
-  // One scene for now; the levels ask for more things in the same picture.
-  const scene = SEEK_SCENES[0];
 
-  useBackButton(level !== null, () => setLevel(null));
+  useBackButton(story !== null, () => setStory(null));
 
-  if (level && scene) {
+  if (story) {
     return (
       <SeekBoard
-        key={level}
-        scene={scene}
+        key={`${level}:${story.slug}`}
+        story={story}
         level={level}
-        onExit={() => setLevel(null)}
-        onComplete={(stars) => setBest(saveBest(BEST_KEY, level, stars))}
+        onExit={() => setStory(null)}
+        onComplete={(stars) => setBest(saveBest(BEST_KEY, `${level}:${story.slug}`, stars))}
       />
     );
   }
@@ -46,37 +48,37 @@ export function SeekGame({ onBack }: { onBack: () => void }) {
   return (
     <MenuScreen
       title={t("game.seek")}
-      subtitle={scene ? localizeSceneTitle(scene.story.slug, lang) : undefined}
+      subtitle={st("seek.instruction")}
       background={homeBg}
       onBack={onBack}
       backLabel={t("select.back")}
     >
-      {scene && (
-        <LevelList
-          describe={(id) => st("seek.itemsCount", { n: itemsForLevel(scene, id).length })}
-          picture={(_id, i) => (
-            <>
-              <img src={scene.story.image} alt="" className="h-full w-full object-cover" />
-              <span className="absolute bottom-1 right-1 grid h-8 w-8 place-items-center rounded-full bg-card text-base shadow">
-                {scene.items.find((it) => it.level === i + 1)?.emoji ?? "🔍"}
-              </span>
-            </>
-          )}
-          best={(id) => best[id] ?? 0}
-          onPick={setLevel}
-        />
-      )}
+      <StoryPicker
+        level={level}
+        onLevel={setLevel}
+        describe={(id) => st("seek.itemsCount", { n: seekCount(id) })}
+        stories={SEEK_STORIES}
+        badge={(s) => {
+          const stars = best[`${level}:${s.slug}`] ?? 0;
+          return stars ? (
+            <span className="rounded-full bg-card px-1.5 py-0.5 text-xs text-[var(--color-gold)] shadow">
+              {"★".repeat(stars)}
+            </span>
+          ) : null;
+        }}
+        onPick={setStory}
+      />
     </MenuScreen>
   );
 }
 
 function SeekBoard({
-  scene,
+  story,
   level,
   onExit,
   onComplete,
 }: {
-  scene: SeekScene;
+  story: Story;
   level: DifficultyId;
   onExit: () => void;
   onComplete: (stars: number) => void;
@@ -84,7 +86,7 @@ function SeekBoard({
   const { lang, t } = useSettings();
   const audio = useAudio();
   const st = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
-  const items = itemsForLevel(scene, level);
+  const items = itemsFor(story, level);
 
   const boardRef = useRef<HTMLDivElement | null>(null);
   const [found, setFound] = useState<Set<string>>(new Set());
@@ -112,10 +114,10 @@ function SeekBoard({
     let hit: string | null = null;
     let bestDist = Infinity;
     for (const it of items) {
-      if (found.has(it.id)) continue;
+      if (found.has(it.word)) continue;
       const d = Math.hypot(x - it.x, (y - it.y) * PAINTING_RATIO);
       if (d <= it.r * 1.15 && d < bestDist) {
-        hit = it.id;
+        hit = it.word;
         bestDist = d;
       }
     }
@@ -142,12 +144,12 @@ function SeekBoard({
   };
 
   const hint = () => {
-    const left = items.filter((it) => !found.has(it.id));
+    const left = items.filter((it) => !found.has(it.word));
     if (!left.length || finished) return;
     const pick = left[Math.floor(Math.random() * left.length)];
     setHints((h) => h + 1);
-    setHinted(pick.id);
-    later(() => setHinted((h) => (h === pick.id ? null : h)), 2200);
+    setHinted(pick.word);
+    later(() => setHinted((h) => (h === pick.word ? null : h)), 2200);
   };
 
   const replay = () => {
@@ -165,7 +167,7 @@ function SeekBoard({
         <header className="flex items-center gap-3 pb-2">
           <BackButton onClick={onExit} label={st("seek.levels")} />
           <h1 className="min-w-0 flex-1 truncate font-display text-xl">
-            {t("game.seek")} · {t(`diff.${level}`)}
+            {localizeSceneTitle(story.slug, lang)}
           </h1>
           <button
             onClick={hint}
@@ -182,18 +184,22 @@ function SeekBoard({
         {/* What to find */}
         <ul className="flex flex-wrap justify-center gap-2 pb-3">
           {items.map((it) => {
-            const isFound = found.has(it.id);
+            const isFound = found.has(it.word);
             return (
               <li
-                key={it.id}
+                key={it.word}
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold shadow-sm transition ${
-                  isFound ? "bg-[oklch(0.86_0.08_150)] text-[oklch(0.3_0.06_150)]" : "bg-card text-foreground"
+                  isFound
+                    ? "bg-[oklch(0.86_0.08_150)] text-[oklch(0.3_0.06_150)]"
+                    : "bg-card text-foreground"
                 }`}
               >
                 <span aria-hidden className="text-lg leading-none">
-                  {it.emoji}
+                  {wordEmoji(it.word)}
                 </span>
-                <span className={isFound ? "line-through decoration-2" : ""}>{st(`seek.item.${it.id}`)}</span>
+                <span className={isFound ? "line-through decoration-2" : ""}>
+                  {wordName(it.word, lang)}
+                </span>
                 {isFound && <span aria-hidden>✓</span>}
               </li>
             );
@@ -206,19 +212,29 @@ function SeekBoard({
           className="relative w-full cursor-pointer touch-manipulation overflow-hidden rounded-3xl shadow-lg"
           style={{ aspectRatio: `1 / ${PAINTING_RATIO}` }}
         >
-          <img src={scene.story.image} alt="" draggable={false} className="absolute inset-0 h-full w-full select-none" />
+          <img
+            src={story.image}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none"
+          />
           {items.map((it) => {
-            const isFound = found.has(it.id);
-            if (!isFound && hinted !== it.id) return null;
+            const isFound = found.has(it.word);
+            if (!isFound && hinted !== it.word) return null;
             return (
               <span
-                key={it.id}
+                key={it.word}
                 className={`pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 ${
                   isFound
                     ? "border-[oklch(0.84_0.115_78)] shadow-[0_0_0_3px_oklch(1_0_0/0.7)]"
                     : "animate-pulse border-white bg-white/25 shadow-[0_0_24px_8px_oklch(0.9_0.12_85/0.8)]"
                 }`}
-                style={{ left: `${it.x}%`, top: `${it.y}%`, width: `${2 * it.r * 1.1}%`, aspectRatio: "1" }}
+                style={{
+                  left: `${it.x}%`,
+                  top: `${it.y}%`,
+                  width: `${2 * it.r * 1.1}%`,
+                  aspectRatio: "1",
+                }}
               >
                 {isFound && (
                   <span className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-[oklch(0.55_0.13_150)] text-xs font-bold text-white shadow">

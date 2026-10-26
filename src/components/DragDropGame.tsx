@@ -9,16 +9,21 @@ import {
   loadDoneStories,
   markStoryDone,
   pieceBackground,
+  pieceCountFor,
+  piecesFor,
   type DragStory,
 } from "@/lib/dragdrop";
+import type { DifficultyId } from "@/lib/puzzles";
+import type { Story } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
-import { BackButton, MenuScreen, ResultCard } from "@/components/GameShell";
+import { BackButton, MenuScreen, ResultCard, StoryPicker } from "@/components/GameShell";
 
 import homeBg from "@/assets/home-bedtime.webp";
 
 export function DragDropGame({ onBack }: { onBack: () => void }) {
   const { lang, t } = useSettings();
-  const [story, setStory] = useState<DragStory | null>(null);
+  const [level, setLevel] = useState<DifficultyId>("easy");
+  const [story, setStory] = useState<Story | null>(null);
   const [done, setDone] = useState(() => loadDoneStories());
   const dt = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
 
@@ -27,58 +32,36 @@ export function DragDropGame({ onBack }: { onBack: () => void }) {
   if (story) {
     return (
       <DragDropBoard
-        key={story.story.slug}
-        item={story}
+        key={`${level}:${story.slug}`}
+        item={{ story, pieces: piecesFor(story, level) }}
         onExit={() => setStory(null)}
-        onComplete={() => setDone(markStoryDone(story.story.slug))}
+        onComplete={() => setDone(markStoryDone(level, story.slug))}
       />
     );
   }
 
   return (
     <MenuScreen
-      title={dt("dd.chooseStory")}
+      title={t("game.dragdrop")}
       subtitle={dt("dd.instruction")}
       background={homeBg}
       onBack={onBack}
       backLabel={t("select.back")}
     >
-      <div className="grid gap-4">
-        {DRAG_STORIES.map((s) => (
-          <button
-            key={s.story.slug}
-            onClick={() => {
-              window.scrollTo(0, 0);
-              setStory(s);
-            }}
-            className="glass-card grid w-full grid-cols-[96px_minmax(0,1fr)] items-center gap-4 overflow-hidden p-3 text-left transition active:scale-[0.99] sm:grid-cols-[120px_minmax(0,1fr)]"
-          >
-            <span className="relative aspect-[7/9] overflow-hidden rounded-xl" aria-hidden>
-              <img src={s.story.image} alt="" className="h-full w-full object-cover" />
-              {/* Two of the round pieces, lifted off the painting */}
-              {s.pieces.slice(0, 2).map((p, i) => (
-                <span
-                  key={i}
-                  className="absolute h-9 w-9 rounded-full border-2 border-white shadow-md"
-                  style={{ ...pieceBackground(s.story.image, p), right: 4 + i * 26, bottom: 6 + i * 14 }}
-                />
-              ))}
+      <StoryPicker
+        level={level}
+        onLevel={setLevel}
+        describe={(id) => dt("dd.piecesCount", { n: pieceCountFor(id) })}
+        stories={DRAG_STORIES}
+        badge={(s) =>
+          done[level]?.includes(s.slug) ? (
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-card text-base text-[var(--color-gold)] shadow">
+              ★
             </span>
-            <span className="min-w-0">
-              <span className="block truncate font-display text-lg leading-snug sm:text-xl">
-                {localizeSceneTitle(s.story.slug, lang)}
-              </span>
-              <span className="mt-0.5 block text-xs italic text-muted-foreground">
-                {localizeVerse(s.story.verse, lang)}
-              </span>
-              <span className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                {dt("dd.piecesCount", { n: s.pieces.length })}
-                {done.includes(s.story.slug) && <span className="text-base text-[var(--color-gold)]">★</span>}
-              </span>
-            </span>
-          </button>
-        ))}
-      </div>
+          ) : null
+        }
+        onPick={setStory}
+      />
     </MenuScreen>
   );
 }
@@ -170,13 +153,18 @@ function DragDropBoard({
   };
 
   const boardWidth = boardRef.current?.getBoundingClientRect().width ?? 320;
+  // Smaller tray pieces when there are many, so the tray stays compact.
+  const trayPiece =
+    pieces.length <= 5 ? "h-20 w-20" : pieces.length <= 7 ? "h-16 w-16" : "h-14 w-14";
 
   return (
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 py-4">
         <header className="flex items-center gap-3 pb-2">
           <BackButton onClick={onExit} label={dt("dd.backStories")} />
-          <h1 className="min-w-0 flex-1 truncate font-display text-xl">{localizeSceneTitle(story.slug, lang)}</h1>
+          <h1 className="min-w-0 flex-1 truncate font-display text-xl">
+            {localizeSceneTitle(story.slug, lang)}
+          </h1>
           <span className="shrink-0 text-sm font-semibold tabular-nums text-muted-foreground">
             {placed.size}/{pieces.length}
           </span>
@@ -191,7 +179,12 @@ function DragDropBoard({
           onPointerUp={drop}
           onPointerCancel={drop}
         >
-          <img src={story.image} alt="" draggable={false} className="absolute inset-0 h-full w-full select-none" />
+          <img
+            src={story.image}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none"
+          />
           {pieces.map((p, i) => {
             const isPlaced = placed.has(i);
             return (
@@ -211,7 +204,7 @@ function DragDropBoard({
         </div>
 
         {/* Tray: the pieces waiting to go back */}
-        <div className="mt-auto flex flex-wrap items-center justify-center gap-4 px-2 pt-6 pb-2">
+        <div className="mt-auto flex flex-wrap items-center justify-center gap-3 px-2 pt-5 pb-2">
           {tray
             .filter((i) => !placed.has(i))
             .map((i, k) => (
@@ -223,7 +216,7 @@ function DragDropBoard({
                 onPointerUp={drop}
                 onPointerCancel={drop}
                 onDragStart={(e) => e.preventDefault()}
-                className={`h-20 w-20 shrink-0 touch-none select-none rounded-full border-4 border-white shadow-[0_8px_16px_oklch(0.35_0.04_60/0.3)] transition ${
+                className={`${trayPiece} shrink-0 touch-none select-none rounded-full border-4 border-white shadow-[0_8px_16px_oklch(0.35_0.04_60/0.3)] transition ${
                   drag?.i === i ? "opacity-25" : ""
                 } ${wrong === i ? "piece-shake" : ""}`}
                 style={{

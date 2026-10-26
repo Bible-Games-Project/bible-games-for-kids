@@ -5,12 +5,15 @@ export function BedtimeBackdrop({
   image,
   position = "center",
   fadeEnd = 40,
+  blur = false,
 }: {
   image: string;
   position?: string;
   // Percentage of the screen height where the top fade disappears; 0 turns
   // the fade off.
   fadeEnd?: number;
+  // Soft-focus the painting, for screens that draw their own artwork on top.
+  blur?: boolean;
 }) {
   const fade =
     fadeEnd > 0
@@ -20,7 +23,7 @@ export function BedtimeBackdrop({
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-0 bg-[oklch(0.95_0.03_70)]"
+      className={`pointer-events-none fixed inset-0 z-0 bg-[oklch(0.95_0.03_70)] ${blur ? "scale-110 blur-md" : ""}`}
       style={{
         backgroundImage: `${fade}url(${image})`,
         backgroundSize: "cover",
