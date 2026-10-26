@@ -15,6 +15,14 @@ const en: Dict = {
   "mem.hidden": "Hidden card",
   "mem.scrollDown": "Show more cards",
   "mem.scrollUp": "Back to top",
+  "mem.howManyPlayers": "How many players?",
+  "mem.playersOne": "1 player",
+  "mem.playersMany": "{n} players",
+  "mem.player": "Player {n}",
+  "mem.turn": "{name}'s turn",
+  "mem.wins": "{name} wins!",
+  "mem.tie": "It's a tie!",
+  "mem.pairOne": "1 pair",
 };
 
 const es: Dict = {
@@ -29,6 +37,14 @@ const es: Dict = {
   "mem.hidden": "Carta oculta",
   "mem.scrollDown": "Ver más cartas",
   "mem.scrollUp": "Volver arriba",
+  "mem.howManyPlayers": "¿Cuántos jugadores?",
+  "mem.playersOne": "1 jugador",
+  "mem.playersMany": "{n} jugadores",
+  "mem.player": "Jugador {n}",
+  "mem.turn": "Turno de {name}",
+  "mem.wins": "¡Gana {name}!",
+  "mem.tie": "¡Empate!",
+  "mem.pairOne": "1 pareja",
 };
 
 const de: Dict = {
@@ -43,6 +59,14 @@ const de: Dict = {
   "mem.hidden": "Verdeckte Karte",
   "mem.scrollDown": "Mehr Karten zeigen",
   "mem.scrollUp": "Nach oben",
+  "mem.howManyPlayers": "Wie viele Spieler?",
+  "mem.playersOne": "1 Spieler",
+  "mem.playersMany": "{n} Spieler",
+  "mem.player": "Spieler {n}",
+  "mem.turn": "{name} ist dran",
+  "mem.wins": "{name} gewinnt!",
+  "mem.tie": "Unentschieden!",
+  "mem.pairOne": "1 Paar",
 };
 
 const fr: Dict = {
@@ -57,6 +81,14 @@ const fr: Dict = {
   "mem.hidden": "Carte cachée",
   "mem.scrollDown": "Voir plus de cartes",
   "mem.scrollUp": "Revenir en haut",
+  "mem.howManyPlayers": "Combien de joueurs ?",
+  "mem.playersOne": "1 joueur",
+  "mem.playersMany": "{n} joueurs",
+  "mem.player": "Joueur {n}",
+  "mem.turn": "Au tour de {name}",
+  "mem.wins": "{name} gagne !",
+  "mem.tie": "Égalité !",
+  "mem.pairOne": "1 paire",
 };
 
 const it: Dict = {
@@ -71,6 +103,14 @@ const it: Dict = {
   "mem.hidden": "Carta coperta",
   "mem.scrollDown": "Mostra altre carte",
   "mem.scrollUp": "Torna su",
+  "mem.howManyPlayers": "Quanti giocatori?",
+  "mem.playersOne": "1 giocatore",
+  "mem.playersMany": "{n} giocatori",
+  "mem.player": "Giocatore {n}",
+  "mem.turn": "Tocca a {name}",
+  "mem.wins": "Vince {name}!",
+  "mem.tie": "Pareggio!",
+  "mem.pairOne": "1 coppia",
 };
 
 const pt: Dict = {
@@ -85,6 +125,14 @@ const pt: Dict = {
   "mem.hidden": "Carta virada",
   "mem.scrollDown": "Ver mais cartas",
   "mem.scrollUp": "Voltar ao topo",
+  "mem.howManyPlayers": "Quantos jogadores?",
+  "mem.playersOne": "1 jogador",
+  "mem.playersMany": "{n} jogadores",
+  "mem.player": "Jogador {n}",
+  "mem.turn": "Vez de {name}",
+  "mem.wins": "{name} venceu!",
+  "mem.tie": "Empate!",
+  "mem.pairOne": "1 par",
 };
 
 const pl: Dict = {
@@ -99,6 +147,14 @@ const pl: Dict = {
   "mem.hidden": "Zakryta karta",
   "mem.scrollDown": "Pokaż więcej kart",
   "mem.scrollUp": "Wróć na górę",
+  "mem.howManyPlayers": "Ilu graczy?",
+  "mem.playersOne": "1 gracz",
+  "mem.playersMany": "Gracze: {n}",
+  "mem.player": "Gracz {n}",
+  "mem.turn": "Kolej: {name}",
+  "mem.wins": "Wygrywa {name}!",
+  "mem.tie": "Remis!",
+  "mem.pairOne": "Pary: 1",
 };
 
 const ru: Dict = {
@@ -113,6 +169,14 @@ const ru: Dict = {
   "mem.hidden": "Закрытая карточка",
   "mem.scrollDown": "Показать ещё карточки",
   "mem.scrollUp": "Наверх",
+  "mem.howManyPlayers": "Сколько игроков?",
+  "mem.playersOne": "1 игрок",
+  "mem.playersMany": "Игроков: {n}",
+  "mem.player": "Игрок {n}",
+  "mem.turn": "Ходит {name}",
+  "mem.wins": "Победил {name}!",
+  "mem.tie": "Ничья!",
+  "mem.pairOne": "Пары: 1",
 };
 
 const ja: Dict = {
@@ -127,6 +191,14 @@ const ja: Dict = {
   "mem.hidden": "ふせたカード",
   "mem.scrollDown": "もっとカードを見る",
   "mem.scrollUp": "上にもどる",
+  "mem.howManyPlayers": "何人であそぶ？",
+  "mem.playersOne": "1人",
+  "mem.playersMany": "{n}人",
+  "mem.player": "プレイヤー{n}",
+  "mem.turn": "{name}のばん",
+  "mem.wins": "{name}のかち！",
+  "mem.tie": "ひきわけ！",
+  "mem.pairOne": "1ペア",
 };
 
 const ko: Dict = {
@@ -141,6 +213,14 @@ const ko: Dict = {
   "mem.hidden": "뒤집힌 카드",
   "mem.scrollDown": "카드 더 보기",
   "mem.scrollUp": "위로 가기",
+  "mem.howManyPlayers": "몇 명이 할까요?",
+  "mem.playersOne": "1명",
+  "mem.playersMany": "{n}명",
+  "mem.player": "플레이어 {n}",
+  "mem.turn": "{name} 차례",
+  "mem.wins": "{name} 승리!",
+  "mem.tie": "무승부!",
+  "mem.pairOne": "1쌍",
 };
 
 const ar: Dict = {
@@ -155,6 +235,14 @@ const ar: Dict = {
   "mem.hidden": "بطاقة مقلوبة",
   "mem.scrollDown": "عرض المزيد من البطاقات",
   "mem.scrollUp": "العودة إلى الأعلى",
+  "mem.howManyPlayers": "كم عدد اللاعبين؟",
+  "mem.playersOne": "لاعب واحد",
+  "mem.playersMany": "{n} لاعبين",
+  "mem.player": "اللاعب {n}",
+  "mem.turn": "دور {name}",
+  "mem.wins": "فاز {name}!",
+  "mem.tie": "تعادل!",
+  "mem.pairOne": "زوج واحد",
 };
 
 const tr: Dict = {
@@ -169,6 +257,14 @@ const tr: Dict = {
   "mem.hidden": "Kapalı kart",
   "mem.scrollDown": "Daha fazla kart göster",
   "mem.scrollUp": "Yukarı dön",
+  "mem.howManyPlayers": "Kaç oyuncu?",
+  "mem.playersOne": "1 oyuncu",
+  "mem.playersMany": "{n} oyuncu",
+  "mem.player": "Oyuncu {n}",
+  "mem.turn": "Sıra: {name}",
+  "mem.wins": "{name} kazandı!",
+  "mem.tie": "Berabere!",
+  "mem.pairOne": "1 çift",
 };
 
 export const MEM_STRINGS: Record<Lang, Dict> = {

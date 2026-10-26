@@ -18,6 +18,25 @@ import memoryBg from "@/assets/memory-bedtime.webp";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { useBackButton } from "@/lib/back-button";
 
+// Up to four players share the board, each with their own color for the
+// turn marker, the scoreboard and the pairs they find.
+const PLAYER_COLORS = [
+  "oklch(0.45 0.115 258)",
+  "oklch(0.6 0.16 15)",
+  "oklch(0.62 0.13 70)",
+  "oklch(0.55 0.1 165)",
+];
+const PLAYERS_KEY = "memory-players";
+
+const loadPlayers = (): number => {
+  try {
+    const n = Number(localStorage.getItem(PLAYERS_KEY));
+    return n >= 1 && n <= 4 ? n : 1;
+  } catch {
+    return 1;
+  }
+};
+
 const formatTime = (sec: number) =>
   `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
 
@@ -57,25 +76,43 @@ function CardBack({ className = "" }: { className?: string }) {
 export function MemoryGame({ onBack }: { onBack: () => void }) {
   const { lang, t } = useSettings();
   const [level, setLevel] = useState<MemoryLevel | null>(null);
+  const [players, setPlayers] = useState<number | null>(null);
   const [progress, setProgress] = useState(() => loadMemoryProgress());
 
   const mt = (k: string) => memText(lang, k);
 
   // Open at the top even if the home screen was scrolled to reach the tile.
   useEffect(() => window.scrollTo(0, 0), []);
-  useBackButton(level !== null, () => {
+  const backToLevels = () => {
     window.scrollTo(0, 0);
+    setPlayers(null);
     setLevel(null);
-  });
+  };
+  useBackButton(level !== null, backToLevels);
 
-  if (level) {
+  if (level && players === null) {
+    return (
+      <PlayerPicker
+        level={level}
+        onBack={backToLevels}
+        onPick={(n) => {
+          try {
+            localStorage.setItem(PLAYERS_KEY, String(n));
+          } catch {
+            /* ignore */
+          }
+          setPlayers(n);
+        }}
+      />
+    );
+  }
+
+  if (level && players !== null) {
     return (
       <MemoryBoard
         level={level}
-        onExit={() => {
-          window.scrollTo(0, 0);
-          setLevel(null);
-        }}
+        players={players}
+        onExit={backToLevels}
         onComplete={(stars) => setProgress(saveMemoryResult(level.id, stars))}
       />
     );
@@ -83,9 +120,9 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
 
   // ---------- Level select ----------
   return (
-    <div className="theme-bedtime relative isolate min-h-[100dvh] w-full">
+    <div className="theme-bedtime relative min-h-[100dvh] w-full">
       <BedtimeBackdrop image={memoryBg} position="center 30%" fadeEnd={30} />
-      <div className="relative min-h-[100dvh] w-full">
+      <div className="relative z-10 min-h-[100dvh] w-full">
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
           <button
             onClick={onBack}
@@ -149,6 +186,74 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
             );
           })}
         </main>
+      </div>
+    </div>
+  );
+}
+
+function PlayerDot({ index, size = "h-7 w-7 text-xs" }: { index: number; size?: string }) {
+  return (
+    <span
+      className={`grid shrink-0 place-items-center rounded-full font-bold text-white shadow-sm ring-2 ring-white/80 ${size}`}
+      style={{ backgroundColor: PLAYER_COLORS[index] }}
+      aria-hidden
+    >
+      {index + 1}
+    </span>
+  );
+}
+
+// ---------- How many players? ----------
+function PlayerPicker({
+  level,
+  onBack,
+  onPick,
+}: {
+  level: MemoryLevel;
+  onBack: () => void;
+  onPick: (players: number) => void;
+}) {
+  const { lang, t } = useSettings();
+  const mt = (k: string) => memText(lang, k);
+  const last = loadPlayers();
+
+  return (
+    <div className="theme-bedtime relative min-h-[100dvh] w-full">
+      <BedtimeBackdrop image={memoryBg} position="center 30%" fadeEnd={30} />
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-md flex-col px-4 pt-6 pb-10">
+        <header className="flex items-center gap-3 pb-2">
+          <button
+            onClick={onBack}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
+            aria-label={mt("mem.levels")}
+          >
+            ←
+          </button>
+          <h1 className="font-display text-2xl">
+            {t("game.memory")} · {t(`diff.${level.id}`)}
+          </h1>
+        </header>
+        <h2 className="mt-6 text-center font-display text-3xl">{mt("mem.howManyPlayers")}</h2>
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((n) => (
+            <button
+              key={n}
+              onClick={() => onPick(n)}
+              className={`glass-card flex aspect-square flex-col items-center justify-center gap-3 p-4 transition active:scale-[0.97] ${
+                n === last ? "ring-4 ring-[var(--color-gold)]" : ""
+              }`}
+            >
+              <span className="flex flex-wrap justify-center gap-1.5">
+                {Array.from({ length: n }, (_, i) => (
+                  <PlayerDot key={i} index={i} size="h-10 w-10 text-base" />
+                ))}
+              </span>
+              <span className="text-lg font-semibold">
+                {n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -222,10 +327,12 @@ function ScrollArrow({
 // ---------- The matching-pairs board ----------
 function MemoryBoard({
   level,
+  players,
   onExit,
   onComplete,
 }: {
   level: MemoryLevel;
+  players: number;
   onExit: () => void;
   onComplete: (stars: number) => void;
 }) {
@@ -235,7 +342,9 @@ function MemoryBoard({
 
   const [deck, setDeck] = useState<MemoryCard[]>(() => buildDeck(level.pairs));
   const [flipped, setFlipped] = useState<number[]>([]);
-  const [matched, setMatched] = useState<Set<string>>(new Set());
+  // Pairs found so far: story slug -> index of the player who found it.
+  const [matched, setMatched] = useState<Map<string, number>>(new Map());
+  const [turn, setTurn] = useState(0);
   const [lastFound, setLastFound] = useState<string | null>(null);
   const [moves, setMoves] = useState(0);
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -271,6 +380,14 @@ function MemoryBoard({
     timeoutsRef.current.push(window.setTimeout(fn, ms));
   };
 
+  const multi = players > 1;
+  const playerName = (i: number) => mt("mem.player").replace("{n}", String(i + 1));
+  const scores = Array.from({ length: players }, (_, i) =>
+    [...matched.values()].filter((p) => p === i).length,
+  );
+  const best = Math.max(...scores);
+  const winners = scores.map((sc, i) => (sc === best ? i : -1)).filter((i) => i >= 0);
+
   const flip = (index: number) => {
     const card = deck[index];
     if (busyRef.current || done || matched.has(card.scene.slug) || flipped.includes(index)) return;
@@ -287,8 +404,9 @@ function MemoryBoard({
     setMoves(nextMoves);
 
     if (first.scene.slug === card.scene.slug) {
-      const next = new Set(matched);
-      next.add(card.scene.slug);
+      // A pair: the same player keeps the turn.
+      const next = new Map(matched);
+      next.set(card.scene.slug, turn);
       setMatched(next);
       setFlipped([]);
       setLastFound(card.scene.slug);
@@ -302,7 +420,7 @@ function MemoryBoard({
           setDone(true);
           busyRef.current = false;
           audio.playWin();
-          onComplete(earned);
+          if (!multi) onComplete(earned);
         }, 600);
       }
       return;
@@ -314,6 +432,7 @@ function MemoryBoard({
     later(() => audio.playIncorrect(), 450);
     later(() => {
       setFlipped([]);
+      setTurn((p) => (p + 1) % players);
       busyRef.current = false;
     }, 1100);
   };
@@ -324,7 +443,8 @@ function MemoryBoard({
     busyRef.current = false;
     setDeck(buildDeck(level.pairs));
     setFlipped([]);
-    setMatched(new Set());
+    setMatched(new Map());
+    setTurn(0);
     setLastFound(null);
     setMoves(0);
     setStartedAt(null);
@@ -350,25 +470,53 @@ function MemoryBoard({
             <h1 className="min-w-0 flex-1 truncate font-display text-xl">
               {t("game.memory")} · {t(`diff.${level.id}`)}
             </h1>
-            <div className="flex shrink-0 gap-3 text-right text-xs text-muted-foreground tabular-nums">
-              <span>
-                {mt("mem.moves")}
-                <span className="block text-base font-bold text-foreground">{moves}</span>
-              </span>
-              <span>
-                {mt("mem.time")}
-                <span className="block text-base font-bold text-foreground">{formatTime(elapsed)}</span>
-              </span>
-            </div>
+            {!multi && (
+              <div className="flex shrink-0 gap-3 text-right text-xs text-muted-foreground tabular-nums">
+                <span>
+                  {mt("mem.moves")}
+                  <span className="block text-base font-bold text-foreground">{moves}</span>
+                </span>
+                <span>
+                  {mt("mem.time")}
+                  <span className="block text-base font-bold text-foreground">{formatTime(elapsed)}</span>
+                </span>
+              </div>
+            )}
           </header>
 
-          <p className="min-h-[1.5rem] pb-3 text-center text-sm text-muted-foreground">
-            {lastFound ? (
+          {multi && (
+            <div className="flex flex-wrap justify-center gap-2 pb-2">
+              {scores.map((sc, i) => {
+                const active = i === turn && !done;
+                return (
+                  <span
+                    key={i}
+                    className={`flex items-center gap-1.5 rounded-full py-1 pl-1 pr-3 text-sm font-semibold shadow-sm transition ${
+                      active ? "scale-105 text-white" : "bg-card text-foreground/70"
+                    }`}
+                    style={active ? { backgroundColor: PLAYER_COLORS[i] } : undefined}
+                    aria-current={active ? "true" : undefined}
+                  >
+                    <PlayerDot index={i} />
+                    <span className="tabular-nums">{sc}</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          <p className="flex min-h-[1.5rem] flex-wrap items-center justify-center gap-x-3 pb-3 text-center text-sm text-muted-foreground">
+            {lastFound && (
               <span key={lastFound} className="inline-block animate-in fade-in font-semibold text-[oklch(0.45_0.12_70)]">
                 ✓ {localizeSceneTitle(lastFound, lang)}
               </span>
+            )}
+            {multi && !done ? (
+              <span className="font-semibold" style={{ color: PLAYER_COLORS[turn] }}>
+                {mt("mem.turn").replace("{name}", playerName(turn))}
+              </span>
             ) : (
-              mt("mem.instruction")
+              !lastFound && mt("mem.instruction")
             )}
           </p>
         </div>
@@ -381,7 +529,8 @@ function MemoryBoard({
         className={`mx-auto grid w-full max-w-lg grid-cols-3 gap-3 px-4 pb-28 pt-1 sm:gap-4 ${wide.cols} ${wide.width}`}
       >
         {deck.map((card, i) => {
-          const isMatched = matched.has(card.scene.slug);
+          const finder = matched.get(card.scene.slug);
+          const isMatched = finder !== undefined;
           const faceUp = isMatched || flipped.includes(i);
           const title = localizeSceneTitle(card.scene.slug, lang);
           return (
@@ -398,9 +547,12 @@ function MemoryBoard({
               >
                 <CardBack className="absolute inset-0 rounded-xl shadow-md [backface-visibility:hidden]" />
                 <span
-                  className={`absolute inset-0 overflow-hidden rounded-xl bg-card shadow-md [backface-visibility:hidden] [transform:rotateY(180deg)] ${
-                    isMatched ? "ring-[3px] ring-[var(--color-gold)]" : ""
-                  }`}
+                  className="absolute inset-0 overflow-hidden rounded-xl bg-card shadow-md [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                  style={
+                    isMatched
+                      ? { boxShadow: `0 0 0 3px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"}` }
+                      : undefined
+                  }
                 >
                   <img
                     src={card.scene.image}
@@ -426,14 +578,46 @@ function MemoryBoard({
       {done && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
           <div className="paper-card w-full max-w-sm p-6 text-center">
-            <div className="text-5xl">
-              {"⭐".repeat(stars)}
-              {"☆".repeat(3 - stars)}
-            </div>
-            <h2 className="mt-3 font-display text-2xl text-foreground">{mt("mem.complete")}</h2>
-            <p className="mt-2 text-base text-muted-foreground tabular-nums">
-              {mt("mem.moves")}: {moves} · {mt("mem.time")}: {formatTime(elapsed)}
-            </p>
+            {multi ? (
+              <>
+                <div className="text-5xl" aria-hidden>
+                  🏆
+                </div>
+                <h2 className="mt-3 font-display text-2xl text-foreground">
+                  {winners.length === 1
+                    ? mt("mem.wins").replace("{name}", playerName(winners[0]))
+                    : mt("mem.tie")}
+                </h2>
+                <ol className="mt-4 space-y-2 text-left">
+                  {scores
+                    .map((sc, i) => ({ sc, i }))
+                    .sort((a, b) => b.sc - a.sc)
+                    .map(({ sc, i }) => (
+                      <li key={i} className="flex items-center gap-3 rounded-xl bg-secondary/60 px-3 py-2">
+                        <PlayerDot index={i} />
+                        <span className="flex-1 font-semibold">{playerName(i)}</span>
+                        <span className="tabular-nums text-muted-foreground">
+                          {sc === 1 ? mt("mem.pairOne") : mt("mem.pairsCount").replace("{n}", String(sc))}
+                        </span>
+                        <span className="w-5 text-center" aria-hidden>
+                          {winners.includes(i) ? "👑" : ""}
+                        </span>
+                      </li>
+                    ))}
+                </ol>
+              </>
+            ) : (
+              <>
+                <div className="text-5xl">
+                  {"⭐".repeat(stars)}
+                  {"☆".repeat(3 - stars)}
+                </div>
+                <h2 className="mt-3 font-display text-2xl text-foreground">{mt("mem.complete")}</h2>
+                <p className="mt-2 text-base text-muted-foreground tabular-nums">
+                  {mt("mem.moves")}: {moves} · {mt("mem.time")}: {formatTime(elapsed)}
+                </p>
+              </>
+            )}
             <button
               onClick={restart}
               className="mt-5 w-full rounded-2xl bg-card px-5 py-3 text-base font-semibold text-foreground/80 shadow-sm transition active:scale-95"

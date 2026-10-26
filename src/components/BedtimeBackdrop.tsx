@@ -20,7 +20,7 @@ export function BedtimeBackdrop({
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10 bg-[oklch(0.95_0.03_70)]"
+      className="pointer-events-none fixed inset-0 z-0 bg-[oklch(0.95_0.03_70)]"
       style={{
         backgroundImage: `${fade}url(${image})`,
         backgroundSize: "cover",

@@ -1,6 +1,7 @@
 // Memory (matching pairs) game. Reuses the puzzle paintings as card faces and
 // keeps its own save data, fully isolated from the Puzzle and Drag & Drop games.
-import { SCENES, type DifficultyId, type Scene } from "./puzzles";
+import type { DifficultyId } from "./puzzles";
+import { STORIES as SCENES, type Story as Scene } from "./stories";
 
 export interface MemoryLevel {
   // Shares ids with the puzzle difficulties so the level names reuse the

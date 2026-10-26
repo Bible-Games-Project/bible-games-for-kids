@@ -133,10 +133,16 @@ function GameTile({
   );
 }
 
-// One row of game tiles that scrolls sideways, exactly three at a time,
-// with an arrow on each side that moves one game and wraps around at the
-// ends, so both arrows always work. The dice under the right
-// arrow spins the row like a roulette and opens a random playable game.
+// One row of game tiles, exactly three at a time. Each arrow (or a swipe)
+// glides to the previous or next three, and the row loops endlessly in both
+// directions. The dice under the right arrow spins the row like a roulette
+// and opens a random playable game.
+//
+// The loop works by rendering the games several times in a row and quietly
+// re-centering on the middle copy after each move; copies look identical,
+// so the jump is invisible.
+const SHELF_COPIES = 5;
+
 function GameShelf({
   games,
   labelFor,
@@ -155,62 +161,55 @@ function GameShelf({
   onPlay: (g: GameDef) => void;
 }) {
   const audio = useAudio();
-  const ref = useRef<HTMLDivElement | null>(null);
+  const n = games.length;
+  // Index (in the repeated row) of the left-most visible tile.
+  const [pos, setPos] = useState(n);
+  // Length of the current slide in ms; 0 = jump without animation.
+  const [slideMs, setSlideMs] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [highlight, setHighlight] = useState<number | null>(null);
   const timers = useRef<number[]>([]);
+  const swipe = useRef<{ x: number; moved: boolean } | null>(null);
+  const rtl = typeof document !== "undefined" && document.documentElement.dir === "rtl";
 
   useEffect(() => {
     const pending = timers.current;
     return () => pending.forEach((id) => window.clearTimeout(id));
   }, []);
 
-  // Distance between the starts of two neighbouring tiles.
-  const stepSize = () => {
-    const el = ref.current;
-    const tiles = el?.children;
-    if (!el || !tiles || tiles.length < 2) return 0;
-    return Math.abs((tiles[1] as HTMLElement).offsetLeft - (tiles[0] as HTMLElement).offsetLeft);
+  // Back into the middle copy, without animation.
+  const recenter = () => {
+    setSlideMs(0);
+    setPos((p) => n + ((((p - n) % n) + n) % n));
   };
-  const dirSign = () => (ref.current && getComputedStyle(ref.current).direction === "rtl" ? -1 : 1);
 
   const move = (dir: 1 | -1) => {
-    const el = ref.current;
-    if (!el) return;
-    const max = el.scrollWidth - el.clientWidth;
-    const pos = Math.abs(el.scrollLeft);
-    // Past the last game, go back to the first one, and the other way round.
-    let next = pos + dir * stepSize();
-    if (dir === 1 && pos >= max - 8) next = 0;
-    else if (dir === -1 && pos <= 8) next = max;
-    el.scrollTo({ left: Math.min(max, Math.max(0, next)) * dirSign(), behavior: "smooth" });
-  };
-
-  // Keep tile `i` in view, in the middle slot when possible.
-  const showTile = (i: number, smooth: boolean) => {
-    const el = ref.current;
-    if (!el) return;
-    const max = el.scrollWidth - el.clientWidth;
-    const left = Math.min(max, Math.max(0, (i - 1) * stepSize()));
-    el.scrollTo({ left: left * dirSign(), behavior: smooth ? "smooth" : "auto" });
+    if (spinning) return;
+    setSlideMs(300);
+    setPos((p) => p + dir * 3);
   };
 
   const spin = () => {
     if (spinning) return;
     const playable = games.map((g, i) => (g.playable ? i : -1)).filter((i) => i >= 0);
     const target = playable[Math.floor(Math.random() * playable.length)];
+    const start = n + ((((pos - n) % n) + n) % n);
+    const middle = (start + 1) % n; // game in the middle slot right now
     // Two laps through every game, then on to the winner, slowing down.
-    const steps = games.length * 2 + target;
+    const steps = n * 2 + ((target - middle + n) % n);
     setSpinning(true);
+    setSlideMs(0);
+    setPos(start);
     let t = 0;
-    for (let k = 0; k <= steps; k++) {
-      const i = k % games.length;
+    for (let k = 1; k <= steps; k++) {
       const last = k === steps;
-      t += 45 + 230 * Math.pow(k / steps, 3);
+      const delay = 45 + 230 * Math.pow(k / steps, 3);
+      t += delay;
       timers.current.push(
         window.setTimeout(() => {
-          setHighlight(i);
-          showTile(i, last);
+          setSlideMs(Math.round(Math.min(delay, 260)));
+          setPos(start + k);
+          setHighlight((middle + k) % n);
           if (last) audio.playCorrect();
           else audio.playClick();
         }, t),
@@ -220,10 +219,13 @@ function GameShelf({
       window.setTimeout(() => {
         setSpinning(false);
         setHighlight(null);
+        recenter();
         onPlay(games[target]);
       }, t + 750),
     );
   };
+
+  const tiles = Array.from({ length: n * SHELF_COPIES }, (_, k) => k);
 
   const roundButton =
     "grid h-8 w-8 place-items-center rounded-full bg-card text-foreground shadow-md transition active:scale-90 disabled:opacity-35 disabled:active:scale-100";
@@ -241,20 +243,55 @@ function GameShelf({
       </button>
 
       <div
-        ref={ref}
-        className="flex min-w-0 flex-1 snap-x snap-mandatory scroll-px-1 gap-3 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="min-w-0 flex-1 overflow-hidden px-1 py-2"
+        style={{ touchAction: "pan-y" }}
+        onPointerDown={(e) => {
+          swipe.current = { x: e.clientX, moved: false };
+        }}
+        onPointerUp={(e) => {
+          const start = swipe.current;
+          if (!start) return;
+          const dx = e.clientX - start.x;
+          if (Math.abs(dx) > 40) {
+            start.moved = true;
+            move((dx < 0) !== rtl ? 1 : -1);
+          }
+        }}
+        onClickCapture={(e) => {
+          // A swipe that ends on a tile must not also open that game.
+          if (swipe.current?.moved) {
+            e.stopPropagation();
+            swipe.current = null;
+          }
+        }}
       >
-        {games.map((g, i) => (
-          <div key={g.id} className="w-[calc((100%-1.5rem)/3)] shrink-0 snap-start">
-            <GameTile
-              game={g}
-              label={labelFor(g)}
-              comingLabel={comingLabel}
-              highlighted={highlight === i}
-              onPlay={() => !spinning && onPlay(g)}
-            />
-          </div>
-        ))}
+        <div
+          className="flex gap-3"
+          style={{
+            transform: `translateX(calc(${rtl ? pos : -pos} * (100% + 0.75rem) / 3))`,
+            transition: slideMs ? `transform ${slideMs}ms ease-out` : "none",
+          }}
+          onTransitionEnd={() => {
+            if (!spinning) recenter();
+          }}
+        >
+          {tiles.map((k) => {
+            const i = k % n;
+            const g = games[i];
+            const visible = k >= pos && k < pos + 3;
+            return (
+              <div key={k} className="w-[calc((100%-1.5rem)/3)] shrink-0" inert={!visible} aria-hidden={!visible}>
+                <GameTile
+                  game={g}
+                  label={labelFor(g)}
+                  comingLabel={comingLabel}
+                  highlighted={highlight === i}
+                  onPlay={() => !spinning && onPlay(g)}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* The arrow lines up with the left one; the dice sits just below it. */}
@@ -368,11 +405,11 @@ function Home() {
 
   if (screen === "home") {
     return (
-      <div className="theme-bedtime relative isolate min-h-[100dvh] w-full">
+      <div className="theme-bedtime relative min-h-[100dvh] w-full">
         {/* The family scene in the middle of the painting stays at full color
             behind the frosted tiles. */}
         <BedtimeBackdrop image={homeBg} position="center 40%" fadeEnd={0} />
-        <div className="relative min-h-[100dvh] w-full">
+        <div className="relative z-10 min-h-[100dvh] w-full">
           {settingsButton}
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-4 pt-16 pb-6 text-center">
             <h1 className="w-[82%] max-w-sm">
@@ -421,9 +458,9 @@ function Home() {
 
   // screen === "select"
   return (
-    <div className="theme-bedtime relative isolate min-h-[100dvh] w-full">
+    <div className="theme-bedtime relative min-h-[100dvh] w-full">
       <BedtimeBackdrop image={puzzlesBg} position="center 40%" fadeEnd={30} />
-      <div className="relative w-full">
+      <div className="relative z-10 w-full">
         {settingsButton}
 
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
