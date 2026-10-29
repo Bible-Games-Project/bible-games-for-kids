@@ -103,7 +103,9 @@ const LIST: [id: string, story: string, traits: string][] = [
 export const CHARACTERS: Character[] = LIST.flatMap(([id, slug, traits]) => {
   const image = PORTRAITS[`../assets/guesswho/${id}.webp`];
   const story = findStory(slug);
-  return image && story ? [{ id, image, story, traits: new Set(traits.split(" ") as Trait[]) }] : [];
+  return image && story
+    ? [{ id, image, story, traits: new Set(traits.split(" ") as Trait[]) }]
+    : [];
 });
 
 // Names for the characters who aren't simply a word in seek-words.ts.
@@ -192,9 +194,48 @@ const NAMES: Record<string, string[]> = {
     "أبو الابن الضال",
     "Müsrif oğulun babası",
   ],
-  "cleopas": ["Cleopas", "Cleofás", "Kleopas", "Cléopas", "Cleopa", "Cleopas", "Kleofas", "Клеопа", "クレオパ", "글로바", "كليوباس", "Kleopas"],
-  "sower": ["The sower", "El sembrador", "Der Sämann", "Le semeur", "Il seminatore", "O semeador", "Siewca", "Сеятель", "種まく人", "씨 뿌리는 사람", "الزارع", "Ekinci"],
-  "temple-teacher": ["Temple teacher", "Maestro del templo", "Lehrer im Tempel", "Maître du Temple", "Maestro del tempio", "Mestre do templo", "Nauczyciel w świątyni", "Учитель в храме", "神殿の先生", "성전의 선생님", "معلّم الهيكل", "Tapınaktaki öğretmen"],
+  cleopas: [
+    "Cleopas",
+    "Cleofás",
+    "Kleopas",
+    "Cléopas",
+    "Cleopa",
+    "Cleopas",
+    "Kleofas",
+    "Клеопа",
+    "クレオパ",
+    "글로바",
+    "كليوباس",
+    "Kleopas",
+  ],
+  sower: [
+    "The sower",
+    "El sembrador",
+    "Der Sämann",
+    "Le semeur",
+    "Il seminatore",
+    "O semeador",
+    "Siewca",
+    "Сеятель",
+    "種まく人",
+    "씨 뿌리는 사람",
+    "الزارع",
+    "Ekinci",
+  ],
+  "temple-teacher": [
+    "Temple teacher",
+    "Maestro del templo",
+    "Lehrer im Tempel",
+    "Maître du Temple",
+    "Maestro del tempio",
+    "Mestre do templo",
+    "Nauczyciel w świątyni",
+    "Учитель в храме",
+    "神殿の先生",
+    "성전의 선생님",
+    "معلّم الهيكل",
+    "Tapınaktaki öğretmen",
+  ],
   "young-joseph": [
     "Joseph, son of Jacob",
     "José, hijo de Jacob",
@@ -235,7 +276,10 @@ function shuffle<T>(arr: T[]): T[] {
 
 // The cards for one game, and the character hidden for each player (two
 // players look for different ones among the same cards).
-export function dealCards(level: DifficultyId, players: number): { cards: Character[]; secrets: Character[] } {
+export function dealCards(
+  level: DifficultyId,
+  players: number,
+): { cards: Character[]; secrets: Character[] } {
   const cards = shuffle(CHARACTERS).slice(0, CHARACTER_COUNTS[level]);
   const secrets = shuffle(cards).slice(0, players);
   return { cards, secrets };

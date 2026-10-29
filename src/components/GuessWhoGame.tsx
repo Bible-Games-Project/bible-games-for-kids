@@ -80,7 +80,9 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
         ))}
       </div>
       {players === 2 && (
-        <p className="-mt-1 mb-4 text-center text-sm text-muted-foreground">{gt("gw.twoPlayers")}</p>
+        <p className="-mt-1 mb-4 text-center text-sm text-muted-foreground">
+          {gt("gw.twoPlayers")}
+        </p>
       )}
       <LevelList
         describe={(id) => gt("gw.charactersCount", { n: CHARACTER_COUNTS[id] })}
@@ -88,7 +90,12 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
           // A little rack of faces (up to 9 shown).
           <span className="absolute inset-0 grid grid-cols-3 gap-0.5 bg-[oklch(0.5_0.13_262)] p-1">
             {CHARACTERS.slice(i * 4, i * 4 + Math.min(9, CHARACTER_COUNTS[id])).map((c) => (
-              <img key={c.id} src={c.image} alt="" className="aspect-square w-full rounded-sm object-cover" />
+              <img
+                key={c.id}
+                src={c.image}
+                alt=""
+                className="aspect-square w-full rounded-sm object-cover"
+              />
             ))}
           </span>
         )}
@@ -103,7 +110,12 @@ function PlayerDot({ index, size = 22 }: { index: number; size?: number }) {
   return (
     <span
       className="grid shrink-0 place-items-center rounded-full border-2 border-white font-bold text-white shadow"
-      style={{ backgroundColor: PLAYER_COLORS[index], width: size, height: size, fontSize: size * 0.5 }}
+      style={{
+        backgroundColor: PLAYER_COLORS[index],
+        width: size,
+        height: size,
+        fontSize: size * 0.5,
+      }}
       aria-hidden
     >
       {index + 1}
@@ -141,13 +153,20 @@ function GuessBoard({
     const { cards, secrets } = dealCards(level, players);
     return {
       cards,
-      boards: secrets.map((secret) => ({ secret, down: new Set<string>(), asked: new Map(), cost: 0 })),
+      boards: secrets.map((secret) => ({
+        secret,
+        down: new Set<string>(),
+        asked: new Map(),
+        cost: 0,
+      })),
     };
   };
   const [game, setGame] = useState(newGame);
   const [turn, setTurn] = useState(0);
   const [sheet, setSheet] = useState(false);
-  const [message, setMessage] = useState<{ text: string; tone: "yes" | "no" | "plain" } | null>(null);
+  const [message, setMessage] = useState<{ text: string; tone: "yes" | "no" | "plain" } | null>(
+    null,
+  );
   const [winner, setWinner] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const timers = useRef<number[]>([]);
@@ -297,9 +316,14 @@ function GuessBoard({
             colour of the player whose turn it is. */}
         <div
           className="rounded-3xl p-2 shadow-[0_10px_24px_oklch(0.25_0.06_262/0.45),inset_0_2px_0_oklch(1_0_0/0.25)] transition-colors duration-500"
-          style={{ backgroundColor: players > 1 ? PLAYER_COLORS[winner ?? turn] : PLAYER_COLORS[0] }}
+          style={{
+            backgroundColor: players > 1 ? PLAYER_COLORS[winner ?? turn] : PLAYER_COLORS[0],
+          }}
         >
-          <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          <div
+            className="grid gap-1.5"
+            style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+          >
             {cards.map((c) => {
               const isDown = shown.down.has(c.id);
               const isSecret = winner !== null && c === shown.secret;
@@ -380,13 +404,18 @@ function GuessBoard({
             <span aria-hidden>❓</span>
             {gt("gw.ask")}
           </button>
-          <p className="pt-2 text-center text-[11px] italic text-muted-foreground">{gt("gw.orGuess")}</p>
+          <p className="pt-2 text-center text-[11px] italic text-muted-foreground">
+            {gt("gw.orGuess")}
+          </p>
         </div>
       </div>
 
       {/* The questions, in a sheet over the bottom of the screen */}
       {sheet && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/30" onClick={() => setSheet(false)}>
+        <div
+          className="fixed inset-0 z-40 flex items-end justify-center bg-black/30"
+          onClick={() => setSheet(false)}
+        >
           <div
             className="paper-card max-h-[75dvh] w-full max-w-lg overflow-y-auto rounded-b-none p-4 pb-6 animate-in slide-in-from-bottom-10 duration-200"
             onClick={(e) => e.stopPropagation()}
@@ -440,8 +469,14 @@ function GuessBoard({
           }
           detail={
             <span className="flex flex-col items-center gap-2">
-              <img src={shown.secret.image} alt="" className="h-24 w-24 rounded-2xl object-cover shadow" />
-              {players > 1 && <span className="font-semibold text-foreground">{name(shown.secret)}</span>}
+              <img
+                src={shown.secret.image}
+                alt=""
+                className="h-24 w-24 rounded-2xl object-cover shadow"
+              />
+              {players > 1 && (
+                <span className="font-semibold text-foreground">{name(shown.secret)}</span>
+              )}
               <span className="text-sm">
                 {gt("gw.from", { story: localizeSceneTitle(shown.secret.story.slug, lang) })}
               </span>

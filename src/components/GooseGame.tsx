@@ -161,7 +161,13 @@ function Pawn({ index, size }: { index: number; size: number }) {
   const id = useId().replace(/:/g, "");
   const [base, dark, light] = PAWN_COLORS[index];
   return (
-    <svg width={size} height={size * 1.2} viewBox="0 0 40 48" aria-hidden className="overflow-visible">
+    <svg
+      width={size}
+      height={size * 1.2}
+      viewBox="0 0 40 48"
+      aria-hidden
+      className="overflow-visible"
+    >
       <defs>
         <radialGradient id={`${id}-g`} cx="0.35" cy="0.3" r="0.8">
           <stop offset="0" stopColor={light} />
@@ -183,7 +189,15 @@ function Pawn({ index, size }: { index: number; size: number }) {
       <path d="M30.5 9.5 L37 11.5 L30.5 13.5 Z" fill="#f29a2e" stroke="#c46f12" strokeWidth=".5" />
       <circle cx="27.5" cy="9.6" r="1.5" fill="#1d1b24" />
       <circle cx="28" cy="9.1" r=".5" fill="#fff" />
-      <ellipse cx="24" cy="10" rx="1.6" ry="3" fill="#fff" opacity=".35" transform="rotate(25 24 10)" />
+      <ellipse
+        cx="24"
+        cy="10"
+        rx="1.6"
+        ry="3"
+        fill="#fff"
+        opacity=".35"
+        transform="rotate(25 24 10)"
+      />
     </svg>
   );
 }

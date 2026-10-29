@@ -28,6 +28,8 @@ import { OrderGame } from "@/components/OrderGame";
 import { ColoringGame } from "@/components/ColoringGame";
 import { GuessWhoGame } from "@/components/GuessWhoGame";
 import { GooseGame } from "@/components/GooseGame";
+import { DominoGame } from "@/components/DominoGame";
+import { ParchisGame } from "@/components/ParchisGame";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
@@ -47,6 +49,11 @@ import guessWhoIcon from "@/assets/icon-guesswho.webp";
 import gooseIcon from "@/assets/icon-goose.webp";
 import guessWhoBg from "@/assets/guesswho-bg.webp";
 import gooseBg from "@/assets/goose-bg.webp";
+import dominoIcon from "@/assets/icon-domino.webp";
+import parchisIcon from "@/assets/icon-parchis.webp";
+import dominoBg from "@/assets/domino-bg.webp";
+import parchisBg from "@/assets/parchis-bg.webp";
+import homeWideBg from "@/assets/home-bedtime-wide.webp";
 
 
 export const Route = createFileRoute("/")({
@@ -77,8 +84,27 @@ interface ActiveState {
 
 type Screen = "home" | "select" | "premium" | GameScreen;
 // Games with their own screen; Puzzles uses the story list ("select").
-type GameScreen = "dragdrop" | "memory" | "seek" | "order" | "coloring" | "guesswho" | "goose";
-const GAME_SCREENS: string[] = ["dragdrop", "memory", "seek", "order", "coloring", "guesswho", "goose"];
+type GameScreen =
+  | "dragdrop"
+  | "memory"
+  | "seek"
+  | "order"
+  | "coloring"
+  | "guesswho"
+  | "goose"
+  | "domino"
+  | "parchis";
+const GAME_SCREENS: string[] = [
+  "dragdrop",
+  "memory",
+  "seek",
+  "order",
+  "coloring",
+  "guesswho",
+  "goose",
+  "domino",
+  "parchis",
+];
 
 interface GameDef {
   id: string;
@@ -99,6 +125,8 @@ const GAMES: GameDef[] = [
   { id: "order", labelKey: "game.order", icon: orderIcon, tint: "oklch(0.8 0.07 258 / 0.6)", playable: true },
   { id: "guesswho", labelKey: "game.guesswho", icon: guessWhoIcon, tint: "oklch(0.8 0.07 258 / 0.6)", playable: true },
   { id: "goose", labelKey: "game.goose", icon: gooseIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
+  { id: "domino", labelKey: "game.domino", icon: dominoIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
+  { id: "parchis", labelKey: "game.parchis", icon: parchisIcon, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
   { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.87 0.07 62 / 0.6)", playable: false },
   { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.85 0.045 6 / 0.6)", playable: false },
   { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.8 0.07 258 / 0.6)", playable: false },
@@ -530,6 +558,18 @@ function Home() {
   const [pendingTutorial, setPendingTutorial] = useState<Difficulty["id"] | null>(null);
   const [showPremiumLock, setShowPremiumLock] = useState(false);
   const [titleIntro, setTitleIntro] = useState(() => !titleIntroPlayed);
+  // Wide screens (tablets on their side, computers) get the landscape
+  // version of the bedtime painting.
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-aspect-ratio: 5/4)");
+    const update = () => setWide(mq.matches);
+    update();
+    mq.addEventListener?.("change", update);
+    return () => {
+      mq.removeEventListener?.("change", update);
+    };
+  }, []);
   const audio = useAudio();
   const [favorites, setFavorites] = useState<Favorites>(() => Array(FAV_SLOTS).fill(null));
   // A game being dragged to (or between) the favorites slots.
@@ -608,7 +648,7 @@ function Home() {
     setProgress(loadProgress());
     // Warm the cache so the game screens open with their painting already
     // loaded instead of fading it in.
-    for (const src of [puzzlesBg, memoryBg, orderMap, guessWhoBg, gooseBg]) {
+    for (const src of [puzzlesBg, memoryBg, orderMap, guessWhoBg, gooseBg, dominoBg, parchisBg]) {
       const img = new Image();
       img.src = src;
     }
@@ -656,6 +696,8 @@ function Home() {
   if (screen === "coloring") return <ColoringGame onBack={() => setScreen("home")} />;
   if (screen === "guesswho") return <GuessWhoGame onBack={() => setScreen("home")} />;
   if (screen === "goose") return <GooseGame onBack={() => setScreen("home")} />;
+  if (screen === "domino") return <DominoGame onBack={() => setScreen("home")} />;
+  if (screen === "parchis") return <ParchisGame onBack={() => setScreen("home")} />;
 
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
   const openGame = (g: GameDef) => setScreen(GAME_SCREENS.includes(g.id) ? (g.id as GameScreen) : "select");
@@ -678,7 +720,7 @@ function Home() {
       <div className="theme-bedtime relative min-h-[100dvh] w-full">
         {/* The family scene in the middle of the painting stays at full color
             behind the frosted tiles. */}
-        <BedtimeBackdrop image={homeBg} position="center 40%" fadeEnd={0} />
+        <BedtimeBackdrop image={wide ? homeWideBg : homeBg} position="center 40%" fadeEnd={0} />
         <div className="relative z-10 min-h-[100dvh] w-full">
           {settingsButton}
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-4 pt-16 pb-6 text-center">
