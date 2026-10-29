@@ -21,14 +21,15 @@ import { BackButton, MenuScreen, ResultCard } from "@/components/GameShell";
 
 import gooseBg from "@/assets/goose-bg.webp";
 
-// Six pawn colours from the board painting's palette.
-const PAWN_COLORS = [
-  "oklch(0.52 0.1 275)",
-  "oklch(0.58 0.13 355)",
-  "oklch(0.62 0.12 75)",
-  "oklch(0.53 0.09 135)",
-  "oklch(0.55 0.13 30)",
-  "oklch(0.5 0.08 220)",
+// The pawns are toy geese, like the ones in the board painting: one shape in
+// six colours (base, shadow, highlight).
+const PAWN_COLORS: [string, string, string][] = [
+  ["#3f6fb5", "#2a4c85", "#7fa3dc"],
+  ["#c4444a", "#8f2a30", "#e8848a"],
+  ["#e6b43c", "#b0841c", "#f7da8a"],
+  ["#4f9a5e", "#336b40", "#8cc797"],
+  ["#7a55a8", "#553878", "#ad90d1"],
+  ["#e07f3a", "#a8561d", "#f2b080"],
 ];
 
 const PLAYERS_KEY = "goose-players-v1";
@@ -84,7 +85,7 @@ export function GooseGame({ onBack }: { onBack: () => void }) {
           >
             <span className="flex max-w-[5.5rem] flex-wrap justify-center gap-1">
               {Array.from({ length: n }, (_, i) => (
-                <Pawn key={i} index={i} size={24} />
+                <Pawn key={i} index={i} size={26} />
               ))}
             </span>
             <span className="text-sm font-semibold">
@@ -155,20 +156,35 @@ const GooseBadge = ({ size = 28 }: { size?: number }) => (
   </Badge>
 );
 
+// A toy goose on a little round stand; `size` is its width.
 function Pawn({ index, size }: { index: number; size: number }) {
+  const id = useId().replace(/:/g, "");
+  const [base, dark, light] = PAWN_COLORS[index];
   return (
-    <span
-      className="grid place-items-center rounded-full border-2 border-white font-bold text-white shadow-md"
-      style={{
-        backgroundColor: PAWN_COLORS[index],
-        width: size,
-        height: size,
-        fontSize: size * 0.45,
-      }}
-      aria-hidden
-    >
-      {index + 1}
-    </span>
+    <svg width={size} height={size * 1.2} viewBox="0 0 40 48" aria-hidden className="overflow-visible">
+      <defs>
+        <radialGradient id={`${id}-g`} cx="0.35" cy="0.3" r="0.8">
+          <stop offset="0" stopColor={light} />
+          <stop offset="0.55" stopColor={base} />
+          <stop offset="1" stopColor={dark} />
+        </radialGradient>
+      </defs>
+      <ellipse cx="19" cy="44.5" rx="13" ry="3" fill="#000" opacity=".25" />
+      <ellipse cx="19" cy="42" rx="12.5" ry="3.6" fill={dark} />
+      <ellipse cx="19" cy="41" rx="12.5" ry="3.4" fill={`url(#${id}-g)`} />
+      <path
+        d="M5 31 C3 24 9 21 15 23 C18 15 21 9 24 7 C29 4 33 8 31 13 C29.5 16 27 17 26.5 21 C31 23 33 28 31 33 C29 38 21 40 14 39 C9 38 6 35 5 31 Z"
+        fill={`url(#${id}-g)`}
+        stroke={dark}
+        strokeWidth=".8"
+      />
+      <path d="M2 27 L7.5 29.5 L6 33 Z" fill={dark} />
+      <path d="M10 30 C14 26 21 27 24 31 C20 35 14 35 10 30 Z" fill={light} opacity=".55" />
+      <path d="M30.5 9.5 L37 11.5 L30.5 13.5 Z" fill="#f29a2e" stroke="#c46f12" strokeWidth=".5" />
+      <circle cx="27.5" cy="9.6" r="1.5" fill="#1d1b24" />
+      <circle cx="28" cy="9.1" r=".5" fill="#fff" />
+      <ellipse cx="24" cy="10" rx="1.6" ry="3" fill="#fff" opacity=".35" transform="rotate(25 24 10)" />
+    </svg>
   );
 }
 
@@ -591,11 +607,12 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
                 key={i}
                 className={`absolute left-0 top-0 ${i === turn ? "z-20" : "z-10"}`}
                 style={{
-                  transform: `translate(${p.x - 21}px, ${p.y - 21}px) ${i === turn && winner === null ? "scale(1.15)" : ""}`,
+                  transform: `translate(${p.x - 22}px, ${p.y - 40}px) ${i === turn && winner === null ? "scale(1.2)" : ""}`,
+                  transformOrigin: "22px 46px",
                   transition: `transform ${hopMs}ms ease-out`,
                 }}
               >
-                <Pawn index={i} size={42} />
+                <Pawn index={i} size={44} />
               </span>
             );
           })}
@@ -607,7 +624,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
         <div className="glass-card flex items-center gap-3 px-3 py-2">
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-2 text-sm font-semibold">
-              <Pawn index={turn} size={24} />
+              <Pawn index={turn} size={22} />
               <span className="truncate">
                 {solo
                   ? gt("goose.rolls", { n: rolls.current[0] })

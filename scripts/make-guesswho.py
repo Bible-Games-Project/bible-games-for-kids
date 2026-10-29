@@ -43,6 +43,9 @@ CHARACTERS = {
     "orpah": ("ruth-fields", 2),
     "mary-bethany": ("mary-martha", 1),
     "boy-jesus": ("boy-temple", 0),
+    "cleopas": ("emmaus", 1),
+    "sower": ("sower-seed", 0),
+    "temple-teacher": ("boy-temple", 1),
 }
 
 # Framing tweaks for faces not centred in their circle: shift (in radii)

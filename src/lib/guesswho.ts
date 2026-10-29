@@ -1,6 +1,7 @@
-// Guess Who?: the computer hides one Bible character among the cards and the
-// child asks yes / no questions about what they look like until only one card
-// is left standing. Portraits are cut from the story paintings by
+// Who's Hiding?: the computer hides one Bible character among the cards and
+// the child asks yes / no questions about what they look like until only one
+// card is left standing. Two players can race, each looking for their own
+// hidden character. Portraits are cut from the story paintings by
 // scripts/make-guesswho.py; what each one shows is listed by hand below.
 import type { DifficultyId } from "./puzzles";
 import type { Lang } from "./translations";
@@ -14,7 +15,27 @@ const PORTRAITS = import.meta.glob("../assets/guesswho/*.webp", {
   import: "default",
 }) as Record<string, string>;
 
-export type Trait = "woman" | "beard" | "white" | "covered" | "crown" | "child" | "old";
+// What a question asks about. "old" = from the Old Testament; "white" =
+// white or grey hair; "covered" = anything on the head; "down" = looking
+// down or eyes closed.
+export type Trait =
+  | "woman"
+  | "child"
+  | "beard"
+  | "white"
+  | "covered"
+  | "veil"
+  | "headband"
+  | "crown"
+  | "blue"
+  | "red"
+  | "smile"
+  | "up"
+  | "down"
+  | "hand"
+  | "fur"
+  | "angel"
+  | "old";
 
 // The questions, in the order they are offered, with an emoji for each.
 export const QUESTIONS: { trait: Trait; emoji: string }[] = [
@@ -23,7 +44,17 @@ export const QUESTIONS: { trait: Trait; emoji: string }[] = [
   { trait: "beard", emoji: "🧔" },
   { trait: "white", emoji: "👴" },
   { trait: "covered", emoji: "🧕" },
+  { trait: "veil", emoji: "🧣" },
+  { trait: "headband", emoji: "🎗️" },
   { trait: "crown", emoji: "👑" },
+  { trait: "blue", emoji: "🔵" },
+  { trait: "red", emoji: "🔴" },
+  { trait: "smile", emoji: "😊" },
+  { trait: "up", emoji: "👆" },
+  { trait: "down", emoji: "👇" },
+  { trait: "hand", emoji: "✋" },
+  { trait: "fur", emoji: "🐑" },
+  { trait: "angel", emoji: "👼" },
   { trait: "old", emoji: "📜" },
 ];
 
@@ -31,45 +62,48 @@ export interface Character {
   id: string;
   image: string;
   story: Story;
-  traits: Set<Trait>; // "old" = from the Old Testament
+  traits: Set<Trait>;
 }
 
 // id -> story it comes from, and what the portrait shows.
-const LIST: [id: string, story: string, traits: Trait[]][] = [
-  ["jesus", "good-shepherd", ["beard"]],
-  ["boy-jesus", "boy-temple", ["child"]],
-  ["mary", "nativity", ["woman", "covered"]],
-  ["joseph", "nativity", ["beard"]],
-  ["gabriel", "annunciation", []],
-  ["john", "baptism-jesus", ["beard"]],
-  ["peter", "washes-feet", ["beard"]],
-  ["zacchaeus", "zacchaeus", ["beard", "covered"]],
-  ["martha", "mary-martha", ["woman", "covered"]],
-  ["mary-bethany", "mary-martha", ["woman", "covered"]],
-  ["samaritan", "good-samaritan", ["beard", "covered"]],
-  ["father", "prodigal-son", ["beard", "white", "covered"]],
-  ["adam", "adam-animals", ["old"]],
-  ["noah", "noahs-ark", ["beard", "white", "covered", "old"]],
-  ["abraham", "abraham-stars", ["beard", "white", "covered", "old"]],
-  ["young-joseph", "joseph-coat", ["child", "old"]],
-  ["moses", "burning-bush", ["beard", "covered", "old"]],
-  ["gideon", "gideon-fleece", ["beard", "covered", "old"]],
-  ["ruth", "ruth-fields", ["woman", "covered", "old"]],
-  ["naomi", "ruth-fields", ["woman", "white", "covered", "old"]],
-  ["orpah", "ruth-fields", ["woman", "covered", "old"]],
-  ["samuel", "samuel-call", ["child", "old"]],
-  ["david", "david-shepherd", ["child", "old"]],
-  ["goliath", "david-goliath", ["beard", "covered", "crown", "old"]],
-  ["elijah", "elijah-ravens", ["beard", "white", "old"]],
-  ["jonah", "jonah-fish", ["beard", "old"]],
-  ["daniel", "daniel-lions", ["beard", "old"]],
-  ["esther", "queen-esther", ["woman", "covered", "crown", "old"]],
+const LIST: [id: string, story: string, traits: string][] = [
+  ["jesus", "good-shepherd", "beard"],
+  ["boy-jesus", "boy-temple", "child blue up"],
+  ["mary", "nativity", "woman covered veil blue smile down"],
+  ["joseph", "nativity", "beard down hand"],
+  ["gabriel", "annunciation", "angel"],
+  ["john", "baptism-jesus", "beard fur"],
+  ["peter", "washes-feet", "beard down"],
+  ["zacchaeus", "zacchaeus", "beard covered headband red"],
+  ["martha", "mary-martha", "woman covered veil red"],
+  ["mary-bethany", "mary-martha", "woman covered veil blue up hand"],
+  ["samaritan", "good-samaritan", "beard covered red smile down"],
+  ["father", "prodigal-son", "beard white covered headband red smile hand"],
+  ["cleopas", "emmaus", "beard blue"],
+  ["sower", "sower-seed", "beard red"],
+  ["temple-teacher", "boy-temple", "beard white covered red hand"],
+  ["adam", "adam-animals", "smile old"],
+  ["noah", "noahs-ark", "beard white covered headband smile up old"],
+  ["abraham", "abraham-stars", "beard white covered headband red smile up old"],
+  ["young-joseph", "joseph-coat", "child smile blue red old"],
+  ["moses", "burning-bush", "beard covered headband red old"],
+  ["gideon", "gideon-fleece", "beard covered headband red down old"],
+  ["ruth", "ruth-fields", "woman covered veil blue smile old"],
+  ["naomi", "ruth-fields", "woman white covered veil blue old"],
+  ["orpah", "ruth-fields", "woman covered veil red hand old"],
+  ["samuel", "samuel-call", "child down old"],
+  ["david", "david-shepherd", "child old"],
+  ["goliath", "david-goliath", "beard covered crown old"],
+  ["elijah", "elijah-ravens", "beard white fur up old"],
+  ["jonah", "jonah-fish", "beard red up hand old"],
+  ["daniel", "daniel-lions", "beard blue up old"],
+  ["esther", "queen-esther", "woman covered crown old"],
 ];
 
 export const CHARACTERS: Character[] = LIST.flatMap(([id, slug, traits]) => {
   const image = PORTRAITS[`../assets/guesswho/${id}.webp`];
   const story = findStory(slug);
-  return image && story ? [{ id, image, story, traits: new Set(traits) }] : [];
+  return image && story ? [{ id, image, story, traits: new Set(traits.split(" ") as Trait[]) }] : [];
 });
 
 // Names for the characters who aren't simply a word in seek-words.ts.
@@ -158,6 +192,9 @@ const NAMES: Record<string, string[]> = {
     "أبو الابن الضال",
     "Müsrif oğulun babası",
   ],
+  "cleopas": ["Cleopas", "Cleofás", "Kleopas", "Cléopas", "Cleopa", "Cleopas", "Kleofas", "Клеопа", "クレオパ", "글로바", "كليوباس", "Kleopas"],
+  "sower": ["The sower", "El sembrador", "Der Sämann", "Le semeur", "Il seminatore", "O semeador", "Siewca", "Сеятель", "種まく人", "씨 뿌리는 사람", "الزارع", "Ekinci"],
+  "temple-teacher": ["Temple teacher", "Maestro del templo", "Lehrer im Tempel", "Maître du Temple", "Maestro del tempio", "Mestre do templo", "Nauczyciel w świątyni", "Учитель в храме", "神殿の先生", "성전의 선생님", "معلّم الهيكل", "Tapınaktaki öğretmen"],
   "young-joseph": [
     "Joseph, son of Jacob",
     "José, hijo de Jacob",
@@ -181,10 +218,10 @@ export function characterName(c: Character, lang: Lang): string {
 
 export const CHARACTER_COUNTS: Record<DifficultyId, number> = {
   easy: 6,
-  "easy-medium": 9,
-  medium: 12,
-  "medium-hard": 16,
-  hard: 20,
+  "easy-medium": 12,
+  medium: 18,
+  "medium-hard": 24,
+  hard: 30,
 };
 
 function shuffle<T>(arr: T[]): T[] {
@@ -196,10 +233,12 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// The cards for one game and the one the computer is hiding.
-export function dealCards(level: DifficultyId): { cards: Character[]; secret: Character } {
+// The cards for one game, and the character hidden for each player (two
+// players look for different ones among the same cards).
+export function dealCards(level: DifficultyId, players: number): { cards: Character[]; secrets: Character[] } {
   const cards = shuffle(CHARACTERS).slice(0, CHARACTER_COUNTS[level]);
-  return { cards, secret: cards[Math.floor(Math.random() * cards.length)] };
+  const secrets = shuffle(cards).slice(0, players);
+  return { cards, secrets };
 }
 
 // Halving the cards with every question finds anyone in log2(n) questions;
