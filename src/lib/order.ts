@@ -25,17 +25,24 @@ function shuffle<T>(arr: T[]): T[] {
 
 // `count` stories from different periods, so there is always one clear
 // answer (stories sharing an era are never asked against each other).
+// Mixing the Old and New Testaments makes the answer too easy to guess, so
+// most rounds stay inside one Testament; only about one in five mixes them.
+const NEW_TESTAMENT = 200;
+
 export function pickRound(count: number, avoid: Set<string>): Story[] {
+  const mode = Math.random();
+  const fits = (s: Story) =>
+    mode < 0.4 ? s.era < NEW_TESTAMENT : mode < 0.8 ? s.era >= NEW_TESTAMENT : true;
+  const pool = STORIES.filter(fits);
   const picked: Story[] = [];
   const eras = new Set<number>();
-  const pool = [...shuffle(STORIES.filter((s) => !avoid.has(s.slug))), ...shuffle(STORIES)];
-  for (const s of pool) {
+  for (const s of [...shuffle(pool.filter((s) => !avoid.has(s.slug))), ...shuffle(pool)]) {
     if (picked.length === count) break;
     if (eras.has(s.era) || picked.includes(s)) continue;
     picked.push(s);
     eras.add(s.era);
   }
-  return picked;
+  return shuffle(picked);
 }
 
 export const orderStars = (right: number) => (right >= 9 ? 3 : right >= 7 ? 2 : 1);
@@ -139,23 +146,47 @@ export const JOURNEY_STOPS: [number, number][] = (() => {
   });
 })();
 
-const JOURNEY_KEY = "order-journey-v1";
+// The map belongs to the level it was walked on; choosing another level
+// starts it again (the game asks first).
+export interface Journey {
+  level: DifficultyId | null;
+  found: Set<string>;
+}
 
-export function loadJourney(): Set<string> {
+const JOURNEY_KEY = "order-journey-v2";
+const OLD_JOURNEY_KEY = "order-journey-v1"; // stories only, from before levels
+
+export function loadJourney(): Journey {
   try {
     const raw = localStorage.getItem(JOURNEY_KEY);
-    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+    if (raw) {
+      const j = JSON.parse(raw) as { level: DifficultyId | null; found: string[] };
+      return { level: j.level ?? null, found: new Set(j.found ?? []) };
+    }
+    const old = localStorage.getItem(OLD_JOURNEY_KEY);
+    return { level: null, found: new Set(old ? (JSON.parse(old) as string[]) : []) };
   } catch {
-    return new Set();
+    return { level: null, found: new Set() };
   }
 }
 
-export function addToJourney(slug: string): Set<string> {
-  const found = loadJourney().add(slug);
+function saveJourney(j: Journey): Journey {
   try {
-    localStorage.setItem(JOURNEY_KEY, JSON.stringify([...found]));
+    localStorage.setItem(JOURNEY_KEY, JSON.stringify({ level: j.level, found: [...j.found] }));
   } catch {
     /* ignore */
   }
-  return found;
+  return j;
+}
+
+export const resetJourney = (level: DifficultyId | null): Journey =>
+  saveJourney({ level, found: new Set() });
+
+// Plays on `level` from now on (keeping the stories found so far).
+export const claimJourney = (level: DifficultyId): Journey =>
+  saveJourney({ ...loadJourney(), level });
+
+export function addToJourney(level: DifficultyId, slug: string): Journey {
+  const j = loadJourney();
+  return saveJourney({ level, found: j.found.add(slug) });
 }

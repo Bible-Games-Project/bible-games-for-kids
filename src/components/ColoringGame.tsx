@@ -3,7 +3,9 @@ import { useSettings } from "@/lib/i18n";
 import { useAudio } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
+import type { DifficultyId } from "@/lib/puzzles";
 import {
+  COLOR_COUNTS,
   COLORING_PAGES,
   MAP_H,
   MAP_W,
@@ -14,19 +16,27 @@ import {
   type Fills,
 } from "@/lib/coloring";
 import { useBackButton } from "@/lib/back-button";
-import { BackButton, MenuScreen, ResultCard } from "@/components/GameShell";
+import { BackButton, MenuScreen, ResultCard, StoryPicker } from "@/components/GameShell";
 
 import homeBg from "@/assets/home-bedtime.webp";
 
 export function ColoringGame({ onBack }: { onBack: () => void }) {
   const { lang, t } = useSettings();
+  const [level, setLevel] = useState<DifficultyId>("easy");
   const [page, setPage] = useState<ColoringPage | null>(null);
-  const ct = (k: string) => gameText(lang, k);
+  const ct = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
 
   useBackButton(page !== null, () => setPage(null));
 
   if (page) {
-    return <ColoringBoard key={page.story.slug} page={page} onExit={() => setPage(null)} />;
+    return (
+      <ColoringBoard
+        key={`${level}:${page.story.slug}`}
+        page={page}
+        level={level}
+        onExit={() => setPage(null)}
+      />
+    );
   }
 
   return (
@@ -37,39 +47,37 @@ export function ColoringGame({ onBack }: { onBack: () => void }) {
       onBack={onBack}
       backLabel={t("select.back")}
     >
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {COLORING_PAGES.map((p) => (
-          <button
-            key={p.story.slug}
-            onClick={() => {
-              window.scrollTo(0, 0);
-              setPage(p);
-            }}
-            className="glass-card flex flex-col overflow-hidden p-2 text-left transition active:scale-[0.98]"
-          >
-            <span className="relative aspect-[7/9] w-full overflow-hidden rounded-xl bg-white">
+      <StoryPicker
+        level={level}
+        onLevel={setLevel}
+        describe={(id) => ct("color.colorsCount", { n: COLOR_COUNTS[id] })}
+        stories={COLORING_PAGES.map((p) => p.story)}
+        picture={(story) => {
+          const p = COLORING_PAGES.find((x) => x.story === story)!;
+          return (
+            <span className="absolute inset-0 bg-white">
               <img
-                src={p.story.image}
+                src={story.image}
                 alt=""
                 loading="lazy"
                 className="absolute inset-0 h-full w-full object-cover opacity-30"
               />
               <img src={p.lines} alt="" loading="lazy" className="absolute inset-0 h-full w-full" />
-              {hasFills(p.story.slug) && (
-                <span
-                  className="absolute right-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-card text-sm shadow"
-                  aria-hidden
-                >
-                  🎨
-                </span>
-              )}
             </span>
-            <span className="line-clamp-2 px-1 pt-1.5 text-center text-xs font-semibold leading-tight">
-              {localizeSceneTitle(p.story.slug, lang)}
+          );
+        }}
+        badge={(story) =>
+          hasFills(story.slug, level) ? (
+            <span
+              className="grid h-7 w-7 place-items-center rounded-full bg-card text-sm shadow"
+              aria-hidden
+            >
+              🎨
             </span>
-          </button>
-        ))}
-      </div>
+          ) : null
+        }
+        onPick={(story) => setPage(COLORING_PAGES.find((p) => p.story === story) ?? null)}
+      />
     </MenuScreen>
   );
 }
@@ -94,13 +102,13 @@ function pixelsOf(src: string): Promise<Uint8ClampedArray> {
 const hex = (rgb: number[]) =>
   `#${rgb.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("")}`;
 
-const PALETTE_SIZE = 12;
 // Areas whose widest point is narrower than this (in map pixels) are too
 // small to hold a number; they start already painted.
 const MIN_LABEL_DIST = 5;
 
 interface NumberedPage {
-  ids: Uint16Array;
+  ids: Uint16Array; // pixel -> outlined region
+  areaOf: Int32Array; // region -> paintable area (neighbouring regions of one color)
   palette: string[]; // index = number - 1
   colorOf: Int16Array; // area id -> palette index (-1 = no area)
   labels: { id: number; x: number; y: number; size: number }[];
@@ -108,10 +116,15 @@ interface NumberedPage {
 }
 
 // Turns the area map plus the painting into a paint-by-number page: the
-// painting's colors are grouped into a 12-color palette (weighted k-means on
-// each area's average color), and each area's number sits at its widest
-// point (furthest from any outline).
-function buildNumbers(map: Uint8ClampedArray, paint: Uint8ClampedArray): NumberedPage {
+// painting's colors are grouped into a palette of `colors` (weighted k-means
+// on each region's average color), touching regions that end up with the
+// same number become one paintable area, and each area's number sits at its
+// widest point (furthest from any outline).
+function buildNumbers(
+  map: Uint8ClampedArray,
+  paint: Uint8ClampedArray,
+  colors: number,
+): NumberedPage {
   const n = MAP_W * MAP_H;
   const ids = new Uint16Array(n);
   let max = 0;
@@ -140,7 +153,7 @@ function buildNumbers(map: Uint8ClampedArray, paint: Uint8ClampedArray): Numbere
     (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
 
   // Weighted k-means, seeded with the biggest area then the farthest colors.
-  const k = Math.min(PALETTE_SIZE, regions.length);
+  const k = Math.min(colors, regions.length);
   const biggest = regions.reduce((a, b) => (area[b] > area[a] ? b : a), regions[0]);
   let centres = [avg[biggest].slice()];
   while (centres.length < k) {
@@ -179,8 +192,35 @@ function buildNumbers(map: Uint8ClampedArray, paint: Uint8ClampedArray): Numbere
   const rank = new Int16Array(centres.length);
   order.forEach((j, r) => (rank[j] = r));
   const palette = order.map((j) => hex(centres[j]));
+  const regionColor = new Int16Array(max + 1).fill(-1);
+  for (const id of regions) regionColor[id] = rank[nearest(avg[id])];
+
+  // Merge touching regions of the same color; an area is named after its
+  // lowest region id.
+  const parent = new Int32Array(max + 1).map((_, i) => i);
+  const find = (a: number): number => {
+    while (parent[a] !== a) a = parent[a] = parent[parent[a]];
+    return a;
+  };
+  const join = (a: number, b: number) => {
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent[Math.max(ra, rb)] = Math.min(ra, rb);
+  };
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const i = y * MAP_W + x;
+      const a = ids[i];
+      if (x + 1 < MAP_W && ids[i + 1] !== a && regionColor[ids[i + 1]] === regionColor[a])
+        join(a, ids[i + 1]);
+      if (y + 1 < MAP_H && ids[i + MAP_W] !== a && regionColor[ids[i + MAP_W]] === regionColor[a])
+        join(a, ids[i + MAP_W]);
+    }
+  }
+  const areaOf = new Int32Array(max + 1);
+  for (let id = 0; id <= max; id++) areaOf[id] = find(id);
   const colorOf = new Int16Array(max + 1).fill(-1);
-  for (const id of regions) colorOf[id] = rank[nearest(avg[id])];
+  for (const id of regions) colorOf[areaOf[id]] = regionColor[id];
 
   // Distance from each pixel to the nearest outline (two-pass chamfer).
   const dist = new Float32Array(n);
@@ -224,17 +264,19 @@ function buildNumbers(map: Uint8ClampedArray, paint: Uint8ClampedArray): Numbere
       );
     }
   }
+  // Each area's number goes in the widest spot of its regions.
   const bestD = new Float32Array(max + 1);
   const bestI = new Int32Array(max + 1);
   for (let i = 0; i < n; i++) {
-    if (dist[i] > bestD[ids[i]]) {
-      bestD[ids[i]] = dist[i];
-      bestI[ids[i]] = i;
+    const a = areaOf[ids[i]];
+    if (dist[i] > bestD[a]) {
+      bestD[a] = dist[i];
+      bestI[a] = i;
     }
   }
   const labels: NumberedPage["labels"] = [];
   const tiny: number[] = [];
-  for (const id of regions) {
+  for (const id of new Set(regions.map((r) => areaOf[r]))) {
     if (bestD[id] >= MIN_LABEL_DIST) {
       labels.push({
         id,
@@ -244,10 +286,18 @@ function buildNumbers(map: Uint8ClampedArray, paint: Uint8ClampedArray): Numbere
       });
     } else tiny.push(id);
   }
-  return { ids, palette, colorOf, labels, tiny };
+  return { ids, areaOf, palette, colorOf, labels, tiny };
 }
 
-function ColoringBoard({ page, onExit }: { page: ColoringPage; onExit: () => void }) {
+function ColoringBoard({
+  page,
+  level,
+  onExit,
+}: {
+  page: ColoringPage;
+  level: DifficultyId;
+  onExit: () => void;
+}) {
   const { lang } = useSettings();
   const audio = useAudio();
   const ct = (k: string) => gameText(lang, k);
@@ -255,7 +305,7 @@ function ColoringBoard({ page, onExit }: { page: ColoringPage; onExit: () => voi
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [data, setData] = useState<NumberedPage | null>(null);
-  const [fills, setFills] = useState<Fills>(() => loadFills(slug));
+  const [fills, setFills] = useState<Fills>(() => loadFills(slug, level));
   const [history, setHistory] = useState<number[]>([]);
   const [selected, setSelected] = useState(0);
   const [zoom, setZoom] = useState(false);
@@ -267,12 +317,12 @@ function ColoringBoard({ page, onExit }: { page: ColoringPage; onExit: () => voi
   useEffect(() => {
     let cancelled = false;
     Promise.all([pixelsOf(page.regions), pixelsOf(page.story.image)]).then(([map, paint]) => {
-      if (!cancelled) setData(buildNumbers(map, paint));
+      if (!cancelled) setData(buildNumbers(map, paint, COLOR_COUNTS[level]));
     });
     return () => {
       cancelled = true;
     };
-  }, [page]);
+  }, [page, level]);
 
   // Tiny areas are painted from the start.
   const allFills = useMemo(() => {
@@ -305,7 +355,7 @@ function ColoringBoard({ page, onExit }: { page: ColoringPage; onExit: () => voi
     for (const [id, c] of Object.entries(allFills)) fillRgb.set(Number(id), rgb(c));
     const hint = rgb(data.palette[selected] ?? "#ffffff");
     for (let i = 0; i < data.ids.length; i++) {
-      const id = data.ids[i];
+      const id = data.areaOf[data.ids[i]];
       const f = fillRgb.get(id);
       if (f) {
         d[i * 4] = f[0];
@@ -323,8 +373,8 @@ function ColoringBoard({ page, onExit }: { page: ColoringPage; onExit: () => voi
   }, [data, allFills, selected]);
 
   useEffect(() => {
-    saveFills(slug, fills);
-  }, [fills, slug]);
+    saveFills(slug, level, fills);
+  }, [fills, slug, level]);
 
   const paintAt = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!data || peek || finished) return;
@@ -332,7 +382,7 @@ function ColoringBoard({ page, onExit }: { page: ColoringPage; onExit: () => voi
     const x = Math.floor(((e.clientX - rect.left) / rect.width) * MAP_W);
     const y = Math.floor(((e.clientY - rect.top) / rect.height) * MAP_H);
     if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) return;
-    const id = data.ids[y * MAP_W + x];
+    const id = data.areaOf[data.ids[y * MAP_W + x]];
     if (!id || allFills[id]) return;
     if (data.colorOf[id] !== selected) {
       // Wrong number: show which area it was, don't paint.
@@ -502,7 +552,12 @@ function ColoringBoard({ page, onExit }: { page: ColoringPage; onExit: () => voi
 
         {/* Numbered palette: the color's number, and a check once all its areas are done */}
         {data && (
-          <div className="mt-2 grid grid-cols-6 gap-2 pb-2">
+          <div
+            className="mt-2 grid justify-center gap-2 pb-2"
+            style={{
+              gridTemplateColumns: `repeat(${Math.min(data.palette.length, 6)}, minmax(0, 3.5rem))`,
+            }}
+          >
             {data.palette.map((c, i) => {
               const done = remaining[i] === 0;
               const light =

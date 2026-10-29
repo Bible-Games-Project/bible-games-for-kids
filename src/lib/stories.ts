@@ -122,3 +122,31 @@ export const STORIES: Story[] = [
 
 export const findStory = (slug: string): Story | undefined =>
   STORIES.find((s) => s.slug === slug);
+
+// Each difficulty level lists the stories in its own fixed order, so moving
+// to a new level brings a fresh sequence instead of the same first stories.
+const LEVEL_SEEDS: Record<string, number> = {
+  easy: 11,
+  "easy-medium": 23,
+  medium: 37,
+  "medium-hard": 41,
+  hard: 59,
+};
+
+export function storiesForLevel<T extends { slug: string }>(list: T[], level: string): T[] {
+  let seed = LEVEL_SEEDS[level] ?? 1;
+  const random = () => {
+    // mulberry32
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = seed;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const out = list.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}

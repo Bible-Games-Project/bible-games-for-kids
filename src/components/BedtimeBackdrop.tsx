@@ -1,3 +1,5 @@
+import { useImageReady } from "@/lib/use-image-ready";
+
 // Full-screen painting behind a .theme-bedtime screen. Fixed to the viewport
 // so long, scrolling lists don't stretch the painting into a blurry zoom.
 // A cream fade at the top keeps titles readable over the artwork.
@@ -20,15 +22,23 @@ export function BedtimeBackdrop({
       ? `linear-gradient(180deg, oklch(0.975 0.025 85 / 0.88) 0%, oklch(0.975 0.025 85 / 0.5) ${fadeEnd / 2}%, oklch(0.975 0.025 85 / 0) ${fadeEnd}%), `
       : "";
 
+  const ready = useImageReady(image);
+
   return (
     <div
       aria-hidden
-      className={`pointer-events-none fixed inset-0 z-0 bg-[oklch(0.95_0.03_70)] ${blur ? "scale-110 blur-md" : ""}`}
-      style={{
-        backgroundImage: `${fade}url(${image})`,
-        backgroundSize: "cover",
-        backgroundPosition: position,
-      }}
-    />
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[oklch(0.95_0.03_70)]"
+    >
+      {/* Fades in once loaded rather than drawing in strips. */}
+      <div
+        className={`absolute inset-0 transition-opacity duration-500 ${blur ? "scale-110 blur-md" : ""}`}
+        style={{
+          backgroundImage: `${fade}url(${image})`,
+          backgroundSize: "cover",
+          backgroundPosition: position,
+          opacity: ready ? 1 : 0,
+        }}
+      />
+    </div>
   );
 }

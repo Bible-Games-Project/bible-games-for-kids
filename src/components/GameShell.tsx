@@ -1,11 +1,11 @@
 // Building blocks shared by the newer games (Drag & Drop, Seek & Find,
 // What Came First?, Coloring): a menu screen over a painting, a five-level
 // list, star ratings and the end-of-game card.
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { useSettings } from "@/lib/i18n";
 import type { DifficultyId } from "@/lib/puzzles";
-import type { Story } from "@/lib/stories";
+import { storiesForLevel, type Story } from "@/lib/stories";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 
 export const LEVEL_IDS: DifficultyId[] = ["easy", "easy-medium", "medium", "medium-hard", "hard"];
@@ -116,6 +116,7 @@ export function StoryPicker({
   describe,
   stories,
   badge,
+  picture,
   onPick,
 }: {
   level: DifficultyId;
@@ -123,9 +124,12 @@ export function StoryPicker({
   describe: (id: DifficultyId) => string;
   stories: Story[];
   badge: (story: Story) => ReactNode;
+  // Thumbnail contents; the painting itself by default.
+  picture?: (story: Story) => ReactNode;
   onPick: (story: Story) => void;
 }) {
   const { t, lang } = useSettings();
+  const ordered = useMemo(() => storiesForLevel(stories, level), [stories, level]);
   return (
     <>
       <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
@@ -149,7 +153,7 @@ export function StoryPicker({
       </div>
       <p className="mt-2 text-center text-xs italic text-muted-foreground">{describe(level)}</p>
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {stories.map((s) => (
+        {ordered.map((s) => (
           <button
             key={s.slug}
             onClick={() => {
@@ -159,7 +163,11 @@ export function StoryPicker({
             className="glass-card flex flex-col overflow-hidden p-2 text-left transition active:scale-[0.98]"
           >
             <span className="relative aspect-[7/9] w-full overflow-hidden rounded-xl">
-              <img src={s.image} alt="" loading="lazy" className="h-full w-full object-cover" />
+              {picture ? (
+                picture(s)
+              ) : (
+                <img src={s.image} alt="" loading="lazy" className="h-full w-full object-cover" />
+              )}
               <span className="absolute right-1.5 top-1.5">{badge(s)}</span>
             </span>
             <span className="line-clamp-2 px-1 pt-1.5 text-center text-xs font-semibold leading-tight">
@@ -206,6 +214,50 @@ export function ResultCard({
           className="mt-2 w-full rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-base font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
         >
           {backLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// A yes / no question over the screen, e.g. before wiping progress.
+export function ConfirmCard({
+  icon,
+  text,
+  confirmLabel,
+  cancelLabel,
+  onConfirm,
+  onCancel,
+}: {
+  icon: ReactNode;
+  text: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6"
+      onClick={onCancel}
+    >
+      <div
+        className="paper-card w-full max-w-sm p-6 text-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="text-4xl">{icon}</div>
+        <p className="mt-3 text-base font-semibold text-foreground">{text}</p>
+        <button
+          onClick={onConfirm}
+          className="mt-5 w-full rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-base font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
+        >
+          {confirmLabel}
+        </button>
+        <button
+          onClick={onCancel}
+          className="mt-2 w-full rounded-2xl bg-card px-5 py-3 text-base font-semibold text-foreground/80 shadow-sm transition active:scale-95"
+        >
+          {cancelLabel}
         </button>
       </div>
     </div>

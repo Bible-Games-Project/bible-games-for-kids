@@ -110,13 +110,15 @@ function SeekBoard({
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     // Closest thing still hidden whose circle contains the tap (distances in
-    // % of the width, so circles stay round).
+    // % of the width, so circles stay round). A face or head must be hit
+    // fairly exactly; things and animals forgive a tap near their edge.
     let hit: string | null = null;
     let bestDist = Infinity;
     for (const it of items) {
       if (found.has(it.word)) continue;
       const d = Math.hypot(x - it.x, (y - it.y) * PAINTING_RATIO);
-      if (d <= it.r * 1.15 && d < bestDist) {
+      const reach = it.word.includes(".") ? 1.15 : 1.35;
+      if (d <= it.r * reach && d < bestDist) {
         hit = it.word;
         bestDist = d;
       }

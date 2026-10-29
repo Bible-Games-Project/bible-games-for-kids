@@ -14,7 +14,9 @@ import {
   ORDER_ROUNDS,
   ROUTE_PATH,
   addToJourney,
+  claimJourney,
   loadJourney,
+  resetJourney,
   orderStars,
   pickRound,
 } from "@/lib/order";
@@ -22,6 +24,7 @@ import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import {
   BackButton,
+  ConfirmCard,
   LevelList,
   MenuScreen,
   ResultCard,
@@ -31,6 +34,8 @@ import {
 } from "@/components/GameShell";
 import { STORIES } from "@/lib/stories";
 
+import { useImageReady } from "@/lib/use-image-ready";
+
 import orderMap from "@/assets/order-map.webp";
 
 const BEST_KEY = "order-best-v1";
@@ -39,13 +44,26 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
   const { lang, t } = useSettings();
   const [level, setLevel] = useState<DifficultyId | null>(null);
   const [best, setBest] = useState(() => loadBest(BEST_KEY));
-  const [found, setFound] = useState(() => loadJourney());
+  const [journey, setJourney] = useState(() => loadJourney());
+  // A question waiting for an answer: change to this level, or reset the map.
+  const [asking, setAsking] = useState<DifficultyId | "reset" | null>(null);
   const ot = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
 
   useBackButton(level !== null, () => {
-    setFound(loadJourney());
+    setJourney(loadJourney());
     setLevel(null);
   });
+
+  const play = (id: DifficultyId) => {
+    setJourney(claimJourney(id));
+    setLevel(id);
+  };
+
+  // Another level's walk would mix up the map, so ask before wiping it.
+  const pick = (id: DifficultyId) => {
+    if (journey.found.size > 0 && journey.level && journey.level !== id) setAsking(id);
+    else play(id);
+  };
 
   if (level) {
     return (
@@ -53,7 +71,7 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
         key={level}
         level={level}
         onExit={() => {
-          setFound(loadJourney());
+          setJourney(loadJourney());
           setLevel(null);
         }}
         onComplete={(stars) => setBest(saveBest(BEST_KEY, level, stars))}
@@ -72,12 +90,26 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
       backLabel={t("select.back")}
     >
       <div className="glass-card mb-5 p-3">
-        <p className="pb-2 text-center text-sm font-semibold text-foreground/80">
-          🗺️ {ot("order.journey", { n: found.size, total: JOURNEY.length })}
+        <p className="text-center text-sm font-semibold text-foreground/80">
+          🗺️ {ot("order.journey", { n: journey.found.size, total: JOURNEY.length })}
         </p>
-        <div className="relative mx-auto h-[56dvh] max-h-[36rem] min-h-[18rem]">
-          <JourneyMap found={found} />
+        {journey.level && journey.found.size > 0 && (
+          <p className="text-center text-xs text-muted-foreground">
+            {ot("order.mapLevel", { level: t(`diff.${journey.level}`) })}
+          </p>
+        )}
+        <div className="relative mx-auto mt-2 h-[56dvh] max-h-[36rem] min-h-[18rem]">
+          <JourneyMap found={journey.found} />
         </div>
+        {journey.found.size > 0 && (
+          <button
+            onClick={() => setAsking("reset")}
+            className="mx-auto mt-3 flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-semibold text-foreground/80 shadow-sm transition active:scale-95"
+          >
+            <span aria-hidden>↺</span>
+            {ot("order.resetMap")}
+          </button>
+        )}
       </div>
       <LevelList
         describe={(id) => ot("order.optionsCount", { n: ORDER_OPTIONS[id] })}
@@ -102,8 +134,26 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
           );
         }}
         best={(id) => best[id] ?? 0}
-        onPick={setLevel}
+        onPick={pick}
       />
+      {asking && (
+        <ConfirmCard
+          icon="🗺️"
+          text={asking === "reset" ? ot("order.resetConfirm") : ot("order.levelChange")}
+          confirmLabel={asking === "reset" ? ot("order.reset") : ot("order.changeLevel")}
+          cancelLabel={ot("order.cancel")}
+          onConfirm={() => {
+            if (asking === "reset") {
+              setJourney(resetJourney(journey.level));
+            } else {
+              resetJourney(asking);
+              play(asking);
+            }
+            setAsking(null);
+          }}
+          onCancel={() => setAsking(null)}
+        />
+      )}
     </MenuScreen>
   );
 }
@@ -117,6 +167,7 @@ function JourneyMap({ found, fresh = null }: { found: Set<string>; fresh?: strin
   const ids = useId().replace(/:/g, "");
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [label, setLabel] = useState<{ story: Story; x: number; y: number } | null>(null);
+  const ready = useImageReady(orderMap);
   const last = JOURNEY.length - 1;
 
   const show = (story: Story, e: React.MouseEvent<SVGGElement>) => {
@@ -137,7 +188,9 @@ function JourneyMap({ found, fresh = null }: { found: Set<string>; fresh?: strin
       <svg
         viewBox={`${MAP_VIEW.x} ${MAP_VIEW.y} ${MAP_VIEW.w} ${MAP_VIEW.h}`}
         preserveAspectRatio="xMidYMid meet"
-        className="h-full w-full drop-shadow-[0_10px_18px_oklch(0.3_0.05_50/0.35)]"
+        className={`h-full w-full drop-shadow-[0_10px_18px_oklch(0.3_0.05_50/0.35)] transition-opacity duration-700 ${
+          ready ? "opacity-100" : "opacity-0"
+        }`}
       >
         <defs>
           <clipPath id={`${ids}-frame`}>
@@ -269,7 +322,7 @@ function OrderBoard({
   const [answer, setAnswer] = useState<string | null>(null);
   const [right, setRight] = useState(0);
   const [finished, setFinished] = useState(false);
-  const [found, setFound] = useState(() => loadJourney());
+  const [found, setFound] = useState(() => loadJourney().found);
   const [fresh, setFresh] = useState<string | null>(null);
   // The picked painting flying from its card to its stop on the map.
   const [flight, setFlight] = useState<{
@@ -315,7 +368,7 @@ function OrderBoard({
     const stop = mapRef.current?.querySelector(`[data-stop="${s.slug}"]`);
     const svg = mapRef.current?.querySelector("svg");
     const place = () => {
-      setFound(addToJourney(s.slug));
+      setFound(addToJourney(level, s.slug).found);
       setFresh(s.slug);
       setFlight(null);
       later(() => nextRound(total), 1100);

@@ -157,9 +157,73 @@ const WORDS: Record<string, [emoji: string, ...names: string[]]> = {
   "zebra": ["🦓", "Zebra", "Cebra", "Zebra", "Zèbre", "Zebra", "Zebra", "Zebra", "Зебра", "シマウマ", "얼룩말", "حمار وحشي", "Zebra"],
 };
 
+// For the people, Seek & Find asks for a face or a head (just the part the
+// tap must land on): an item word like "jesus.face" reads "Jesus' face",
+// "Cara de Jesús"... These are the "whose" forms, in LANGS order.
+const OF: Record<string, string[]> = {
+  "abraham": ["Abraham's", "de Abraham", "von Abraham", "d'Abraham", "di Abramo", "de Abraão", "Abrahama", "Авраама", "アブラハムの", "아브라함의", "إبراهيم", "İbrahim'in"],
+  "adam": ["Adam's", "de Adán", "von Adam", "d'Adam", "di Adamo", "de Adão", "Adama", "Адама", "アダムの", "아담의", "آدم", "Adem'in"],
+  "angel": ["the angel's", "del ángel", "des Engels", "de l'ange", "dell'angelo", "do anjo", "anioła", "ангела", "天使の", "천사의", "الملاك", "meleğin"],
+  "baby": ["the baby's", "del bebé", "des Babys", "du bébé", "del bambino", "do bebê", "niemowlęcia", "младенца", "赤ちゃんの", "아기의", "الطفل الرضيع", "bebeğin"],
+  "blindman": ["the blind man's", "del ciego", "des blinden Mannes", "de l'aveugle", "del cieco", "do cego", "niewidomego", "слепого", "目の見えない人の", "눈먼 사람의", "الأعمى", "kör adamın"],
+  "boy": ["the boy's", "del niño", "des Jungen", "du garçon", "del bambino", "do menino", "chłopca", "мальчика", "男の子の", "소년의", "الصبي", "oğlanın"],
+  "brother": ["the brother's", "del hermano", "des Bruders", "du frère", "del fratello", "do irmão", "brata", "брата", "兄の", "형의", "الأخ", "kardeşin"],
+  "daniel": ["Daniel's", "de Daniel", "von Daniel", "de Daniel", "di Daniele", "de Daniel", "Daniela", "Даниила", "ダニエルの", "다니엘의", "دانيال", "Daniel'in"],
+  "david": ["David's", "de David", "von David", "de David", "di Davide", "de Davi", "Dawida", "Давида", "ダビデの", "다윗의", "داود", "Davut'un"],
+  "disciple": ["the disciple's", "del discípulo", "des Jüngers", "du disciple", "del discepolo", "do discípulo", "ucznia", "ученика", "弟子の", "제자의", "التلميذ", "havarinin"],
+  "elijah": ["Elijah's", "de Elías", "von Elija", "d'Élie", "di Elia", "de Elias", "Eliasza", "Илии", "エリヤの", "엘리야의", "إيليا", "İlyas'ın"],
+  "esther": ["Esther's", "de Ester", "von Ester", "d'Esther", "di Ester", "de Ester", "Estery", "Есфири", "エステルの", "에스더의", "أستير", "Ester'in"],
+  "father": ["the father's", "del padre", "des Vaters", "du père", "del padre", "do pai", "ojca", "отца", "お父さんの", "아버지의", "الأب", "babanın"],
+  "fisherman": ["the fisherman's", "del pescador", "des Fischers", "du pêcheur", "del pescatore", "do pescador", "rybaka", "рыбака", "漁師の", "어부의", "الصياد", "balıkçının"],
+  "gideon": ["Gideon's", "de Gedeón", "von Gideon", "de Gédéon", "di Gedeone", "de Gideão", "Gedeona", "Гедеона", "ギデオンの", "기드온의", "جدعون", "Gideon'un"],
+  "girl": ["the girl's", "de la niña", "des Mädchens", "de la fille", "della bambina", "da menina", "dziewczynki", "девочки", "女の子の", "소녀의", "الفتاة", "kızın"],
+  "god": ["God's", "de Dios", "Gottes", "de Dieu", "di Dio", "de Deus", "Boga", "Бога", "神さまの", "하나님의", "الله", "Tanrı'nın"],
+  "goliath": ["Goliath's", "de Goliat", "von Goliat", "de Goliath", "di Golia", "de Golias", "Goliata", "Голиафа", "ゴリアテの", "골리앗의", "جليات", "Golyat'ın"],
+  "injured": ["the injured man's", "del herido", "des Verletzten", "du blessé", "del ferito", "do ferido", "rannego", "раненого", "けが人の", "다친 사람의", "الجريح", "yaralının"],
+  "jacob": ["Jacob's", "de Jacob", "von Jakob", "de Jacob", "di Giacobbe", "de Jacó", "Jakuba", "Иакова", "ヤコブの", "야곱의", "يعقوب", "Yakup'un"],
+  "jesus": ["Jesus'", "de Jesús", "von Jesus", "de Jésus", "di Gesù", "de Jesus", "Jezusa", "Иисуса", "イエスさまの", "예수님의", "يسوع", "İsa'nın"],
+  "john": ["John's", "de Juan", "von Johannes", "de Jean", "di Giovanni", "de João", "Jana", "Иоанна", "ヨハネの", "요한의", "يوحنا", "Yahya'nın"],
+  "jonah": ["Jonah's", "de Jonás", "von Jona", "de Jonas", "di Giona", "de Jonas", "Jonasza", "Ионы", "ヨナの", "요나의", "يونان", "Yunus'un"],
+  "joseph": ["Joseph's", "de José", "von Josef", "de Joseph", "di Giuseppe", "de José", "Józefa", "Иосифа", "ヨセフの", "요셉의", "يوسف", "Yusuf'un"],
+  "king": ["the king's", "del rey", "des Königs", "du roi", "del re", "do rei", "króla", "царя", "王さまの", "왕의", "الملك", "kralın"],
+  "man": ["the man's", "del hombre", "des Mannes", "de l'homme", "dell'uomo", "do homem", "mężczyzny", "мужчины", "男の人の", "남자의", "الرجل", "adamın"],
+  "martha": ["Martha's", "de Marta", "von Marta", "de Marthe", "di Marta", "de Marta", "Marty", "Марфы", "マルタの", "마르다의", "مرثا", "Marta'nın"],
+  "mary": ["Mary's", "de María", "von Maria", "de Marie", "di Maria", "de Maria", "Maryi", "Марии", "マリアの", "마리아의", "مريم", "Meryem'in"],
+  "moses": ["Moses'", "de Moisés", "von Mose", "de Moïse", "di Mosè", "de Moisés", "Mojżesza", "Моисея", "モーセの", "모세의", "موسى", "Musa'nın"],
+  "naomi": ["Naomi's", "de Noemí", "von Noomi", "de Naomi", "di Noemi", "de Noemi", "Noemi", "Ноемини", "ナオミの", "나오미의", "نعمي", "Naomi'nin"],
+  "noah": ["Noah's", "de Noé", "von Noah", "de Noé", "di Noè", "de Noé", "Noego", "Ноя", "ノアの", "노아의", "نوح", "Nuh'un"],
+  "orpah": ["Orpah's", "de Orfa", "von Orpa", "d'Orpa", "di Orpa", "de Orfa", "Orpy", "Орфы", "オルパの", "오르바의", "عرفة", "Orpa'nın"],
+  "peter": ["Peter's", "de Pedro", "von Petrus", "de Pierre", "di Pietro", "de Pedro", "Piotra", "Петра", "ペテロの", "베드로의", "بطرس", "Petrus'un"],
+  "ruth": ["Ruth's", "de Rut", "von Rut", "de Ruth", "di Rut", "de Rute", "Rut", "Руфи", "ルツの", "룻의", "راعوث", "Rut'un"],
+  "samaritan": ["the Samaritan's", "del samaritano", "des Samariters", "du Samaritain", "del Samaritano", "do samaritano", "Samarytanina", "самарянина", "サマリア人の", "사마리아인의", "السامري", "Samiriyelinin"],
+  "samuel": ["Samuel's", "de Samuel", "von Samuel", "de Samuel", "di Samuele", "de Samuel", "Samuela", "Самуила", "サムエルの", "사무엘의", "صموئيل", "Samuel'in"],
+  "servant": ["the servant's", "del sirviente", "des Dieners", "du serviteur", "del servo", "do servo", "sługi", "слуги", "しもべの", "하인의", "الخادم", "hizmetçinin"],
+  "shepherd": ["the shepherd's", "del pastor", "des Hirten", "du berger", "del pastore", "do pastor", "pasterza", "пастуха", "羊飼いの", "목자의", "الراعي", "çobanın"],
+  "son": ["the son's", "del hijo", "des Sohnes", "du fils", "del figlio", "do filho", "syna", "сына", "息子の", "아들의", "الابن", "oğlun"],
+  "sower": ["the sower's", "del sembrador", "des Sämanns", "du semeur", "del seminatore", "do semeador", "siewcy", "сеятеля", "種まく人の", "씨 뿌리는 사람의", "الزارع", "ekincinin"],
+  "teacher": ["the teacher's", "del maestro", "des Lehrers", "du maître", "del maestro", "do mestre", "nauczyciela", "учителя", "先生の", "선생님의", "المعلّم", "öğretmenin"],
+  "woman": ["the woman's", "de la mujer", "der Frau", "de la femme", "della donna", "da mulher", "kobiety", "женщины", "女の人の", "여자의", "المرأة", "kadının"],
+  "worker": ["the worker's", "del obrero", "des Arbeiters", "de l'ouvrier", "dell'operaio", "do operário", "robotnika", "рабочего", "はたらく人の", "일꾼의", "العامل", "işçinin"],
+  "zacchaeus": ["Zacchaeus'", "de Zaqueo", "von Zachäus", "de Zachée", "di Zaccheo", "de Zaqueu", "Zacheusza", "Закхея", "ザアカイの", "삭개오의", "زكا", "Zakkay'ın"],
+};
+
+const PART: Record<string, string[]> = {
+  face: ["{of} face", "Cara {of}", "Gesicht {of}", "Visage {of}", "Volto {of}", "Rosto {of}", "Twarz {of}", "Лицо {of}", "{of}顔", "{of} 얼굴", "وجه {of}", "{of} yüzü"],
+  head: ["{of} head", "Cabeza {of}", "Kopf {of}", "Tête {of}", "Testa {of}", "Cabeça {of}", "Głowa {of}", "Голова {of}", "{of}頭", "{of} 머리", "رأس {of}", "{of} başı"],
+};
+
 const LANG_INDEX = Object.fromEntries(LANGS.map((l, i) => [l.id, i])) as Record<Lang, number>;
 
-export const wordEmoji = (word: string): string => WORDS[word]?.[0] ?? "🔍";
+export const wordEmoji = (word: string): string => WORDS[word.split(".")[0]]?.[0] ?? "🔍";
 
-export const wordName = (word: string, lang: Lang): string =>
-  WORDS[word]?.[1 + (LANG_INDEX[lang] ?? 0)] ?? WORDS[word]?.[1] ?? word;
+export const wordName = (word: string, lang: Lang): string => {
+  const i = LANG_INDEX[lang] ?? 0;
+  const [base, part] = word.split(".");
+  const of = OF[base]?.[i];
+  const template = PART[part]?.[i];
+  if (of && template) {
+    const text = template.replace("{of}", of);
+    return text.charAt(0).toLocaleUpperCase(lang) + text.slice(1);
+  }
+  return WORDS[base]?.[1 + i] ?? WORDS[base]?.[1] ?? base;
+};

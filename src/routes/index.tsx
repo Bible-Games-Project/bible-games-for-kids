@@ -20,19 +20,20 @@ import { useSettings } from "@/lib/i18n";
 import { localizeSceneTitle, localizeVerse } from "@/lib/scenes-i18n";
 import { OnboardingLanguage } from "@/components/OnboardingLanguage";
 import { SettingsModal } from "@/components/SettingsModal";
-import { MoreGamesScreen } from "@/components/MoreGamesScreen";
 import { PremiumScreen } from "@/components/PremiumScreen";
 import { DragDropGame } from "@/components/DragDropGame";
 import { MemoryGame } from "@/components/MemoryGame";
 import { SeekGame } from "@/components/SeekGame";
 import { OrderGame } from "@/components/OrderGame";
 import { ColoringGame } from "@/components/ColoringGame";
+import { GuessWhoGame } from "@/components/GuessWhoGame";
+import { GooseGame } from "@/components/GooseGame";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
 import { isFreePuzzle } from "@/lib/freemium";
 import homeBg from "@/assets/home-bedtime.webp";
-import titleImg from "@/assets/title-faithfun.webp";
+import titleImg from "@/assets/title-gospikids.webp";
 import puzzlesBg from "@/assets/puzzles-bedtime.webp";
 import memoryBg from "@/assets/memory-bedtime.webp";
 import puzzlesIcon from "@/assets/icon-puzzles.webp";
@@ -41,18 +42,23 @@ import dragdropIcon from "@/assets/icon-dragdrop.webp";
 import coloringIcon from "@/assets/icon-coloring.webp";
 import seekIcon from "@/assets/icon-seek.webp";
 import orderIcon from "@/assets/icon-order.webp";
+import orderMap from "@/assets/order-map.webp";
+import guessWhoIcon from "@/assets/icon-guesswho.webp";
+import gooseIcon from "@/assets/icon-goose.webp";
+import guessWhoBg from "@/assets/guesswho-bg.webp";
+import gooseBg from "@/assets/goose-bg.webp";
 
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FaithFun: Bible Games for Kids" },
+      { title: "Gospi Kids: Bible Games" },
       {
         name: "description",
         content:
           "A peaceful watercolor jigsaw puzzle app for children, illustrating gentle stories from the life of Jesus and the New Testament.",
       },
-      { property: "og:title", content: "FaithFun: Bible Games for Kids" },
+      { property: "og:title", content: "Gospi Kids: Bible Games" },
       {
         property: "og:description",
         content:
@@ -69,10 +75,10 @@ interface ActiveState {
   difficultyId: Difficulty["id"];
 }
 
-type Screen = "home" | "select" | "more" | "premium" | GameScreen;
+type Screen = "home" | "select" | "premium" | GameScreen;
 // Games with their own screen; Puzzles uses the story list ("select").
-type GameScreen = "dragdrop" | "memory" | "seek" | "order" | "coloring";
-const GAME_SCREENS: string[] = ["dragdrop", "memory", "seek", "order", "coloring"];
+type GameScreen = "dragdrop" | "memory" | "seek" | "order" | "coloring" | "guesswho" | "goose";
+const GAME_SCREENS: string[] = ["dragdrop", "memory", "seek", "order", "coloring", "guesswho", "goose"];
 
 interface GameDef {
   id: string;
@@ -91,6 +97,8 @@ const GAMES: GameDef[] = [
   { id: "coloring", labelKey: "game.coloring", icon: coloringIcon, tint: "oklch(0.86 0.06 13 / 0.6)", playable: true },
   { id: "seek", labelKey: "game.seek", icon: seekIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
   { id: "order", labelKey: "game.order", icon: orderIcon, tint: "oklch(0.8 0.07 258 / 0.6)", playable: true },
+  { id: "guesswho", labelKey: "game.guesswho", icon: guessWhoIcon, tint: "oklch(0.8 0.07 258 / 0.6)", playable: true },
+  { id: "goose", labelKey: "game.goose", icon: gooseIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
   { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.87 0.07 62 / 0.6)", playable: false },
   { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.85 0.045 6 / 0.6)", playable: false },
   { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.8 0.07 258 / 0.6)", playable: false },
@@ -123,7 +131,7 @@ function GameTile({
         style={{ backgroundColor: game.tint }}
       >
         {game.icon ? (
-          <img src={game.icon} alt="" className="h-full w-full object-cover" />
+          <img src={game.icon} alt="" draggable={false} className="h-full w-full select-none object-cover" />
         ) : (
           <span className="text-4xl sm:text-5xl" aria-hidden>
             {game.emoji}
@@ -146,7 +154,7 @@ function GameTile({
 }
 
 // One row of game tiles, exactly three at a time, the middle one larger.
-// Each arrow (or a swipe) glides to the previous or next three, and the row
+// Each arrow (or a swipe) glides one game to the left or right, and the row
 // loops endlessly in both directions. Tapping a side game first slides it to
 // the middle (it grows as it arrives), then opens it. The dice under the
 // right arrow spins the row like a roulette and opens a random playable game.
@@ -154,7 +162,14 @@ function GameTile({
 // The loop works by rendering the games several times in a row and quietly
 // re-centering on the middle copy after each move; copies look identical,
 // so the jump is invisible.
+//
+// Dragging a game up or down (instead of sideways) picks it up, so it can be
+// dropped into a favorites slot.
 const SHELF_COPIES = 5;
+
+// Left-most visible game, kept while a game is open so the shelf comes back
+// where the player left it.
+let shelfStart = 0;
 
 function GameShelf({
   games,
@@ -164,6 +179,7 @@ function GameShelf({
   nextLabel,
   randomLabel,
   onPlay,
+  onDragStart,
 }: {
   games: GameDef[];
   labelFor: (g: GameDef) => string;
@@ -172,17 +188,21 @@ function GameShelf({
   nextLabel: string;
   randomLabel: string;
   onPlay: (g: GameDef) => void;
+  onDragStart: (g: GameDef, x: number, y: number) => void;
 }) {
   const audio = useAudio();
   const n = games.length;
   // Index (in the repeated row) of the left-most visible tile.
-  const [pos, setPos] = useState(n);
+  const [pos, setPos] = useState(() => n + (shelfStart % n));
   // Length of the current slide in ms; 0 = jump without animation.
   const [slideMs, setSlideMs] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [highlight, setHighlight] = useState<number | null>(null);
   const timers = useRef<number[]>([]);
-  const swipe = useRef<{ x: number; moved: boolean } | null>(null);
+  // A press on the row: undecided until it moves, then a sideways swipe or
+  // a drag of the pressed game.
+  const press = useRef<{ x: number; y: number; game: GameDef | null; mode: "press" | "swipe" | "drag" } | null>(null);
+  const moved = useRef(false);
   const rtl = typeof document !== "undefined" && document.documentElement.dir === "rtl";
 
   useEffect(() => {
@@ -190,13 +210,17 @@ function GameShelf({
     return () => pending.forEach((id) => window.clearTimeout(id));
   }, []);
 
+  useEffect(() => {
+    shelfStart = (((pos - n) % n) + n) % n;
+  }, [pos, n]);
+
   // Back into the middle copy, without animation.
   const recenter = () => {
     setSlideMs(0);
     setPos((p) => n + ((((p - n) % n) + n) % n));
   };
 
-  const move = (dir: 1 | -1, step = 3) => {
+  const move = (dir: 1 | -1, step = 1) => {
     if (spinning) return;
     setSlideMs(300);
     setPos((p) => p + dir * step);
@@ -273,24 +297,45 @@ function GameShelf({
 
       <div
         className="min-w-0 flex-1 overflow-hidden px-1 py-4"
-        style={{ touchAction: "pan-y" }}
+        style={{ touchAction: "none" }}
         onPointerDown={(e) => {
-          swipe.current = { x: e.clientX, moved: false };
+          const tile = (e.target as HTMLElement).closest<HTMLElement>("[data-game]");
+          const game = tile ? games[Number(tile.dataset.game)] : null;
+          press.current = { x: e.clientX, y: e.clientY, game, mode: "press" };
+          moved.current = false;
         }}
-        onPointerUp={(e) => {
-          const start = swipe.current;
-          if (!start) return;
-          const dx = e.clientX - start.x;
-          if (Math.abs(dx) > 40) {
-            start.moved = true;
-            move((dx < 0) !== rtl ? 1 : -1);
+        onPointerMove={(e) => {
+          const p = press.current;
+          if (!p || p.mode !== "press") return;
+          const dx = e.clientX - p.x;
+          const dy = e.clientY - p.y;
+          if (Math.hypot(dx, dy) < 10) return;
+          moved.current = true;
+          // Mostly sideways is a swipe; anything steeper picks the game up.
+          if (Math.abs(dy) > Math.abs(dx) * 0.6 && p.game?.playable && !spinning) {
+            p.mode = "drag";
+            onDragStart(p.game, e.clientX, e.clientY);
+          } else {
+            p.mode = "swipe";
           }
         }}
+        onPointerUp={(e) => {
+          const p = press.current;
+          press.current = null;
+          if (p?.mode !== "swipe") return;
+          const dx = e.clientX - p.x;
+          if (Math.abs(dx) > 40) move((dx < 0) !== rtl ? 1 : -1);
+        }}
+        onPointerCancel={() => {
+          press.current = null;
+        }}
+        onDragStart={(e) => e.preventDefault()}
         onClickCapture={(e) => {
-          // A swipe that ends on a tile must not also open that game.
-          if (swipe.current?.moved) {
+          // A swipe or drag that ends on a tile must not also open that game.
+          if (moved.current) {
             e.stopPropagation();
-            swipe.current = null;
+            e.preventDefault();
+            moved.current = false;
           }
         }}
       >
@@ -317,6 +362,7 @@ function GameShelf({
                   middle ? "z-10" : ""
                 }`}
                 style={{ transform: middle ? "scale(1.14)" : "scale(0.88)" }}
+                data-game={i}
                 inert={!visible}
                 aria-hidden={!visible}
               >
@@ -356,6 +402,118 @@ function GameShelf({
   );
 }
 
+// Five slots for the player's favorite games, under the shelf. Games are
+// dragged in from the shelf; a slot's game can be dragged onto another slot
+// (they swap) or anywhere else to clear the slot. Tapping a slot plays it.
+const FAV_KEY = "home-favorites-v1";
+const FAV_SLOTS = 5;
+type Favorites = (string | null)[];
+
+function loadFavorites(): Favorites {
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem(FAV_KEY) ?? "[]");
+    const list = Array.isArray(raw) ? raw : [];
+    return Array.from({ length: FAV_SLOTS }, (_, i) =>
+      GAMES.some((g) => g.playable && g.id === list[i]) ? (list[i] as string) : null,
+    );
+  } catch {
+    return Array(FAV_SLOTS).fill(null);
+  }
+}
+
+function saveFavorites(favorites: Favorites) {
+  try {
+    localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
+  } catch {
+    /* ignore */
+  }
+}
+
+function FavoriteSlots({
+  favorites,
+  dragging,
+  over,
+  title,
+  hint,
+  labelFor,
+  slotRefs,
+  onPlay,
+  onDragStart,
+}: {
+  favorites: Favorites;
+  dragging: number | null; // slot whose game is being dragged
+  over: number; // slot under the dragged game, or -1
+  title: string;
+  hint: string;
+  labelFor: (g: GameDef) => string;
+  slotRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>;
+  onPlay: (g: GameDef) => void;
+  onDragStart: (g: GameDef, slot: number, x: number, y: number) => void;
+}) {
+  const press = useRef<{ x: number; y: number; slot: number } | null>(null);
+  const moved = useRef(false);
+  const any = favorites.some(Boolean);
+
+  return (
+    <div className="glass-card mt-6 w-full px-3 pb-3 pt-2">
+      <p className="pb-2 text-xs font-semibold text-foreground/75">⭐ {any ? title : hint}</p>
+      <div className="grid grid-cols-5 gap-2">
+        {favorites.map((id, i) => {
+          const g = GAMES.find((x) => x.id === id);
+          return (
+            <button
+              key={i}
+              ref={(el) => {
+                slotRefs.current[i] = el;
+              }}
+              aria-label={g ? labelFor(g) : hint}
+              onClick={() => {
+                if (moved.current) {
+                  moved.current = false;
+                  return;
+                }
+                if (g) onPlay(g);
+              }}
+              onPointerDown={(e) => {
+                press.current = { x: e.clientX, y: e.clientY, slot: i };
+                moved.current = false;
+                try {
+                  // Keep following the finger once it leaves the slot.
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                } catch {
+                  /* capture is best-effort */
+                }
+              }}
+              onPointerMove={(e) => {
+                const p = press.current;
+                if (!p || !g || Math.hypot(e.clientX - p.x, e.clientY - p.y) < 10) return;
+                press.current = null;
+                moved.current = true;
+                onDragStart(g, i, e.clientX, e.clientY);
+              }}
+              onPointerUp={() => {
+                press.current = null;
+              }}
+              style={{ touchAction: "none" }}
+              className={`relative grid aspect-square w-full place-items-center overflow-hidden rounded-xl transition duration-200 ${
+                g ? "bg-card shadow-md ring-2 ring-white" : "border-2 border-dashed border-white/85 bg-white/25"
+              } ${over === i ? "scale-110 ring-4 ring-[var(--color-gold)]" : ""} ${dragging === i ? "opacity-40" : ""}`}
+            >
+              {g?.icon ? (
+                <img src={g.icon} alt="" draggable={false} className="h-full w-full select-none object-cover" />
+              ) : (
+                <span className="text-xl font-light text-white drop-shadow" aria-hidden>
+                  +
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // The title floats down and fades in once each time the app is opened, not
 // every time the player comes back to the home screen.
 let titleIntroPlayed = false;
@@ -372,6 +530,68 @@ function Home() {
   const [pendingTutorial, setPendingTutorial] = useState<Difficulty["id"] | null>(null);
   const [showPremiumLock, setShowPremiumLock] = useState(false);
   const [titleIntro, setTitleIntro] = useState(() => !titleIntroPlayed);
+  const audio = useAudio();
+  const [favorites, setFavorites] = useState<Favorites>(() => Array(FAV_SLOTS).fill(null));
+  // A game being dragged to (or between) the favorites slots.
+  const [drag, setDrag] = useState<{ game: GameDef; from: number | null; x: number; y: number; over: number } | null>(
+    null,
+  );
+  const slotRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const endDrag = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    setFavorites(loadFavorites());
+    return () => {
+      endDrag.current?.();
+    };
+  }, []);
+
+  const slotAt = (x: number, y: number) =>
+    slotRefs.current.findIndex((el) => {
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return x >= r.left - 6 && x <= r.right + 6 && y >= r.top - 6 && y <= r.bottom + 6;
+    });
+
+  const dropOn = (game: GameDef, from: number | null, to: number) => {
+    setFavorites((prev) => {
+      const next = [...prev];
+      if (to < 0) {
+        if (from !== null) next[from] = null;
+      } else if (from !== null) {
+        [next[from], next[to]] = [next[to], next[from]];
+      } else {
+        const had = next.indexOf(game.id);
+        if (had >= 0) next[had] = next[to];
+        next[to] = game.id;
+      }
+      saveFavorites(next);
+      return next;
+    });
+    if (to >= 0) audio.playClick();
+  };
+
+  const beginDrag = (game: GameDef, from: number | null, x: number, y: number) => {
+    endDrag.current?.();
+    setDrag({ game, from, x, y, over: slotAt(x, y) });
+    const move = (e: PointerEvent) =>
+      setDrag((d) => d && { ...d, x: e.clientX, y: e.clientY, over: slotAt(e.clientX, e.clientY) });
+    const up = (e: PointerEvent) => {
+      stop();
+      dropOn(game, from, slotAt(e.clientX, e.clientY));
+    };
+    const stop = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", stop);
+      endDrag.current = null;
+      setDrag(null);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", stop);
+    endDrag.current = stop;
+  };
   useEffect(() => {
     titleIntroPlayed = true;
     // Home stays mounted while games are open; drop the animation once it
@@ -388,7 +608,7 @@ function Home() {
     setProgress(loadProgress());
     // Warm the cache so the game screens open with their painting already
     // loaded instead of fading it in.
-    for (const src of [puzzlesBg, memoryBg]) {
+    for (const src of [puzzlesBg, memoryBg, orderMap, guessWhoBg, gooseBg]) {
       const img = new Image();
       img.src = src;
     }
@@ -428,15 +648,17 @@ function Home() {
     );
   }
 
-  if (screen === "more") return <MoreGamesScreen onBack={() => setScreen("home")} />;
   if (screen === "premium") return <PremiumScreen onBack={() => setScreen("home")} />;
   if (screen === "dragdrop") return <DragDropGame onBack={() => setScreen("home")} />;
   if (screen === "memory") return <MemoryGame onBack={() => setScreen("home")} />;
   if (screen === "seek") return <SeekGame onBack={() => setScreen("home")} />;
   if (screen === "order") return <OrderGame onBack={() => setScreen("home")} />;
   if (screen === "coloring") return <ColoringGame onBack={() => setScreen("home")} />;
+  if (screen === "guesswho") return <GuessWhoGame onBack={() => setScreen("home")} />;
+  if (screen === "goose") return <GooseGame onBack={() => setScreen("home")} />;
 
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
+  const openGame = (g: GameDef) => setScreen(GAME_SCREENS.includes(g.id) ? (g.id as GameScreen) : "select");
 
   const settingsButton = (
     <button
@@ -467,7 +689,7 @@ function Home() {
             >
               <img
                 src={titleImg}
-                alt={`FaithFun: ${t("app.title")}`}
+                alt="Gospi Kids: Bible Games"
                 draggable={false}
                 className="h-auto w-full select-none drop-shadow-[0_4px_10px_oklch(0.4_0.08_50/0.35)]"
               />
@@ -482,27 +704,32 @@ function Home() {
               prevLabel={t("home.prevGames")}
               nextLabel={t("home.nextGames")}
               randomLabel={t("home.randomGame")}
-              onPlay={(g) => setScreen(GAME_SCREENS.includes(g.id) ? (g.id as GameScreen) : "select")}
+              onPlay={openGame}
+              onDragStart={(g, x, y) => beginDrag(g, null, x, y)}
             />
 
-            <div className="mt-6 grid w-full grid-cols-2 gap-3">
-              <button
-                onClick={() => setScreen("premium")}
-                className="flex items-center justify-center gap-2 rounded-2xl border border-[oklch(1_0_0/0.5)] bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] px-3 py-3 text-base font-semibold text-foreground shadow-md transition active:scale-95"
-              >
-                <span aria-hidden>⭐</span>
-                {t("home.premium")}
-              </button>
-              <button
-                onClick={() => setScreen("more")}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-3 py-3 text-base font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
-              >
-                <span aria-hidden>🎮</span>
-                {t("home.moreGames")}
-              </button>
-            </div>
+            <FavoriteSlots
+              favorites={favorites}
+              dragging={drag?.from ?? null}
+              over={drag?.over ?? -1}
+              title={t("home.favorites")}
+              hint={t("home.favoritesHint")}
+              labelFor={(g) => t(g.labelKey)}
+              slotRefs={slotRefs}
+              onPlay={openGame}
+              onDragStart={(g, slot, x, y) => beginDrag(g, slot, x, y)}
+            />
           </div>
         </div>
+        {drag?.game.icon && (
+          <img
+            src={drag.game.icon}
+            alt=""
+            aria-hidden
+            className="pointer-events-none fixed z-50 h-16 w-16 -translate-x-1/2 -translate-y-1/2 -rotate-6 rounded-2xl border-4 border-white object-cover shadow-xl"
+            style={{ left: drag.x, top: drag.y }}
+          />
+        )}
         <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       </div>
     );

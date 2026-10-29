@@ -2,6 +2,7 @@
 // of the areas a tap fills), made by scripts/make-coloring.py. Pages are
 // picked up automatically for every story that has its two files in
 // src/assets/coloring/, listed in Bible order.
+import type { DifficultyId } from "./puzzles";
 import { STORIES, type Story } from "./stories";
 
 const LINES = import.meta.glob("../assets/coloring/*-lines.webp", {
@@ -32,28 +33,42 @@ export const COLORING_PAGES: ColoringPage[] = [...STORIES]
     return lines && regions ? [{ story, lines, regions }] : [];
   });
 
-// Colors chosen per area, saved per story so a picture can be finished later.
+// The five levels paint with more and more colors (and so more, smaller
+// areas): Easy has 4 numbers, Master all 12.
+export const COLOR_COUNTS: Record<DifficultyId, number> = {
+  easy: 4,
+  "easy-medium": 6,
+  medium: 8,
+  "medium-hard": 10,
+  hard: 12,
+};
+
+// Colors chosen per area, saved per story and level so a picture can be
+// finished later.
 export type Fills = Record<number, string>;
 
 // v2: paint by numbers (v1 was free coloring, whose fills no longer match).
-const key = (slug: string) => `coloring-v2:${slug}`;
+// Master keeps the key it had before there were levels.
+const key = (slug: string, level: DifficultyId) =>
+  level === "hard" ? `coloring-v2:${slug}` : `coloring-v2:${level}:${slug}`;
 
-export function loadFills(slug: string): Fills {
+export function loadFills(slug: string, level: DifficultyId): Fills {
   try {
-    const raw = localStorage.getItem(key(slug));
+    const raw = localStorage.getItem(key(slug, level));
     return raw ? (JSON.parse(raw) as Fills) : {};
   } catch {
     return {};
   }
 }
 
-export function saveFills(slug: string, fills: Fills) {
+export function saveFills(slug: string, level: DifficultyId, fills: Fills) {
   try {
-    if (Object.keys(fills).length) localStorage.setItem(key(slug), JSON.stringify(fills));
-    else localStorage.removeItem(key(slug));
+    if (Object.keys(fills).length) localStorage.setItem(key(slug, level), JSON.stringify(fills));
+    else localStorage.removeItem(key(slug, level));
   } catch {
     /* ignore */
   }
 }
 
-export const hasFills = (slug: string) => Object.keys(loadFills(slug)).length > 0;
+export const hasFills = (slug: string, level: DifficultyId) =>
+  Object.keys(loadFills(slug, level)).length > 0;
