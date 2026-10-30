@@ -42,6 +42,7 @@ import otKnight from "@/assets/chess/ot-knight.webp";
 import otRook from "@/assets/chess/ot-rook.webp";
 import otPawn from "@/assets/chess/ot-pawn.webp";
 import chessBg from "@/assets/parchis-bg.webp";
+import boardArt from "@/assets/chess-board.webp";
 
 const ART: Record<string, string> = {
   "nt-k": ntKing,
@@ -175,8 +176,8 @@ function PieceGuide() {
   );
 }
 
-// A piece: the character standing on its pedestal (ivory for the New
-// Testament, dark wood for the Old), with the chess symbol in a corner so
+// A piece: the character standing on its team's pedestal (light wood for the
+// New Testament, black for the Old), with the chess symbol in a corner so
 // children can tell how it moves. With a size it is that tall; without, it
 // fills its box, standing on the box's bottom edge.
 function PieceFigure({ side, kind, size }: { side: Side; kind: Kind; size?: number }) {
@@ -193,7 +194,7 @@ function PieceFigure({ side, kind, size }: { side: Side; kind: Kind; size?: numb
       />
       <span
         className={`absolute bottom-0 right-0 grid aspect-square place-items-center rounded-full leading-none shadow ${
-          side === "nt" ? "bg-[#fffaf0] text-[#5b3f12]" : "bg-[#35224d] text-[#f3e6ff]"
+          side === "nt" ? "bg-[#fff4e4] text-[#9b2a1c]" : "bg-[#1f2f6e] text-[#eef2ff]"
         }`}
         style={
           size ? { width: size * 0.3, fontSize: size * 0.22 } : { width: "34%", fontSize: "24cqw" }
@@ -204,6 +205,29 @@ function PieceFigure({ side, kind, size }: { side: Side; kind: Kind; size?: numb
     </span>
   );
 }
+
+// Where the squares are on the board picture, in % of its width and height.
+const COLS = [7.03, 17.26, 28.04, 38.81, 49.77, 60.55, 71.51, 82.28, 92.97];
+const ROWS = [6.85, 17.59, 28.52, 39.26, 49.81, 60.56, 71.02, 81.57, 92.31];
+
+const square = (sq: number) => {
+  const r = Math.floor(sq / 8);
+  const c = sq % 8;
+  return {
+    left: `${COLS[c]}%`,
+    top: `${ROWS[r]}%`,
+    width: `${COLS[c + 1] - COLS[c]}%`,
+    height: `${ROWS[r + 1] - ROWS[r]}%`,
+  };
+};
+
+// A figure is almost twice as tall as its square and stands near the square's
+// bottom edge; lower rows are drawn in front.
+const figureBox = (sq: number) => {
+  const r = Math.floor(sq / 8);
+  const h = ROWS[r + 1] - ROWS[r];
+  return { ...square(sq), top: `${ROWS[r] - 0.83 * h}%`, height: `${1.75 * h}%`, zIndex: 10 + r };
+};
 
 function ChessBoard({
   players,
@@ -362,60 +386,48 @@ function ChessBoard({
         {tray("ot")}
 
         {/* The board: the Old Testament at the top, the New at the bottom */}
-        <div className="relative mx-auto mb-1 mt-3 aspect-square w-full max-w-[min(100%,64dvh)] rounded-xl border-[6px] border-[oklch(0.45_0.07_50)] shadow-[0_14px_30px_oklch(0.25_0.05_50/0.45)]">
-          {/* The squares are clipped to the board's rounded corners; the
-              figures may stand a little above the top row. */}
-          <div className="absolute inset-0 overflow-hidden rounded-md">
-            {Array.from({ length: 64 }, (_, sq) => {
-              const dark = (Math.floor(sq / 8) + (sq % 8)) % 2 === 1;
-              const isLast = last && (last.from === sq || last.to === sq);
-              const target = targets.find((m) => m.to === sq);
-              return (
-                <button
-                  key={sq}
-                  onClick={() => tap(sq)}
-                  aria-label={`${"abcdefgh"[sq % 8]}${8 - Math.floor(sq / 8)}`}
-                  className="absolute"
-                  style={{
-                    left: `${(sq % 8) * 12.5}%`,
-                    top: `${Math.floor(sq / 8) * 12.5}%`,
-                    width: "12.5%",
-                    height: "12.5%",
-                    backgroundColor: dark ? "#b98b5e" : "#f3e3c3",
-                  }}
-                >
-                  {isLast && <span className="absolute inset-0 bg-[oklch(0.85_0.13_90/0.45)]" />}
-                  {selected === sq && (
-                    <span className="absolute inset-0 bg-[oklch(0.8_0.14_80/0.7)]" />
-                  )}
-                  {check && sq === kingSq && (
-                    <span className="absolute inset-0 bg-[radial-gradient(circle,oklch(0.6_0.22_25/0.85),transparent_70%)]" />
-                  )}
-                  {target && (
-                    <span
-                      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ${
-                        pos.board[sq] || target.enPassant
-                          ? "h-[92%] w-[92%] border-[4px] border-[oklch(0.45_0.13_150/0.8)]"
-                          : "h-[30%] w-[30%] bg-[oklch(0.45_0.13_150/0.6)]"
-                      }`}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+        <div className="relative mx-auto mb-1 mt-7 aspect-[1095/1080] w-full max-w-[min(100%,64dvh)] drop-shadow-[0_14px_22px_oklch(0.25_0.05_50/0.45)]">
+          <img
+            src={boardArt}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none"
+          />
+          {Array.from({ length: 64 }, (_, sq) => {
+            const isLast = last && (last.from === sq || last.to === sq);
+            const target = targets.find((m) => m.to === sq);
+            return (
+              <button
+                key={sq}
+                onClick={() => tap(sq)}
+                aria-label={`${"abcdefgh"[sq % 8]}${8 - Math.floor(sq / 8)}`}
+                className="absolute"
+                style={square(sq)}
+              >
+                {isLast && <span className="absolute inset-0 bg-[oklch(0.85_0.13_90/0.45)]" />}
+                {selected === sq && (
+                  <span className="absolute inset-0 bg-[oklch(0.8_0.14_80/0.7)]" />
+                )}
+                {check && sq === kingSq && (
+                  <span className="absolute inset-0 bg-[radial-gradient(circle,oklch(0.6_0.22_25/0.85),transparent_70%)]" />
+                )}
+                {target && (
+                  <span
+                    className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ${
+                      pos.board[sq] || target.enPassant
+                        ? "h-[92%] w-[92%] border-[4px] border-[oklch(0.45_0.13_150/0.8)]"
+                        : "h-[30%] w-[30%] bg-[oklch(0.45_0.13_150/0.6)]"
+                    }`}
+                  />
+                )}
+              </button>
+            );
+          })}
           {pieces.map(({ p, sq }) => (
             <span
               key={p.id}
-              className="pointer-events-none absolute px-[0.4%] transition-[left,top] duration-300 ease-out"
-              style={{
-                left: `${(sq % 8) * 12.5}%`,
-                // figures stand a bit taller than their square; lower rows in front
-                top: `${Math.floor(sq / 8) * 12.5 - 2.6}%`,
-                width: "12.5%",
-                height: "14.6%",
-                zIndex: 10 + Math.floor(sq / 8),
-              }}
+              className="pointer-events-none absolute transition-[left,top] duration-300 ease-out"
+              style={figureBox(sq)}
             >
               <PieceFigure side={p.side} kind={p.kind} />
             </span>
