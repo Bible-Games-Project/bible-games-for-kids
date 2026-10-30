@@ -30,6 +30,7 @@ import { GuessWhoGame } from "@/components/GuessWhoGame";
 import { GooseGame } from "@/components/GooseGame";
 import { DominoGame } from "@/components/DominoGame";
 import { ParchisGame } from "@/components/ParchisGame";
+import { ChessGame } from "@/components/ChessGame";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { ScreenFade } from "@/components/GameShell";
 import { useAudio } from "@/lib/audio";
@@ -52,6 +53,7 @@ import guessWhoBg from "@/assets/guesswho-bg.webp";
 import gooseBg from "@/assets/goose-bg.webp";
 import dominoIcon from "@/assets/icon-domino.webp";
 import parchisIcon from "@/assets/icon-parchis.webp";
+import chessIcon from "@/assets/icon-chess.webp";
 import dominoBg from "@/assets/domino-bg.webp";
 import parchisBg from "@/assets/parchis-bg.webp";
 import homeWideBg from "@/assets/home-bedtime-wide.webp";
@@ -94,7 +96,8 @@ type GameScreen =
   | "guesswho"
   | "goose"
   | "domino"
-  | "parchis";
+  | "parchis"
+  | "chess";
 const GAME_SCREENS: string[] = [
   "dragdrop",
   "memory",
@@ -105,6 +108,7 @@ const GAME_SCREENS: string[] = [
   "goose",
   "domino",
   "parchis",
+  "chess",
 ];
 
 interface GameDef {
@@ -128,6 +132,7 @@ const GAMES: GameDef[] = [
   { id: "goose", labelKey: "game.goose", icon: gooseIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
   { id: "domino", labelKey: "game.domino", icon: dominoIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
   { id: "parchis", labelKey: "game.parchis", icon: parchisIcon, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
+  { id: "chess", labelKey: "game.chess", icon: chessIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
   { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.87 0.07 62 / 0.6)", playable: false },
   { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.85 0.045 6 / 0.6)", playable: false },
   { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.8 0.07 258 / 0.6)", playable: false },
@@ -702,6 +707,7 @@ function Home() {
   if (screen === "goose") return <GooseGame onBack={() => setScreen("home")} />;
   if (screen === "domino") return <DominoGame onBack={() => setScreen("home")} />;
   if (screen === "parchis") return <ParchisGame onBack={() => setScreen("home")} />;
+  if (screen === "chess") return <ChessGame onBack={() => setScreen("home")} />;
 
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
   const openGame = (g: GameDef) => setScreen(GAME_SCREENS.includes(g.id) ? (g.id as GameScreen) : "select");
