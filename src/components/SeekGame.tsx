@@ -17,6 +17,7 @@ import {
   loadBest,
   saveBest,
   starText,
+  ScreenFade,
 } from "@/components/GameShell";
 
 import homeBg from "@/assets/home-bedtime.webp";
@@ -165,6 +166,7 @@ function SeekBoard({
 
   return (
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
+      <ScreenFade />
       <div className="mx-auto flex w-full max-w-lg flex-col px-4 py-4">
         <header className="flex items-center gap-3 pb-2">
           <BackButton onClick={onExit} label={st("seek.levels")} />

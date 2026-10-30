@@ -31,6 +31,7 @@ import {
   loadBest,
   saveBest,
   starText,
+  ScreenFade,
 } from "@/components/GameShell";
 import { STORIES } from "@/lib/stories";
 
@@ -121,7 +122,7 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
               {STORIES.slice(0, n).map((s, i) => (
                 <img
                   key={s.slug}
-                  src={s.image}
+                  src={s.thumb}
                   alt=""
                   className="absolute top-3 h-[72%] w-auto rounded-md border-2 border-white shadow"
                   style={{
@@ -236,7 +237,7 @@ function JourneyMap({ found, fresh = null }: { found: Set<string>; fresh?: strin
                         fill={fresh === s.slug ? "oklch(0.84 0.13 80)" : "white"}
                       />
                       <image
-                        href={s.image}
+                        href={s.thumb}
                         x={-STOP_R}
                         y={-STOP_R}
                         width={2 * STOP_R}
@@ -284,7 +285,7 @@ function JourneyMap({ found, fresh = null }: { found: Set<string>; fresh?: strin
           style={{ left: label.x, top: label.y }}
         >
           <div className="paper-card flex flex-col items-center gap-1 p-2 text-center">
-            <img src={label.story.image} alt="" className="h-20 w-16 rounded-lg object-cover" />
+            <img src={label.story.thumb} alt="" className="h-20 w-16 rounded-lg object-cover" />
             <span className="text-xs font-semibold leading-tight text-foreground">
               {localizeSceneTitle(label.story.slug, lang)}
             </span>
@@ -381,7 +382,7 @@ function OrderBoard({
     const scale = Math.min(box.width / MAP_VIEW.w, box.height / MAP_VIEW.h);
     const r = stop.getBoundingClientRect();
     setFlight({
-      image: s.image,
+      image: s.thumb,
       from: card.getBoundingClientRect(),
       to: { x: r.left + r.width / 2, y: r.top + r.height / 2, size: 2 * (STOP_R + 4) * scale },
       go: false,
@@ -424,6 +425,7 @@ function OrderBoard({
 
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
+      <ScreenFade />
       <BedtimeBackdrop image={orderMap} position="center top" fadeEnd={0} blur />
       <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-3 md:py-5">
         <header className="flex items-center gap-3 pb-2">
@@ -493,7 +495,7 @@ function OrderBoard({
                         className={`relative w-full overflow-hidden rounded-xl ${tall ? "aspect-[7/9]" : "aspect-square"}`}
                       >
                         <img
-                          src={s.image}
+                          src={s.thumb}
                           alt=""
                           draggable={false}
                           className="h-full w-full object-cover"

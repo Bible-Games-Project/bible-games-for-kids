@@ -274,15 +274,27 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// The cards for one game, and the character hidden for each player (two
-// players look for different ones among the same cards).
-export function dealCards(
+// Each player's own cards and hidden character. Players take their cards
+// one after another from a shuffled pile, so boards share as few characters
+// as possible, and nobody looks for the same character as someone else.
+export function dealBoards(
   level: DifficultyId,
   players: number,
-): { cards: Character[]; secrets: Character[] } {
-  const cards = shuffle(CHARACTERS).slice(0, CHARACTER_COUNTS[level]);
-  const secrets = shuffle(cards).slice(0, players);
-  return { cards, secrets };
+): { cards: Character[]; secret: Character }[] {
+  const n = Math.min(CHARACTER_COUNTS[level], CHARACTERS.length);
+  const pile = shuffle(CHARACTERS);
+  const hidden: Character[] = [];
+  return Array.from({ length: players }, (_, p) => {
+    const cards: Character[] = [];
+    for (let k = p * n; cards.length < n; k++) {
+      const c = pile[k % pile.length];
+      if (!cards.includes(c)) cards.push(c);
+    }
+    const free = cards.filter((c) => !hidden.includes(c));
+    const secret = free[Math.floor(Math.random() * free.length)];
+    hidden.push(secret);
+    return { cards: shuffle(cards), secret };
+  });
 }
 
 // Halving the cards with every question finds anyone in log2(n) questions;

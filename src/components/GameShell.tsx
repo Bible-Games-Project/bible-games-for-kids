@@ -1,7 +1,7 @@
 // Building blocks shared by the newer games (Drag & Drop, Seek & Find,
 // What Came First?, Coloring): a menu screen over a painting, a five-level
 // list, star ratings and the end-of-game card.
-import { useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { useSettings } from "@/lib/i18n";
 import type { DifficultyId } from "@/lib/puzzles";
@@ -9,6 +9,31 @@ import { storiesForLevel, type Story } from "@/lib/stories";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 
 export const LEVEL_IDS: DifficultyId[] = ["easy", "easy-medium", "medium", "medium-hard", "hard"];
+
+// A half-second fade from black when a screen opens, so its paintings
+// appear smoothly instead of popping in while they load.
+export function ScreenFade() {
+  const [clear, setClear] = useState(false);
+  const [gone, setGone] = useState(false);
+  useEffect(() => {
+    let raf = requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => setClear(true));
+    });
+    const id = window.setTimeout(() => setGone(true), 650);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(id);
+    };
+  }, []);
+  if (gone) return null;
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-[100] bg-black transition-opacity duration-500 ease-out motion-reduce:hidden"
+      style={{ opacity: clear ? 0 : 1 }}
+    />
+  );
+}
 
 export function BackButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
@@ -43,6 +68,7 @@ export function MenuScreen({
 }) {
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
+      <ScreenFade />
       <BedtimeBackdrop image={background} position={position} fadeEnd={30} blur={blur} />
       <div className="relative z-10 min-h-[100dvh] w-full">
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
@@ -99,6 +125,9 @@ export function LevelList({
           </span>
           <span className="min-w-0 flex-1">
             <span className="block font-display text-xl leading-snug">{t(`diff.${id}`)}</span>
+            <span className="block text-[11px] font-semibold text-muted-foreground/90">
+              {t(`diff.${id}.age`)}
+            </span>
             <span className="mt-0.5 block text-sm text-muted-foreground">{describe(id, i)}</span>
             <Stars value={best(id)} className="mt-1.5 block text-base" />
           </span>
@@ -146,7 +175,12 @@ export function StoryPicker({
                   : "bg-card text-foreground/80"
               }`}
             >
-              {t(`diff.${id}`)}
+              <span className="block truncate">{t(`diff.${id}`)}</span>
+              <span
+                className={`block truncate text-[9px] font-medium sm:text-[11px] ${active ? "opacity-80" : "text-muted-foreground"}`}
+              >
+                {t(`diff.${id}.age`)}
+              </span>
             </button>
           );
         })}
@@ -166,7 +200,7 @@ export function StoryPicker({
               {picture ? (
                 picture(s)
               ) : (
-                <img src={s.image} alt="" loading="lazy" className="h-full w-full object-cover" />
+                <img src={s.thumb} alt="" loading="lazy" className="h-full w-full object-cover" />
               )}
               <span className="absolute right-1.5 top-1.5">{badge(s)}</span>
             </span>

@@ -19,7 +19,8 @@ import {
 } from "@/lib/domino";
 import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
-import { BackButton, MenuScreen, ResultCard } from "@/components/GameShell";
+import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
+import { TOKEN_ORDER, Token } from "@/components/Token";
 
 import dominoBg from "@/assets/domino-bg.webp";
 
@@ -81,7 +82,7 @@ function Half({ value, faces, size }: { value: number; faces: Story[]; size: num
       style={{ width: size, height: size }}
     >
       <img
-        src={faces[value].image}
+        src={faces[value].thumb}
         alt=""
         draggable={false}
         className="h-full w-full object-cover"
@@ -306,6 +307,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
 
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
+      <ScreenFade />
       <BedtimeBackdrop image={dominoBg} fadeEnd={0} blur />
       <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-2xl flex-col px-3 py-3">
         <header className="flex items-center gap-3 pb-2">
@@ -328,6 +330,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
                   i === g.turn ? "ring-2 ring-[var(--color-gold)]" : ""
                 }`}
               >
+                <Token color={TOKEN_ORDER[i]} size={22} />
                 {nameOf(i)}
                 <span className="flex">
                   {h.slice(0, 10).map((x) => (
@@ -378,7 +381,11 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
         </div>
 
         <div className="glass-card mt-3 px-3 pb-3 pt-2">
-          <p className="min-h-[1.25rem] text-center text-sm font-semibold" aria-live="polite">
+          <p
+            className="flex min-h-[1.25rem] items-center justify-center gap-2 text-center text-sm font-semibold"
+            aria-live="polite"
+          >
+            {g.winner === null && <Token color={TOKEN_ORDER[g.turn]} size={22} />}
             {status}
           </p>
 

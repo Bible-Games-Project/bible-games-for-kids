@@ -16,18 +16,13 @@ import {
 
 import memoryBg from "@/assets/memory-bedtime.webp";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
+import { ScreenFade } from "@/components/GameShell";
+import { TOKEN_HEX, TOKEN_ORDER, Token } from "@/components/Token";
 import { useBackButton } from "@/lib/back-button";
 
-// Up to four players share the board, each with their own color for the
-// turn marker, the scoreboard and the pairs they find. Each is a deeper shade
-// of a color in the Memory painting: the lavender cards, the girl's pink
-// pajamas, the lamp's gold and the plant's leaves.
-const PLAYER_COLORS = [
-  "oklch(0.52 0.1 275)",
-  "oklch(0.58 0.13 355)",
-  "oklch(0.62 0.12 75)",
-  "oklch(0.53 0.09 135)",
-];
+// Up to four players share the board, each with the colour of their round
+// token for the turn marker, the scoreboard and the pairs they find.
+const PLAYER_COLORS = TOKEN_ORDER.map((c) => TOKEN_HEX[c]);
 const PLAYERS_KEY = "memory-players";
 
 const loadPlayers = (): number => {
@@ -125,6 +120,7 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
   // ---------- Level select ----------
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
+      <ScreenFade />
       <BedtimeBackdrop image={memoryBg} position="center 30%" fadeEnd={30} />
       <div className="relative z-10 min-h-[100dvh] w-full">
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
@@ -167,7 +163,7 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                     >
                       {cover && (
                         <img
-                          src={cover.image}
+                          src={cover.thumb}
                           alt=""
                           draggable={false}
                           className="h-full w-full object-cover"
@@ -178,6 +174,7 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <h2 className="font-display text-xl leading-snug">{t(`diff.${lv.id}`)}</h2>
+                  <p className="text-[11px] font-semibold text-muted-foreground/90">{t(`diff.${lv.id}.age`)}</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">
                     {mt("mem.pairsCount").replace("{n}", String(lv.pairs))}
                   </p>
@@ -195,16 +192,9 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
   );
 }
 
-function PlayerDot({ index, size = "h-7 w-7 text-xs" }: { index: number; size?: string }) {
-  return (
-    <span
-      className={`grid shrink-0 place-items-center rounded-full font-bold text-white shadow-sm ring-2 ring-white/80 ${size}`}
-      style={{ backgroundColor: PLAYER_COLORS[index] }}
-      aria-hidden
-    >
-      {index + 1}
-    </span>
-  );
+// Players are shown by the round tokens shared with the board games.
+function PlayerDot({ index, size = 28 }: { index: number; size?: number }) {
+  return <Token color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
 }
 
 // ---------- How many players? ----------
@@ -223,6 +213,7 @@ function PlayerPicker({
 
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
+      <ScreenFade />
       <BedtimeBackdrop image={memoryBg} position="center 30%" fadeEnd={30} />
       <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-md flex-col px-4 pt-6 pb-10">
         <header className="flex items-center gap-3 pb-2">
@@ -249,7 +240,7 @@ function PlayerPicker({
             >
               <span className="flex flex-wrap justify-center gap-1.5">
                 {Array.from({ length: n }, (_, i) => (
-                  <PlayerDot key={i} index={i} size="h-10 w-10 text-base" />
+                  <PlayerDot key={i} index={i} size={40} />
                 ))}
               </span>
               <span className="text-lg font-semibold">
@@ -460,6 +451,7 @@ function MemoryBoard({
 
   return (
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
+      <ScreenFade />
       {/* Header stays pinned while the board scrolls underneath it. */}
       <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 bg-[oklch(0.97_0.02_75/0.94)] backdrop-blur-sm">
         <div className={`mx-auto w-full max-w-lg px-4 pt-4 ${wide.width}`}>
@@ -559,7 +551,7 @@ function MemoryBoard({
                   }
                 >
                   <img
-                    src={card.scene.image}
+                    src={card.scene.thumb}
                     alt=""
                     draggable={false}
                     className="h-full w-full select-none object-cover"

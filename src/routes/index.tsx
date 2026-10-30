@@ -31,6 +31,7 @@ import { GooseGame } from "@/components/GooseGame";
 import { DominoGame } from "@/components/DominoGame";
 import { ParchisGame } from "@/components/ParchisGame";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
+import { ScreenFade } from "@/components/GameShell";
 import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
 import { isFreePuzzle } from "@/lib/freemium";
@@ -666,7 +667,9 @@ function Home() {
 
   if (active) {
     return (
-      <PuzzleBoard
+      <>
+        <ScreenFade key={active.puzzle.id} />
+        <PuzzleBoard
         key={active.puzzle.id}
         puzzle={active.puzzle}
         seed={active.seed}
@@ -685,6 +688,7 @@ function Home() {
         }}
         onExit={() => setActive(null)}
       />
+      </>
     );
   }
 
@@ -718,6 +722,7 @@ function Home() {
   if (screen === "home") {
     return (
       <div className="theme-bedtime relative min-h-[100dvh] w-full">
+        <ScreenFade />
         {/* The family scene in the middle of the painting stays at full color
             behind the frosted tiles. */}
         <BedtimeBackdrop image={wide ? homeWideBg : homeBg} position="center 40%" fadeEnd={0} />
@@ -780,6 +785,7 @@ function Home() {
   // screen === "select"
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
+      <ScreenFade />
       <BedtimeBackdrop image={puzzlesBg} position="center 40%" fadeEnd={30} />
       <div className="relative z-10 w-full">
         {settingsButton}
@@ -816,6 +822,9 @@ function Home() {
                   </span>
                   <span className="hidden w-full truncate text-center sm:block">
                     {t(`diff.${d.id}`)}
+                  </span>
+                  <span className={`block w-full truncate text-center text-[9px] font-medium sm:text-[11px] ${isActive ? "opacity-80" : "text-muted-foreground"}`}>
+                    {t(`diff.${d.id}.age`)}
                   </span>
                   <span className={`mt-0.5 text-[9px] font-bold sm:text-[10px] ${isActive ? "opacity-80" : "text-muted-foreground"}`}>
                     {completed}/{d.puzzles.length}
@@ -983,7 +992,7 @@ function DifficultyList({
             <div
               className="relative aspect-[7/9] overflow-hidden rounded-xl"
               style={{
-                backgroundImage: `url(${p.image})`,
+                backgroundImage: `url(${p.thumb})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}

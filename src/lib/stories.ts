@@ -63,11 +63,20 @@ export interface Story {
   // period (or their order is uncertain, like Jesus' parables) and are never
   // asked against each other. Old Testament < 200 <= New Testament.
   era: number;
+  // A small copy of the painting (scripts/make-thumbs.py) for lists, cards
+  // and board squares, which load much faster than the full painting.
+  thumb: string;
 }
+
+const THUMBS = import.meta.glob("../assets/thumbs/*.webp", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
 
 // Order here only seeds the puzzle shuffles; keep new stories at the end so
 // existing puzzle levels keep their order.
-export const STORIES: Story[] = [
+const LIST: Omit<Story, "thumb">[] = [
   { slug: "blessing-children", title: "Jesus Blesses the Children", verse: "Matthew 19:14", image: blessingChildren, era: 210 },
   { slug: "walking-water", title: "Jesus Walks on Water", verse: "Matthew 14:25", image: walkingWater, era: 210 },
   { slug: "feeding-5000", title: "Jesus Feeds the 5,000", verse: "John 6:11", image: feeding5000, era: 210 },
@@ -119,6 +128,11 @@ export const STORIES: Story[] = [
   { slug: "emmaus", title: "The Road to Emmaus", verse: "Luke 24:15", image: emmaus, era: 241 },
   { slug: "mustard-seed", title: "The Mustard Seed", verse: "Matthew 13:31", image: mustardSeed, era: 210 },
 ];
+
+export const STORIES: Story[] = LIST.map((s) => ({
+  ...s,
+  thumb: THUMBS[`../assets/thumbs/${s.slug}.webp`] ?? s.image,
+}));
 
 export const findStory = (slug: string): Story | undefined =>
   STORIES.find((s) => s.slug === slug);

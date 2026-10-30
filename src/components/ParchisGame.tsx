@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
 import { useAudio } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
@@ -21,7 +21,8 @@ import {
 import { findStory } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
-import { BackButton, MenuScreen, ResultCard } from "@/components/GameShell";
+import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
+import { Token } from "@/components/Token";
 
 import parchisBg from "@/assets/parchis-bg.webp";
 
@@ -108,40 +109,9 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
   );
 }
 
-// A classic parchís pawn: round head, collar and a cone on a round foot.
-// Without a size it fills the width of its box.
+// The pieces are the round tokens shared by all the board games.
 function Pawn({ color, size, dim = false }: { color: Color; size?: number; dim?: boolean }) {
-  const id = useId().replace(/:/g, "");
-  const [base, dark, light] = SHADES[color];
-  return (
-    <svg
-      width={size ?? "100%"}
-      height={size ? size * 1.3 : undefined}
-      viewBox="0 0 30 39"
-      aria-hidden
-      className={`block overflow-visible ${dim ? "opacity-50" : ""}`}
-      style={size ? undefined : { height: "auto" }}
-    >
-      <defs>
-        <radialGradient id={`${id}-g`} cx="0.35" cy="0.3" r="0.85">
-          <stop offset="0" stopColor={light} />
-          <stop offset="0.5" stopColor={base} />
-          <stop offset="1" stopColor={dark} />
-        </radialGradient>
-      </defs>
-      <ellipse cx="15" cy="36.5" rx="11" ry="2.5" fill="#000" opacity=".22" />
-      <ellipse cx="15" cy="34" rx="10.5" ry="3.2" fill={dark} />
-      <path
-        d="M6 33.5 C8 26 11 21 12 17 L18 17 C19 21 22 26 24 33.5 Z"
-        fill={`url(#${id}-g)`}
-        stroke={dark}
-        strokeWidth=".6"
-      />
-      <ellipse cx="15" cy="17" rx="5.5" ry="1.8" fill={base} stroke={dark} strokeWidth=".6" />
-      <circle cx="15" cy="10" r="6.2" fill={`url(#${id}-g)`} stroke={dark} strokeWidth=".6" />
-      <ellipse cx="12.8" cy="7.6" rx="1.8" ry="2.4" fill="#fff" opacity=".45" />
-    </svg>
-  );
+  return <Token color={color} size={size} className={dim ? "opacity-50" : ""} />;
 }
 
 // The middle of the board: the four colours meeting around the cross and an
@@ -402,6 +372,7 @@ function ParchisBoard({
 
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
+      <ScreenFade />
       <BedtimeBackdrop image={parchisBg} fadeEnd={0} blur />
       <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-xl flex-col px-3 py-3">
         <header className="flex items-center gap-3 pb-2">
@@ -426,7 +397,7 @@ function ParchisBoard({
                 <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-white/80">
                   {story && (
                     <img
-                      src={story.image}
+                      src={story.thumb}
                       alt=""
                       className="h-full w-full object-cover opacity-90"
                     />
@@ -458,7 +429,7 @@ function ParchisBoard({
                   boxShadow: exitOf ? `inset 0 0 0 2px ${SHADES[exitOf][0]}` : undefined,
                 }}
               >
-                {story && <img src={story.image} alt="" className="h-full w-full object-cover" />}
+                {story && <img src={story.thumb} alt="" className="h-full w-full object-cover" />}
               </div>
             );
           })}
@@ -477,13 +448,13 @@ function ParchisBoard({
                 onClick={() => canPick && move(p.k)}
                 disabled={!canPick}
                 aria-label={`${nameOf(p.s)} ${p.k + 1}`}
-                className={`absolute -translate-x-1/2 -translate-y-[78%] transition-[left,top] duration-150 ease-out ${
+                className={`absolute -translate-x-1/2 -translate-y-[45%] transition-[left,top] duration-150 ease-out ${
                   canPick ? "z-30" : "z-20"
                 }`}
-                style={{ left: pct(p.at[0] + shift), top: pct(p.at[1]), width: pct(1.15) }}
+                style={{ left: pct(p.at[0] + shift), top: pct(p.at[1]), width: pct(1.05) }}
               >
                 {canPick && (
-                  <span className="absolute inset-x-0 bottom-0 mx-auto aspect-square w-full animate-ping rounded-full bg-[var(--color-gold)]/60" />
+                  <span className="absolute inset-0 animate-ping rounded-full bg-[var(--color-gold)]/60" />
                 )}
                 <Pawn color={p.color} />
                 {canPick && (

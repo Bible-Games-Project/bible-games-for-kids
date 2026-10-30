@@ -10,6 +10,7 @@ export interface Puzzle {
   title: string;
   verse: string;
   image: string;
+  thumb: string;
   cols: number;
   rows: number;
 }
@@ -129,6 +130,7 @@ export const DIFFICULTIES: Difficulty[] = DIFFICULTY_DEFS.map((d) => {
         title: scene.title,
         verse: scene.verse,
         image: scene.image,
+        thumb: scene.thumb,
         cols: grid.cols,
         rows: grid.rows,
       };

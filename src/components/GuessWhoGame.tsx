@@ -10,7 +10,7 @@ import {
   CHARACTER_COUNTS,
   QUESTIONS,
   characterName,
-  dealCards,
+  dealBoards,
   guessStars,
   type Character,
   type Trait,
@@ -25,12 +25,16 @@ import {
   loadBest,
   saveBest,
   starText,
+  ScreenFade,
 } from "@/components/GameShell";
+
+import { TOKEN_HEX, TOKEN_ORDER, Token } from "@/components/Token";
 
 import guessBg from "@/assets/guesswho-bg.webp";
 
 const BEST_KEY = "guesswho-best-v1";
-const PLAYER_COLORS = ["oklch(0.5 0.13 262)", "oklch(0.55 0.17 25)"];
+// Each player's rack takes the colour of their token.
+const PLAYER_COLORS = TOKEN_ORDER.map((c) => TOKEN_HEX[c]);
 
 export function GuessWhoGame({ onBack }: { onBack: () => void }) {
   const { lang, t } = useSettings();
@@ -63,7 +67,7 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
       backLabel={t("select.back")}
     >
       <div className="mb-4 grid grid-cols-2 gap-3">
-        {[1, 2].map((n) => (
+        {[1, 2, 3, 4].map((n) => (
           <button
             key={n}
             onClick={() => setPlayers(n)}
@@ -75,11 +79,11 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
             {Array.from({ length: n }, (_, i) => (
               <PlayerDot key={i} index={i} />
             ))}
-            {n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", "2")}
+            {n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))}
           </button>
         ))}
       </div>
-      {players === 2 && (
+      {players > 1 && (
         <p className="-mt-1 mb-4 text-center text-sm text-muted-foreground">
           {gt("gw.twoPlayers")}
         </p>
@@ -106,25 +110,13 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
   );
 }
 
-function PlayerDot({ index, size = 22 }: { index: number; size?: number }) {
-  return (
-    <span
-      className="grid shrink-0 place-items-center rounded-full border-2 border-white font-bold text-white shadow"
-      style={{
-        backgroundColor: PLAYER_COLORS[index],
-        width: size,
-        height: size,
-        fontSize: size * 0.5,
-      }}
-      aria-hidden
-    >
-      {index + 1}
-    </span>
-  );
+function PlayerDot({ index, size = 26 }: { index: number; size?: number }) {
+  return <Token color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
 }
 
 // What one player has found out so far about their hidden character.
 interface PlayerBoard {
+  cards: Character[];
   secret: Character;
   down: Set<string>;
   asked: Map<Trait, boolean>;
@@ -149,18 +141,15 @@ function GuessBoard({
   const mt = (k: string) => memText(lang, k);
   const playerName = (i: number) => mt("mem.player").replace("{n}", String(i + 1));
 
-  const newGame = () => {
-    const { cards, secrets } = dealCards(level, players);
-    return {
+  const newGame = () => ({
+    boards: dealBoards(level, players).map(({ cards, secret }) => ({
       cards,
-      boards: secrets.map((secret) => ({
-        secret,
-        down: new Set<string>(),
-        asked: new Map(),
-        cost: 0,
-      })),
-    };
-  };
+      secret,
+      down: new Set<string>(),
+      asked: new Map(),
+      cost: 0,
+    })),
+  });
   const [game, setGame] = useState(newGame);
   const [turn, setTurn] = useState(0);
   const [sheet, setSheet] = useState(false);
@@ -181,10 +170,11 @@ function GuessBoard({
     };
   }, []);
 
-  const { cards, boards } = game;
+  const { boards } = game;
   const board = boards[turn];
+  const cards = board.cards;
   const name = (c: Character) => characterName(c, lang);
-  const standing = (b: PlayerBoard) => cards.filter((c) => !b.down.has(c.id));
+  const standing = (b: PlayerBoard) => b.cards.filter((c) => !b.down.has(c.id));
 
   const update = (i: number, change: (b: PlayerBoard) => PlayerBoard) =>
     setGame((g) => ({ ...g, boards: g.boards.map((b, k) => (k === i ? change(b) : b)) }));
@@ -276,6 +266,7 @@ function GuessBoard({
 
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
+      <ScreenFade />
       <BedtimeBackdrop image={guessBg} fadeEnd={0} blur />
       <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col px-3 py-3">
         <header className="flex items-center gap-3 pb-2">
@@ -324,7 +315,7 @@ function GuessBoard({
             className="grid gap-1.5"
             style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
           >
-            {cards.map((c) => {
+            {shown.cards.map((c) => {
               const isDown = shown.down.has(c.id);
               const isSecret = winner !== null && c === shown.secret;
               return (

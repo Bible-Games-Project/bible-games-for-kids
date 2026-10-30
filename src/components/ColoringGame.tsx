@@ -16,7 +16,13 @@ import {
   type Fills,
 } from "@/lib/coloring";
 import { useBackButton } from "@/lib/back-button";
-import { BackButton, MenuScreen, ResultCard, StoryPicker } from "@/components/GameShell";
+import {
+  BackButton,
+  MenuScreen,
+  ResultCard,
+  StoryPicker,
+  ScreenFade,
+} from "@/components/GameShell";
 
 import homeBg from "@/assets/home-bedtime.webp";
 
@@ -57,7 +63,7 @@ export function ColoringGame({ onBack }: { onBack: () => void }) {
           return (
             <span className="absolute inset-0 bg-white">
               <img
-                src={story.image}
+                src={story.thumb}
                 alt=""
                 loading="lazy"
                 className="absolute inset-0 h-full w-full object-cover opacity-30"
@@ -432,6 +438,7 @@ function ColoringBoard({
 
   return (
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
+      <ScreenFade />
       <div className="mx-auto flex w-full max-w-md flex-col px-4 py-4">
         <header className="flex items-center gap-2 pb-3">
           <BackButton onClick={onExit} label={ct("color.back")} />
