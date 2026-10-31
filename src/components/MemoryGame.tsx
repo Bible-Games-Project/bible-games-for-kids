@@ -16,7 +16,7 @@ import {
 
 import memoryBg from "@/assets/memory-bedtime.webp";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
-import { ScreenFade } from "@/components/GameShell";
+import { BackButton, ScreenFade } from "@/components/GameShell";
 import { TOKEN_HEX, TOKEN_ORDER, Token } from "@/components/Token";
 import { useBackButton } from "@/lib/back-button";
 
@@ -124,13 +124,7 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
       <BedtimeBackdrop image={memoryBg} position="center 30%" fadeEnd={30} />
       <div className="relative z-10 min-h-[100dvh] w-full">
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
-          <button
-            onClick={onBack}
-            className="grid h-10 w-10 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
-            aria-label={t("select.back")}
-          >
-            ←
-          </button>
+          <BackButton onClick={onBack} label={t("select.back")} />
           <h1 className="font-display text-2xl sm:text-3xl">{mt("mem.chooseLevel")}</h1>
         </header>
         <p className="mx-auto max-w-3xl px-6 pt-1 text-sm italic text-muted-foreground">
@@ -217,13 +211,7 @@ function PlayerPicker({
       <BedtimeBackdrop image={memoryBg} position="center 30%" fadeEnd={30} />
       <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-md flex-col px-4 pt-6 pb-10">
         <header className="flex items-center gap-3 pb-2">
-          <button
-            onClick={onBack}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
-            aria-label={mt("mem.levels")}
-          >
-            ←
-          </button>
+          <BackButton onClick={onBack} label={mt("mem.levels")} />
           <h1 className="font-display text-2xl">
             {t("game.memory")} · {t(`diff.${level.id}`)}
           </h1>
@@ -456,13 +444,7 @@ function MemoryBoard({
       <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 bg-[oklch(0.97_0.02_75/0.94)] backdrop-blur-sm">
         <div className={`mx-auto w-full max-w-lg px-4 pt-4 ${wide.width}`}>
           <header className="flex items-center gap-3 pb-2">
-            <button
-              onClick={onExit}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
-              aria-label={mt("mem.levels")}
-            >
-              ←
-            </button>
+            <BackButton onClick={onExit} label={mt("mem.levels")} />
             <h1 className="min-w-0 flex-1 truncate font-display text-xl">
               {t("game.memory")} · {t(`diff.${level.id}`)}
             </h1>

@@ -7,6 +7,7 @@ import { useSettings } from "@/lib/i18n";
 import type { DifficultyId } from "@/lib/puzzles";
 import { storiesForLevel, type Story } from "@/lib/stories";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
+import backArt from "@/assets/ui/back.webp";
 
 export const LEVEL_IDS: DifficultyId[] = ["easy", "easy-medium", "medium", "medium-hard", "hard"];
 
@@ -40,9 +41,14 @@ export function BackButton({ onClick, label }: { onClick: () => void; label: str
     <button
       onClick={onClick}
       aria-label={label}
-      className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
+      className="grid h-10 w-[3.25rem] shrink-0 place-items-center transition active:scale-90"
     >
-      ←
+      <img
+        src={backArt}
+        alt=""
+        draggable={false}
+        className="h-full w-full select-none object-contain drop-shadow-[0_2px_3px_oklch(0.3_0.06_50/0.35)] rtl:-scale-x-100"
+      />
     </button>
   );
 }

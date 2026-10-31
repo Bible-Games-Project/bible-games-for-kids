@@ -32,7 +32,7 @@ import { DominoGame } from "@/components/DominoGame";
 import { ParchisGame } from "@/components/ParchisGame";
 import { ChessGame } from "@/components/ChessGame";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
-import { ScreenFade } from "@/components/GameShell";
+import { BackButton, ScreenFade } from "@/components/GameShell";
 import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
 import { isFreePuzzle } from "@/lib/freemium";
@@ -57,6 +57,10 @@ import chessIcon from "@/assets/icon-chess.webp";
 import dominoBg from "@/assets/domino-bg.webp";
 import parchisBg from "@/assets/parchis-bg.webp";
 import homeWideBg from "@/assets/home-bedtime-wide.webp";
+import favoritesBar from "@/assets/ui/favorites-bar.webp";
+import diceArt from "@/assets/ui/dice.webp";
+import arrowArt from "@/assets/ui/arrow.webp";
+import gearArt from "@/assets/ui/gear.webp";
 
 
 export const Route = createFileRoute("/")({
@@ -315,18 +319,21 @@ function GameShelf({
   const tiles = Array.from({ length: n * SHELF_COPIES }, (_, k) => k);
 
   const roundButton =
-    "grid h-8 w-8 place-items-center rounded-full bg-card text-foreground shadow-md transition active:scale-90 disabled:opacity-35 disabled:active:scale-100";
+    "grid h-10 w-10 place-items-center transition active:scale-90 disabled:opacity-35 disabled:active:scale-100";
 
-  const chevron = (flip: boolean) => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden className={flip ? "rotate-180 rtl:rotate-0" : "rtl:rotate-180"}>
-      <path d="M9 6l6 6-6 6" />
-    </svg>
+  const paint = (src: string, extra = "") => (
+    <img
+      src={src}
+      alt=""
+      draggable={false}
+      className={`h-full w-full select-none object-contain drop-shadow-[0_2px_4px_oklch(0.3_0.06_50/0.35)] ${extra}`}
+    />
   );
 
   return (
     <div className="flex w-full items-center gap-1.5">
       <button onClick={() => move(-1)} disabled={spinning} aria-label={prevLabel} className={`${roundButton} shrink-0`}>
-        {chevron(true)}
+        {paint(arrowArt, "-scale-x-100 rtl:scale-x-100")}
       </button>
 
       <div
@@ -416,20 +423,15 @@ function GameShelf({
       {/* The arrow lines up with the left one; the dice sits just below it. */}
       <div className="relative shrink-0">
         <button onClick={() => move(1)} disabled={spinning} aria-label={nextLabel} className={roundButton}>
-          {chevron(false)}
+          {paint(arrowArt, "rtl:-scale-x-100")}
         </button>
         <button
           onClick={spin}
           disabled={spinning}
           aria-label={randomLabel}
-          className="absolute left-1/2 top-full mt-2 grid h-8 w-8 -translate-x-1/2 place-items-center rounded-xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] text-foreground shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90"
+          className="absolute left-1/2 top-full mt-2 grid h-10 w-10 -translate-x-1/2 place-items-center transition active:scale-90"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden className={spinning ? "animate-spin" : ""}>
-            <rect x="3" y="3" width="18" height="18" rx="4.5" fill="oklch(0.99 0.012 85)" stroke="currentColor" strokeWidth="1.6" />
-            {[[8, 8], [16, 8], [12, 12], [8, 16], [16, 16]].map(([cx, cy]) => (
-              <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="1.6" fill="currentColor" />
-            ))}
-          </svg>
+          {paint(diceArt, spinning ? "animate-spin" : "")}
         </button>
       </div>
     </div>
@@ -441,6 +443,8 @@ function GameShelf({
 // (they swap) or anywhere else to clear the slot. Tapping a slot plays it.
 const FAV_KEY = "home-favorites-v1";
 const FAV_SLOTS = 5;
+// Left edge of each well in the painted favorites bar, in % of its width.
+const WELLS = [6.8, 24.8, 42.5, 60.3, 77.9];
 type Favorites = (string | null)[];
 
 function loadFavorites(): Favorites {
@@ -489,9 +493,17 @@ function FavoriteSlots({
   const any = favorites.some(Boolean);
 
   return (
-    <div className="glass-card mt-6 w-full px-3 pb-3 pt-2">
-      <p className="pb-2 text-xs font-semibold text-foreground/75">⭐ {any ? title : hint}</p>
-      <div className="grid grid-cols-5 gap-2">
+    <div className="mt-5 w-full">
+      <p className="pb-1 text-xs font-semibold text-[oklch(0.99_0.01_85)] [text-shadow:0_1px_4px_oklch(0.25_0.05_50/0.8)]">
+        ⭐ {any ? title : hint}
+      </p>
+      <div className="relative w-full" style={{ aspectRatio: "1100 / 298" }}>
+        <img
+          src={favoritesBar}
+          alt=""
+          draggable={false}
+          className="absolute inset-0 h-full w-full select-none drop-shadow-[0_6px_12px_oklch(0.3_0.06_50/0.35)]"
+        />
         {favorites.map((id, i) => {
           const g = GAMES.find((x) => x.id === id);
           return (
@@ -528,15 +540,21 @@ function FavoriteSlots({
               onPointerUp={() => {
                 press.current = null;
               }}
-              style={{ touchAction: "none" }}
-              className={`relative grid aspect-square w-full place-items-center overflow-hidden rounded-xl transition duration-200 ${
-                g ? "bg-card shadow-md ring-2 ring-white" : "border-2 border-dashed border-white/85 bg-white/25"
+              style={{
+                touchAction: "none",
+                left: `${WELLS[i]}%`,
+                top: "21.1%",
+                width: "15.3%",
+                height: "56.4%",
+              }}
+              className={`absolute grid place-items-center overflow-hidden rounded-[20%] transition duration-200 ${
+                g ? "shadow-md" : ""
               } ${over === i ? "scale-110 ring-4 ring-[var(--color-gold)]" : ""} ${dragging === i ? "opacity-40" : ""}`}
             >
               {g?.icon ? (
                 <img src={g.icon} alt="" draggable={false} className="h-full w-full select-none object-cover" />
               ) : (
-                <span className="text-xl font-light text-white drop-shadow" aria-hidden>
+                <span className="text-2xl font-light text-[oklch(0.62_0.13_55/0.55)]" aria-hidden>
                   +
                 </span>
               )}
@@ -716,12 +734,14 @@ function Home() {
     <button
       onClick={() => setSettingsOpen(true)}
       aria-label={t("settings.title")}
-      className="absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full bg-card text-foreground/80 shadow-md transition active:scale-95"
+      className="absolute right-4 top-4 z-10 grid h-12 w-12 place-items-center transition active:scale-90"
     >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-      </svg>
+      <img
+        src={gearArt}
+        alt=""
+        draggable={false}
+        className="h-full w-full select-none object-contain drop-shadow-[0_2px_4px_oklch(0.3_0.06_50/0.4)]"
+      />
     </button>
   );
 
@@ -797,13 +817,7 @@ function Home() {
         {settingsButton}
 
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
-          <button
-            onClick={() => setScreen("home")}
-            className="grid h-10 w-10 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
-            aria-label={t("select.back")}
-          >
-            ←
-          </button>
+          <BackButton onClick={() => setScreen("home")} label={t("select.back")} />
           <h1 className="font-display text-2xl sm:text-3xl">{t("select.title")}</h1>
         </header>
 
