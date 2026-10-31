@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
 import { useAudio } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
@@ -229,6 +229,83 @@ const figureBox = (sq: number) => {
   return { ...square(sq), top: `${ROWS[r] - 0.83 * h}%`, height: `${1.75 * h}%`, zIndex: 10 + r };
 };
 
+// The squares a piece passes through on its way (the knight goes two squares
+// one way, then one to the side) and how long the trip takes.
+function travel(from: number, to: number, kind: Kind) {
+  const [r0, c0, r1, c1] = [Math.floor(from / 8), from % 8, Math.floor(to / 8), to % 8];
+  const turn = Math.abs(r1 - r0) === 2 ? r1 * 8 + c0 : r0 * 8 + c1;
+  const path = kind === "n" ? [from, turn, to] : [from, to];
+  const steps = kind === "n" ? 3 : Math.max(Math.abs(r1 - r0), Math.abs(c1 - c0));
+  return { path, ms: Math.min(1100, 260 + 160 * steps) };
+}
+
+// A piece on the board. When its square changes it travels there, lifted a
+// little, so children can follow the move.
+function BoardPiece({ piece, sq }: { piece: Piece; sq: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const was = useRef(sq);
+  useLayoutEffect(() => {
+    const from = was.current;
+    was.current = sq;
+    const el = ref.current;
+    if (from === sq || !el?.animate) return;
+    const { path, ms } = travel(from, sq, piece.kind);
+    const legs = path.slice(1).map((s, i) => {
+      const a = path[i];
+      return Math.max(Math.abs((s >> 3) - (a >> 3)), Math.abs((s & 7) - (a & 7)));
+    });
+    const total = legs.reduce((a, b) => a + b, 0);
+    let done = 0;
+    const frames = path.map((s, i) => {
+      if (i > 0) done += legs[i - 1];
+      const box = figureBox(s);
+      return { left: box.left, top: box.top, zIndex: 60, offset: done / total };
+    });
+    const glide = el.animate(frames, { duration: ms, easing: "ease-in-out" });
+    const lift = el.animate(
+      [
+        { transform: "translateY(0) scale(1)" },
+        { transform: `translateY(-${piece.kind === "n" ? 22 : 10}%) scale(1.08)` },
+        { transform: "translateY(0) scale(1)" },
+      ],
+      { duration: ms, easing: "ease-in-out" },
+    );
+    return () => {
+      glide.cancel();
+      lift.cancel();
+    };
+  }, [sq, piece.kind]);
+  return (
+    <span ref={ref} className="pointer-events-none absolute" style={figureBox(sq)}>
+      <PieceFigure side={piece.side} kind={piece.kind} />
+    </span>
+  );
+}
+
+// A captured piece waits on its square until the attacker lands, then spins
+// away in a burst of light.
+function CaptureBurst({ piece, sq, delay }: { piece: Piece; sq: number; delay: number }) {
+  return (
+    <>
+      <span className="pointer-events-none absolute" style={figureBox(sq)}>
+        <span className="chess-victim block h-full w-full" style={{ animationDelay: `${delay}ms` }}>
+          <PieceFigure side={piece.side} kind={piece.kind} />
+        </span>
+      </span>
+      <span
+        className="pointer-events-none absolute"
+        style={{ ...figureBox(sq), zIndex: 70, animationDelay: `${delay}ms` }}
+      >
+        <span className="chess-flash" />
+        <span className="chess-ring" />
+        {Array.from({ length: 10 }, (_, i) => (
+          <span key={i} className="chess-spark" style={{ rotate: `${i * 36 + 18}deg` }} />
+        ))}
+      </span>
+    </>
+  );
+}
+
 function ChessBoard({
   players,
   level,
@@ -249,6 +326,7 @@ function ChessBoard({
   const [selected, setSelected] = useState<number | null>(null);
   const [last, setLast] = useState<Move | null>(null);
   const [taken, setTaken] = useState<Piece[]>([]);
+  const [bursts, setBursts] = useState<{ piece: Piece; sq: number; delay: number }[]>([]);
   const [note, setNote] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
   const [ended, setEnded] = useState<"checkmate" | "stalemate" | "draw" | null>(null);
@@ -270,29 +348,40 @@ function ChessBoard({
     pos.board[sq]?.side === pos.turn && !(vsComputer && pos.turn === "ot");
   const targets = selected === null ? [] : moves.filter((m) => m.from === selected);
 
+  // The captured piece goes to the tray once the attacker has landed on it.
+  const capture = (victim: Piece, sq: number, ms: number) => {
+    setBursts((list) => [...list, { piece: victim, sq, delay: ms }]);
+    later(() => setTaken((list) => [...list, victim]), ms);
+    later(() => setBursts((list) => list.filter((b) => b.piece.id !== victim.id)), ms + 1100);
+  };
+
   const apply = (m: Move) => {
     const capturedSq = m.enPassant ? m.from - (m.from % 8) + (m.to % 8) : m.to;
     const victim = pos.board[capturedSq];
     const mover = pos.board[m.from]!;
     const next = play(pos, m);
+    const { ms } = travel(m.from, m.to, mover.kind);
     setPos(next);
     setLast(m);
     setSelected(null);
-    if (victim) setTaken((list) => [...list, victim]);
+    if (victim) capture(victim, capturedSq, ms);
     const result = outcome(next);
     if (m.promote) setNote(ct("chess.promoted", { name: ct(`chess.name.${mover.side}-q`) }));
     else setNote(null);
     if (result !== "play") {
-      setEnded(result);
-      if (result === "checkmate") {
-        const winner = pos.turn;
-        if (!vsComputer || winner === "nt") audio.playWin();
-        else audio.playIncorrect();
-        if (vsComputer && winner === "nt") onWin();
-      }
+      // the game ends once the last move has landed
+      later(() => {
+        setEnded(result);
+        if (result === "checkmate") {
+          const winner = pos.turn;
+          if (!vsComputer || winner === "nt") audio.playWin();
+          else audio.playIncorrect();
+          if (vsComputer && winner === "nt") onWin();
+        }
+      }, ms + 400);
       return;
     }
-    if (victim) audio.playCorrect();
+    if (victim) later(() => audio.playCorrect(), ms);
     else audio.playClick();
     if (vsComputer && next.turn === "ot") {
       setThinking(true);
@@ -301,7 +390,7 @@ function ChessBoard({
         const reply = computerMove(next, level);
         setThinking(false);
         if (reply) applyFrom(next, reply);
-      }, 450);
+      }, ms + 250);
     }
   };
 
@@ -311,17 +400,20 @@ function ChessBoard({
     const victim = base.board[capturedSq];
     const mover = base.board[m.from]!;
     const next = play(base, m);
+    const { ms } = travel(m.from, m.to, mover.kind);
     setPos(next);
     setLast(m);
-    if (victim) setTaken((list) => [...list, victim]);
+    if (victim) capture(victim, capturedSq, ms);
     setNote(m.promote ? ct("chess.promoted", { name: ct(`chess.name.${mover.side}-q`) }) : null);
     const result = outcome(next);
     if (result !== "play") {
-      setEnded(result);
-      if (result === "checkmate") audio.playIncorrect();
+      later(() => {
+        setEnded(result);
+        if (result === "checkmate") audio.playIncorrect();
+      }, ms + 400);
       return;
     }
-    if (victim) audio.playIncorrect();
+    if (victim) later(() => audio.playIncorrect(), ms);
     else audio.playClick();
   };
 
@@ -340,6 +432,7 @@ function ChessBoard({
     setSelected(null);
     setLast(null);
     setTaken([]);
+    setBursts([]);
     setNote(null);
     setThinking(false);
     setEnded(null);
@@ -354,8 +447,11 @@ function ChessBoard({
   else if (check) status = `${ct("chess.check")} ${ct("chess.turn", { team: team(pos.turn) })}`;
   else status = ct("chess.turn", { team: team(pos.turn) });
 
-  // All pieces, keyed by id so a move glides across the board.
-  const pieces = pos.board.flatMap((p, sq) => (p ? [{ p, sq }] : []));
+  // All pieces, keyed by id and always in the same order, so a piece keeps
+  // its element and can travel from square to square.
+  const pieces = pos.board
+    .flatMap((p, sq) => (p ? [{ p, sq }] : []))
+    .sort((a, b) => a.p.id - b.p.id);
 
   const tray = (side: Side) => (
     <div className="flex min-h-7 flex-wrap items-center gap-1 px-1">
@@ -423,14 +519,11 @@ function ChessBoard({
               </button>
             );
           })}
+          {bursts.map((b) => (
+            <CaptureBurst key={b.piece.id} {...b} />
+          ))}
           {pieces.map(({ p, sq }) => (
-            <span
-              key={p.id}
-              className="pointer-events-none absolute transition-[left,top] duration-300 ease-out"
-              style={figureBox(sq)}
-            >
-              <PieceFigure side={p.side} kind={p.kind} />
-            </span>
+            <BoardPiece key={p.id} piece={p} sq={sq} />
           ))}
         </div>
 
