@@ -357,7 +357,7 @@ function GuessBoard({
           </div>
         </div>
 
-        <div className="glass-card mt-3 px-3 pb-3 pt-2">
+        <div className="paint-box paint-long mt-3 px-5 pb-4 pt-3">
           <p
             className={`min-h-[1.5rem] text-center text-sm font-semibold ${
               message?.tone === "yes"
@@ -408,43 +408,45 @@ function GuessBoard({
           onClick={() => setSheet(false)}
         >
           <div
-            className="paper-card max-h-[75dvh] w-full max-w-lg overflow-y-auto rounded-b-none p-4 pb-6 animate-in slide-in-from-bottom-10 duration-200"
+            className="paint-box paint-tall paint-solid w-full max-w-lg animate-in slide-in-from-bottom-10 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-display text-xl text-foreground">{gt("gw.ask")}</h2>
-              <button
-                onClick={() => setSheet(false)}
-                aria-label={gt("gw.close")}
-                className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground/70 shadow-sm"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {QUESTIONS.map(({ trait, emoji }) => {
-                const answer = board.asked.get(trait);
-                return (
-                  <button
-                    key={trait}
-                    onClick={() => ask(trait)}
-                    disabled={answer !== undefined}
-                    className={`flex items-center gap-2 rounded-2xl px-3 py-2.5 text-left text-sm font-semibold shadow-sm transition active:scale-95 ${
-                      answer === undefined
-                        ? "bg-card text-foreground"
-                        : answer
-                          ? "bg-[oklch(0.9_0.07_150)] text-[oklch(0.35_0.08_150)]"
-                          : "bg-[oklch(0.92_0.04_25)] text-[oklch(0.45_0.12_25)]"
-                    }`}
-                  >
-                    <span className="text-xl" aria-hidden>
-                      {emoji}
-                    </span>
-                    <span className="min-w-0 flex-1 leading-tight">{gt(`gw.q.${trait}`)}</span>
-                    {answer !== undefined && <span aria-hidden>{answer ? "✓" : "✗"}</span>}
-                  </button>
-                );
-              })}
+            <div className="max-h-[75dvh] overflow-y-auto px-6 pb-7 pt-6">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-display text-xl text-foreground">{gt("gw.ask")}</h2>
+                <button
+                  onClick={() => setSheet(false)}
+                  aria-label={gt("gw.close")}
+                  className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground/70 shadow-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {QUESTIONS.map(({ trait, emoji }) => {
+                  const answer = board.asked.get(trait);
+                  return (
+                    <button
+                      key={trait}
+                      onClick={() => ask(trait)}
+                      disabled={answer !== undefined}
+                      className={`flex items-center gap-2 rounded-2xl px-3 py-2.5 text-left text-sm font-semibold shadow-sm transition active:scale-95 ${
+                        answer === undefined
+                          ? "bg-card text-foreground"
+                          : answer
+                            ? "bg-[oklch(0.9_0.07_150)] text-[oklch(0.35_0.08_150)]"
+                            : "bg-[oklch(0.92_0.04_25)] text-[oklch(0.45_0.12_25)]"
+                      }`}
+                    >
+                      <span className="text-xl" aria-hidden>
+                        {emoji}
+                      </span>
+                      <span className="min-w-0 flex-1 leading-tight">{gt(`gw.q.${trait}`)}</span>
+                      {answer !== undefined && <span aria-hidden>{answer ? "✓" : "✗"}</span>}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

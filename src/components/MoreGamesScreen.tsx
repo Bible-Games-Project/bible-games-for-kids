@@ -83,7 +83,7 @@ export function MoreGamesScreen({ onBack }: { onBack: () => void }) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="paper-card group grid grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 p-3 transition active:scale-[0.99]"
+              className="paint-box paint-long paint-solid group grid grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 p-4 transition active:scale-[0.99]"
             >
               <img
                 src={g.icon}

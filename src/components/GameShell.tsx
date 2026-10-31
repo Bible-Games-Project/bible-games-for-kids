@@ -200,7 +200,7 @@ export function StoryPicker({
               window.scrollTo(0, 0);
               onPick(s);
             }}
-            className="glass-card flex flex-col overflow-hidden p-2 text-left transition active:scale-[0.98]"
+            className="paint-box paint-tall paint-thin flex flex-col p-2.5 text-left transition active:scale-[0.98]"
           >
             <span className="relative aspect-[7/9] w-full overflow-hidden rounded-xl">
               {picture ? (
@@ -239,7 +239,7 @@ export function ResultCard({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-      <div className="paper-card w-full max-w-sm p-6 text-center">
+      <div className="paint-box paint-square paint-solid w-full max-w-sm p-7 text-center">
         <div className="text-5xl">{top}</div>
         <h2 className="mt-3 font-display text-2xl text-foreground">{title}</h2>
         {detail && <div className="mt-2 text-base text-muted-foreground">{detail}</div>}
@@ -282,7 +282,7 @@ export function ConfirmCard({
       onClick={onCancel}
     >
       <div
-        className="paper-card w-full max-w-sm p-6 text-center"
+        className="paint-box paint-square paint-solid w-full max-w-sm p-7 text-center"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-4xl">{icon}</div>

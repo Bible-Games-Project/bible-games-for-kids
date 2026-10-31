@@ -90,7 +90,7 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
       onBack={onBack}
       backLabel={t("select.back")}
     >
-      <div className="glass-card mb-5 p-3">
+      <div className="paint-box paint-long paint-thin mb-5 px-4 py-3">
         <p className="text-center text-sm font-semibold text-foreground/80">
           🗺️ {ot("order.journey", { n: journey.found.size, total: JOURNEY.length })}
         </p>
@@ -284,7 +284,7 @@ function JourneyMap({ found, fresh = null }: { found: Set<string>; fresh?: strin
           className="pointer-events-none absolute z-10 w-36 -translate-x-1/2 -translate-y-full pb-2 animate-in fade-in zoom-in-95 duration-200"
           style={{ left: label.x, top: label.y }}
         >
-          <div className="paper-card flex flex-col items-center gap-1 p-2 text-center">
+          <div className="paint-box paint-square paint-solid paint-thin flex flex-col items-center gap-1 p-3 text-center">
             <img src={label.story.thumb} alt="" className="h-20 w-16 rounded-lg object-cover" />
             <span className="text-xs font-semibold leading-tight text-foreground">
               {localizeSceneTitle(label.story.slug, lang)}
@@ -449,7 +449,7 @@ function OrderBoard({
           </div>
 
           <div className="shrink-0 md:flex md:w-[26rem] md:flex-col md:justify-center">
-            <div className="glass-card px-3 pb-3 pt-2">
+            <div className="paint-box paint-wide px-4 pb-4 pt-3">
               <p className="text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {ot("order.round", { n: round, total: ORDER_ROUNDS })}
               </p>

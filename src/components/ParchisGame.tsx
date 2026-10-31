@@ -86,7 +86,7 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
           </button>
         ))}
       </div>
-      <label className="glass-card mt-3 flex items-center gap-3 px-4 py-3 text-sm font-semibold">
+      <label className="paint-box paint-long paint-thin mt-3 flex items-center gap-3 px-5 py-3.5 text-sm font-semibold">
         <input
           type="checkbox"
           checked={quick}
@@ -95,7 +95,7 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
         />
         {pt("par.quick")}
       </label>
-      <div className="glass-card mt-4 p-4">
+      <div className="paint-box paint-wide mt-4 p-5">
         <h3 className="font-display text-lg">{pt("par.rules")}</h3>
         <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm">
           <li>{pt("par.rule5")}</li>
@@ -468,7 +468,7 @@ function ParchisBoard({
         </div>
 
         {/* Whose turn, the die and the pawn choice */}
-        <div className="glass-card mt-3 flex items-center gap-3 px-3 py-2">
+        <div className="paint-box paint-long paint-thin mt-3 flex items-center gap-3 px-4 py-2.5">
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-2 text-sm font-semibold">
               <Pawn color={seat.color} size={18} />

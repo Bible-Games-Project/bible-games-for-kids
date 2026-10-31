@@ -14,7 +14,7 @@ export function OnboardingLanguage() {
       className="flex min-h-[100dvh] w-full items-center justify-center px-5 py-10"
       dir={isRtl ? "rtl" : "ltr"}
     >
-      <div className="paper-card w-full max-w-sm p-6 text-center">
+      <div className="paint-box paint-tall paint-solid w-full max-w-sm p-7 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           {dict["onboard.welcome"]}
         </p>

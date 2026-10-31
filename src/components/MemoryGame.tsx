@@ -19,6 +19,7 @@ import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, ScreenFade } from "@/components/GameShell";
 import { TOKEN_HEX, TOKEN_ORDER, Token } from "@/components/Token";
 import { useBackButton } from "@/lib/back-button";
+import cardBack from "@/assets/ui/card-back.webp";
 
 // Up to four players share the board, each with the colour of their round
 // token for the turn marker, the scoreboard and the pairs they find.
@@ -49,23 +50,26 @@ const WIDE_LAYOUT: Record<MemoryLevel["wideCols"], { cols: string; width: string
 // pattern and a cream cross.
 function CardBack({ className = "" }: { className?: string }) {
   return (
-    <span
-      className={`grid place-items-center bg-[var(--color-primary)] ring-2 ring-inset ring-[oklch(0.98_0.02_80/0.55)] ${className}`}
-      style={{
-        backgroundImage:
-          "radial-gradient(oklch(1 0 0 / 0.16) 1.2px, transparent 1.4px), linear-gradient(145deg, oklch(0.74 0.11 45), oklch(0.62 0.12 35))",
-        backgroundSize: "12px 12px, 100% 100%",
-      }}
-    >
-      <svg viewBox="0 0 24 24" className="h-1/3 w-1/3" aria-hidden>
-        <path
-          d="M12 3v18M6 9h12"
-          stroke="oklch(0.98 0.02 80)"
-          strokeWidth="2.6"
-          strokeLinecap="round"
-          fill="none"
-        />
-      </svg>
+    <img
+      src={cardBack}
+      alt=""
+      draggable={false}
+      className={`select-none drop-shadow-[0_3px_4px_oklch(0.3_0.06_50/0.35)] ${className}`}
+    />
+  );
+}
+
+// A face-up card: the painting set inside the same painted frame as the back.
+function CardFace({ src, className = "" }: { src: string; className?: string }) {
+  return (
+    <span className={`drop-shadow-[0_3px_4px_oklch(0.3_0.06_50/0.35)] ${className}`}>
+      <img src={cardBack} alt="" draggable={false} className="absolute inset-0 h-full w-full select-none" />
+      <img
+        src={src}
+        alt=""
+        draggable={false}
+        className="absolute inset-x-[7.5%] inset-y-[5.2%] h-[89.6%] w-[85%] select-none rounded-[10%/6.5%] object-cover"
+      />
     </span>
   );
 }
@@ -146,25 +150,14 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                 {/* A small fan of game cards: one still face down and a
                     matched pair showing this level's painting. */}
                 <span className="relative h-28 w-36 shrink-0" aria-hidden>
-                  <CardBack className="absolute left-0 top-5 aspect-[4/5] w-16 -rotate-12 rounded-lg shadow-md" />
-                  {[
-                    "left-[40px] top-2 -rotate-2",
-                    "left-[76px] top-5 rotate-[11deg] transition-transform group-hover:rotate-[15deg]",
-                  ].map((pos) => (
-                    <span
-                      key={pos}
-                      className={`absolute aspect-[4/5] w-16 overflow-hidden rounded-lg bg-card shadow-md ring-2 ring-[var(--color-gold)] ${pos}`}
-                    >
-                      {cover && (
-                        <img
-                          src={cover.thumb}
-                          alt=""
-                          draggable={false}
-                          className="h-full w-full object-cover"
-                        />
-                      )}
-                    </span>
-                  ))}
+                  <CardBack className="absolute left-0 top-4 aspect-[13/20] w-14 -rotate-12" />
+                  {cover &&
+                    [
+                      "left-[38px] top-1 -rotate-2",
+                      "left-[74px] top-4 rotate-[11deg] transition-transform group-hover:rotate-[15deg]",
+                    ].map((pos) => (
+                      <CardFace key={pos} src={cover.thumb} className={`absolute aspect-[13/20] w-14 ${pos}`} />
+                    ))}
                 </span>
                 <div className="min-w-0 flex-1">
                   <h2 className="font-display text-xl leading-snug">{t(`diff.${lv.id}`)}</h2>
@@ -517,27 +510,24 @@ function MemoryBoard({
               onClick={() => flip(i)}
               disabled={isMatched}
               aria-label={faceUp ? title : mt("mem.hidden")}
-              className="relative aspect-[4/5] w-full rounded-xl [perspective:800px]"
+              className="relative aspect-[13/20] w-full [perspective:800px]"
             >
               <span
                 className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d] motion-reduce:transition-none"
                 style={{ transform: faceUp ? "rotateY(180deg)" : "none" }}
               >
-                <CardBack className="absolute inset-0 rounded-xl shadow-md [backface-visibility:hidden]" />
+                <CardBack className="absolute inset-0 h-full w-full [backface-visibility:hidden]" />
                 <span
-                  className="absolute inset-0 overflow-hidden rounded-xl bg-card shadow-md [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                  className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]"
                   style={
                     isMatched
-                      ? { boxShadow: `0 0 0 3px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"}` }
+                      ? {
+                          filter: `drop-shadow(0 0 3px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"}) drop-shadow(0 0 7px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"})`,
+                        }
                       : undefined
                   }
                 >
-                  <img
-                    src={card.scene.thumb}
-                    alt=""
-                    draggable={false}
-                    className="h-full w-full select-none object-cover"
-                  />
+                  <CardFace src={card.scene.thumb} className="absolute inset-0" />
                 </span>
               </span>
             </button>
@@ -555,7 +545,7 @@ function MemoryBoard({
 
       {done && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-          <div className="paper-card w-full max-w-sm p-6 text-center">
+          <div className="paint-box paint-square paint-solid w-full max-w-sm p-7 text-center">
             {multi ? (
               <>
                 <div className="text-5xl" aria-hidden>

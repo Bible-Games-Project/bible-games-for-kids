@@ -62,7 +62,7 @@ export function DominoGame({ onBack }: { onBack: () => void }) {
           </button>
         ))}
       </div>
-      <div className="glass-card mt-5 flex flex-col items-center gap-3 p-4 text-center">
+      <div className="paint-box paint-long mt-5 flex flex-col items-center gap-3 p-5 text-center">
         <div className="flex gap-2">
           <DominoTile tile={{ id: -1, a: 2, b: 5 }} faces={sample} size={44} />
           <DominoTile tile={{ id: -2, a: 5, b: 3 }} faces={sample} size={44} />
@@ -380,7 +380,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
           </div>
         </div>
 
-        <div className="glass-card mt-3 px-3 pb-3 pt-2">
+        <div className="paint-box paint-long mt-3 px-5 pb-4 pt-3">
           <p
             className="flex min-h-[1.25rem] items-center justify-center gap-2 text-center text-sm font-semibold"
             aria-live="polite"
@@ -454,7 +454,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
 
       {cover && g.winner === null && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[oklch(0.3_0.05_262/0.75)] p-6">
-          <div className="paper-card w-full max-w-sm p-6 text-center">
+          <div className="paint-box paint-square paint-solid w-full max-w-sm p-7 text-center">
             <div className="text-4xl">📱</div>
             <p className="mt-3 text-lg font-semibold text-foreground">
               {dt("dom.passDevice", { name: nameOf(g.turn) })}

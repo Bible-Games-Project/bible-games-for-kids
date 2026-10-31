@@ -15,7 +15,7 @@ export function PremiumScreen({ onBack }: { onBack: () => void }) {
         <h1 className="font-display text-2xl sm:text-3xl">{t("premium.title")}</h1>
       </header>
       <main className="mx-auto max-w-md px-5 py-8 text-center">
-        <div className="paper-card p-8">
+        <div className="paint-box paint-tall paint-solid p-8">
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[var(--color-gold)]/30 text-3xl">
             ✨
           </div>

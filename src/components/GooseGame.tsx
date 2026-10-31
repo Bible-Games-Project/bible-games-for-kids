@@ -85,7 +85,7 @@ export function GooseGame({ onBack }: { onBack: () => void }) {
         ))}
       </div>
 
-      <div className="glass-card mt-5 p-4">
+      <div className="paint-box paint-wide mt-5 p-5">
         <h3 className="font-display text-lg">{gt("goose.rules")}</h3>
         <ul className="mt-2 space-y-2 text-sm">
           <RuleLine icon={<GooseBadge />} text={gt("goose.ruleGoose")} />
@@ -585,7 +585,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
 
       {/* Turn, message and the die */}
       <div className="relative z-10 mx-auto w-full max-w-3xl px-3 pb-4 pt-2">
-        <div className="glass-card flex items-center gap-3 px-3 py-2">
+        <div className="paint-box paint-long paint-thin flex items-center gap-3 px-4 py-2.5">
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-2 text-sm font-semibold">
               <Pawn index={turn} size={22} />

@@ -613,42 +613,44 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
       </div>
 
       {/* Tray */}
-      <div
-        className="paper-card mx-2 mb-2 flex items-center gap-2 overflow-x-auto p-3"
-        style={{ minHeight: trayPieceSize + 24 }}
-      >
-        {trayPieces.length === 0 && !done && (
-          <p className="w-full text-center text-sm text-muted-foreground">{t("puzzle.allPlaced")}</p>
-        )}
-        {boardSize.w > 0 &&
-          trayPieces.map((p) => {
-            if (drag?.pieceId === p.id) {
+      <div className="paint-box paint-long mx-2 mb-2">
+        <div
+          className="flex items-center gap-2 overflow-x-auto px-4 py-3"
+          style={{ minHeight: trayPieceSize + 24 }}
+        >
+          {trayPieces.length === 0 && !done && (
+            <p className="w-full text-center text-sm text-muted-foreground">{t("puzzle.allPlaced")}</p>
+          )}
+          {boardSize.w > 0 &&
+            trayPieces.map((p) => {
+              if (drag?.pieceId === p.id) {
+                return (
+                  <div
+                    key={p.id}
+                    style={{ width: trayPieceSize, height: trayPieceSize, flex: "0 0 auto", opacity: 0.25 }}
+                  />
+                );
+              }
+              const isSelected = selectedId === p.id;
+              const isShaking = shakeId === p.id;
               return (
                 <div
                   key={p.id}
-                  style={{ width: trayPieceSize, height: trayPieceSize, flex: "0 0 auto", opacity: 0.25 }}
-                />
+                  onPointerDown={(e) => startPointer(e, p.id, true)}
+                  className={`no-select piece-shadow shrink-0 cursor-grab transition-transform active:cursor-grabbing ${
+                    isSelected ? "piece-selected" : ""
+                  } ${isShaking ? "piece-shake" : ""}`}
+                  style={{
+                    width: trayPieceSize,
+                    height: trayPieceSize,
+                    touchAction: "none",
+                  }}
+                >
+                  {renderPieceSvg(p, trayPieceSize, trayPieceSize)}
+                </div>
               );
-            }
-            const isSelected = selectedId === p.id;
-            const isShaking = shakeId === p.id;
-            return (
-              <div
-                key={p.id}
-                onPointerDown={(e) => startPointer(e, p.id, true)}
-                className={`no-select piece-shadow shrink-0 cursor-grab transition-transform active:cursor-grabbing ${
-                  isSelected ? "piece-selected" : ""
-                } ${isShaking ? "piece-shake" : ""}`}
-                style={{
-                  width: trayPieceSize,
-                  height: trayPieceSize,
-                  touchAction: "none",
-                }}
-              >
-                {renderPieceSvg(p, trayPieceSize, trayPieceSize)}
-              </div>
-            );
-          })}
+            })}
+        </div>
       </div>
 
       {drag && boardSize.w > 0 && (() => {

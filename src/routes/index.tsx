@@ -903,7 +903,7 @@ function TutorialModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="paper-card max-w-sm w-full p-6 text-center"
+        className="paint-box paint-square paint-solid max-w-sm w-full p-7 text-center"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-2xl text-foreground">{t("tutorial.title")}</h2>
@@ -935,7 +935,7 @@ function PremiumLockModal({
       onClick={onClose}
     >
       <div
-        className="paper-card max-w-sm w-full p-6 text-center"
+        className="paint-box paint-square paint-solid max-w-sm w-full p-7 text-center"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--color-gold)]/30 text-2xl">

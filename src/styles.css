@@ -274,57 +274,72 @@
 
 /* Painted wooden panels (the supplied box art) drawn as nine-slice borders,
    so one picture fits boxes of any size. Like the frosted cards they replace,
-   they are a little see-through over a blur of the painting behind. */
-.paint-box {
-  --paint-w: 22px;
-  position: relative;
-  isolation: isolate;
-}
+   they are a little see-through over a blur of the painting behind; dialogs
+   use them solid. In the components layer so utilities can still override. */
+@layer components {
+  .paint-box {
+    --paint-w: 22px;
+    position: relative;
+    isolation: isolate;
+  }
 
-.paint-box::before {
-  content: "";
-  position: absolute;
-  inset: calc(var(--paint-w) * 0.4);
-  z-index: -1;
-  border-radius: calc(var(--paint-w) * 0.9);
-  -webkit-backdrop-filter: blur(10px) saturate(1.1);
-  backdrop-filter: blur(10px) saturate(1.1);
-}
+  .paint-box::before {
+    content: "";
+    position: absolute;
+    inset: calc(var(--paint-w) * 0.4);
+    z-index: -1;
+    border-radius: calc(var(--paint-w) * 0.9);
+    -webkit-backdrop-filter: blur(10px) saturate(1.1);
+    backdrop-filter: blur(10px) saturate(1.1);
+  }
 
-.paint-box::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border: var(--paint-w) solid transparent;
-  border-image-slice: 75 fill;
-  border-image-width: var(--paint-w);
-  border-image-repeat: stretch;
-  opacity: 0.9;
-}
+  .paint-box::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border: var(--paint-w) solid transparent;
+    border-image-slice: 75 fill;
+    border-image-width: var(--paint-w);
+    border-image-repeat: stretch;
+    opacity: 0.9;
+  }
 
-.paint-thin {
-  --paint-w: 15px;
-}
+  .paint-thin {
+    --paint-w: 15px;
+  }
 
-.paint-tall::after {
-  border-image-source: url("./assets/ui/panel-tall.webp");
-}
+  .paint-solid {
+    filter: drop-shadow(0 12px 18px oklch(0.25 0.05 50 / 0.35));
+  }
 
-.paint-wide::after {
-  border-image-source: url("./assets/ui/panel-wide.webp");
-}
+  .paint-solid::before {
+    display: none;
+  }
 
-.paint-long::after {
-  border-image-source: url("./assets/ui/panel-long.webp");
-}
+  .paint-solid::after {
+    opacity: 1;
+  }
 
-.paint-square::after {
-  border-image-source: url("./assets/ui/panel-square.webp");
-}
+  .paint-tall::after {
+    border-image-source: url("./assets/ui/panel-tall.webp");
+  }
 
-/* The chosen painted panel glows gold around its edge. */
-.paint-picked {
-  filter: drop-shadow(0 0 3px oklch(0.85 0.17 80)) drop-shadow(0 0 9px oklch(0.88 0.16 85));
+  .paint-wide::after {
+    border-image-source: url("./assets/ui/panel-wide.webp");
+  }
+
+  .paint-long::after {
+    border-image-source: url("./assets/ui/panel-long.webp");
+  }
+
+  .paint-square::after {
+    border-image-source: url("./assets/ui/panel-square.webp");
+  }
+
+  /* The chosen painted panel glows gold around its edge. */
+  .paint-picked {
+    filter: drop-shadow(0 0 3px oklch(0.85 0.17 80)) drop-shadow(0 0 9px oklch(0.88 0.16 85));
+  }
 }

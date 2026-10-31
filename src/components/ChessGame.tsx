@@ -154,7 +154,7 @@ function PieceGuide() {
   const { lang } = useSettings();
   const ct = (k: string) => gameText(lang, k);
   return (
-    <div className="glass-card mt-5 p-4">
+    <div className="paint-box paint-tall mt-5 p-5">
       <h3 className="font-display text-lg">{ct("chess.pieces")}</h3>
       <div className="mt-3 grid gap-2">
         {KINDS.map((kind) => (
@@ -529,7 +529,7 @@ function ChessBoard({
 
         {tray("nt")}
 
-        <div className="glass-card mt-2 px-3 py-2">
+        <div className="paint-box paint-long paint-thin mt-2 px-4 py-2.5">
           <p
             className={`text-center text-sm font-semibold ${check ? "text-[oklch(0.55_0.2_25)]" : ""}`}
             aria-live="polite"

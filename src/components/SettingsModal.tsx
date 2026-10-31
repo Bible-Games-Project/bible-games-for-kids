@@ -22,7 +22,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       onClick={onClose}
     >
       <div
-        className="paper-card w-full max-w-sm p-5"
+        className="paint-box paint-tall paint-solid w-full max-w-sm p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
