@@ -19,7 +19,7 @@ OUT = os.path.join(ROOT, "src", "assets", "chess")
 SRC = os.path.join(OUT, "source")
 
 PEDESTAL = 511  # pedestal width in the frame below
-HALF, TALL, OUT_H = 330, 1390, 560
+HALF, TALL, OUT_H = 370, 1390, 560
 NAMES = [f"{team}-{piece}" for team in ("nt", "ot") for piece in ("king", "queen", "bishop", "knight", "rook", "pawn")]
 
 
