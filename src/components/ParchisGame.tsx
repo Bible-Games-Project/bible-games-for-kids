@@ -73,7 +73,7 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
               window.scrollTo(0, 0);
               setSetup({ players: n, pawns: quick ? 2 : 4 });
             }}
-            className="glass-card flex flex-col items-center justify-center gap-2 p-3 text-center transition active:scale-[0.97]"
+            className="paint-box paint-square flex flex-col items-center justify-center gap-2 p-4 text-center transition active:scale-[0.97]"
           >
             <span className="flex gap-0.5">
               {seatColors(n).map((c, i) => (

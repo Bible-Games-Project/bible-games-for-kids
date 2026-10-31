@@ -124,7 +124,7 @@ export function LevelList({
             window.scrollTo(0, 0);
             onPick(id);
           }}
-          className="glass-card flex w-full items-center gap-4 overflow-hidden p-3 pr-4 text-left transition active:scale-[0.99]"
+          className="paint-box paint-wide flex w-full items-center gap-4 overflow-hidden p-4 text-left transition active:scale-[0.99]"
         >
           <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl" aria-hidden>
             {picture(id, i)}

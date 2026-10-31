@@ -72,8 +72,8 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
             key={n}
             onClick={() => setPlayers(n)}
             aria-pressed={players === n}
-            className={`glass-card flex items-center justify-center gap-2 px-3 py-3 text-base font-semibold transition active:scale-[0.97] ${
-              players === n ? "ring-4 ring-[var(--color-gold)]" : ""
+            className={`paint-box paint-square flex items-center justify-center gap-2 px-4 py-4 text-base font-semibold transition active:scale-[0.97] ${
+              players === n ? "paint-picked" : ""
             }`}
           >
             {Array.from({ length: n }, (_, i) => (

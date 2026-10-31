@@ -51,7 +51,7 @@ export function DominoGame({ onBack }: { onBack: () => void }) {
               window.scrollTo(0, 0);
               setPlayers(n);
             }}
-            className="glass-card flex items-center gap-4 p-4 text-left transition active:scale-[0.98]"
+            className="paint-box paint-square flex items-center gap-4 p-4 text-left transition active:scale-[0.98]"
           >
             <span className="shrink-0 whitespace-nowrap text-3xl" aria-hidden>
               {n === 1 ? "🧒🤖" : "🧒🧒"}

@@ -69,8 +69,8 @@ export function GooseGame({ onBack }: { onBack: () => void }) {
           <button
             key={n}
             onClick={() => pick(n)}
-            className={`glass-card flex aspect-square flex-col items-center justify-center gap-2 p-2 transition active:scale-[0.97] ${
-              n === last ? "ring-4 ring-[var(--color-gold)]" : ""
+            className={`paint-box paint-square flex aspect-square flex-col items-center justify-center gap-2 p-3 transition active:scale-[0.97] ${
+              n === last ? "paint-picked" : ""
             }`}
           >
             <span className="flex max-w-[5.5rem] flex-wrap justify-center gap-1">

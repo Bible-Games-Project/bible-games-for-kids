@@ -160,8 +160,8 @@ function GameTile({
       onClick={() => game.playable && onPlay()}
       disabled={!game.playable}
       aria-label={label}
-      className={`glass-card group relative flex aspect-[4/5] w-full flex-col overflow-hidden p-1.5 transition active:scale-[0.97] disabled:active:scale-100 ${
-        highlighted ? "scale-[1.04] ring-4 ring-[var(--color-gold)]" : ""
+      className={`paint-box paint-tall paint-thin group relative flex aspect-[4/5] w-full flex-col p-[9px] transition active:scale-[0.97] disabled:active:scale-100 ${
+        highlighted ? "paint-picked scale-[1.04]" : ""
       }`}
     >
       <div
@@ -1007,7 +1007,7 @@ function DifficultyList({
               if (premiumLocked) return onLocked();
               if (unlocked) onPlay(p);
             }}
-            className="glass-card group relative grid w-full grid-cols-[96px_minmax(0,1fr)] items-center gap-4 overflow-hidden p-3 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:grid-cols-[120px_minmax(0,1fr)]"
+            className="paint-box paint-long group relative grid w-full grid-cols-[96px_minmax(0,1fr)] items-center gap-4 overflow-hidden p-4 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:grid-cols-[120px_minmax(0,1fr)]"
           >
             <div
               className="relative aspect-[7/9] overflow-hidden rounded-xl"

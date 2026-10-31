@@ -141,7 +141,7 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                   window.scrollTo(0, 0);
                   setLevel(lv);
                 }}
-                className="glass-card group flex w-full items-center gap-4 overflow-hidden p-3 pr-4 text-left transition active:scale-[0.99]"
+                className="paint-box paint-wide group flex w-full items-center gap-4 overflow-hidden p-4 text-left transition active:scale-[0.99]"
               >
                 {/* A small fan of game cards: one still face down and a
                     matched pair showing this level's painting. */}
@@ -222,8 +222,8 @@ function PlayerPicker({
             <button
               key={n}
               onClick={() => onPick(n)}
-              className={`glass-card flex aspect-square flex-col items-center justify-center gap-3 p-4 transition active:scale-[0.97] ${
-                n === last ? "ring-4 ring-[var(--color-gold)]" : ""
+              className={`paint-box paint-square flex aspect-square flex-col items-center justify-center gap-3 p-4 transition active:scale-[0.97] ${
+                n === last ? "paint-picked" : ""
               }`}
             >
               <span className="flex flex-wrap justify-center gap-1.5">

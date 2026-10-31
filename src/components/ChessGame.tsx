@@ -121,7 +121,7 @@ export function ChessGame({ onBack }: { onBack: () => void }) {
           <div className="grid gap-3">
             <button
               onClick={() => setChoosingLevel(true)}
-              className="glass-card flex items-center gap-4 p-4 text-left transition active:scale-[0.98]"
+              className="paint-box paint-square flex items-center gap-4 p-4 text-left transition active:scale-[0.98]"
             >
               <PieceFigure side="nt" kind="k" size={60} />
               <span className="text-lg font-semibold">{ct("dom.vsComputer")}</span>
@@ -131,7 +131,7 @@ export function ChessGame({ onBack }: { onBack: () => void }) {
                 window.scrollTo(0, 0);
                 setGame({ players: 2, level: "medium" });
               }}
-              className="glass-card flex items-center gap-4 p-4 text-left transition active:scale-[0.98]"
+              className="paint-box paint-square flex items-center gap-4 p-4 text-left transition active:scale-[0.98]"
             >
               <span className="flex -space-x-3">
                 <PieceFigure side="nt" kind="k" size={60} />
