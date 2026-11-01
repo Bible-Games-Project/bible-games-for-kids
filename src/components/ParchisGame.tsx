@@ -22,7 +22,7 @@ import { findStory } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
-import { Token } from "@/components/Token";
+import { PlayerPawn } from "@/components/Token";
 
 import parchisBg from "@/assets/parchis-bg.webp";
 
@@ -111,7 +111,7 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
 
 // The pieces are the round tokens shared by all the board games.
 function Pawn({ color, size, dim = false }: { color: Color; size?: number; dim?: boolean }) {
-  return <Token color={color} size={size} className={dim ? "opacity-50" : ""} />;
+  return <PlayerPawn color={color} size={size} className={dim ? "opacity-50" : ""} />;
 }
 
 // The middle of the board: the four colours meeting around the cross and an
@@ -448,7 +448,7 @@ function ParchisBoard({
                 onClick={() => canPick && move(p.k)}
                 disabled={!canPick}
                 aria-label={`${nameOf(p.s)} ${p.k + 1}`}
-                className={`absolute -translate-x-1/2 -translate-y-[45%] transition-[left,top] duration-150 ease-out ${
+                className={`absolute -translate-x-1/2 -translate-y-[82%] transition-[left,top] duration-150 ease-out ${
                   canPick ? "z-30" : "z-20"
                 }`}
                 style={{ left: pct(p.at[0] + shift), top: pct(p.at[1]), width: pct(1.05) }}

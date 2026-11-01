@@ -175,16 +175,12 @@ export function StoryPicker({
               key={id}
               onClick={() => onLevel(id)}
               aria-pressed={active}
-              className={`min-w-0 truncate rounded-xl px-1 py-2 text-[11px] font-semibold shadow-sm transition active:scale-95 sm:text-sm ${
-                active
-                  ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
-                  : "bg-card text-foreground/80"
+              className={`paint-box paint-square paint-thin min-w-0 truncate px-2 py-3 text-[11px] font-semibold transition active:scale-95 sm:text-sm ${
+                active ? "paint-picked z-10 scale-105 text-[var(--color-primary)]" : "text-foreground/80"
               }`}
             >
               <span className="block truncate">{t(`diff.${id}`)}</span>
-              <span
-                className={`block truncate text-[9px] font-medium sm:text-[11px] ${active ? "opacity-80" : "text-muted-foreground"}`}
-              >
+              <span className="block truncate text-[9px] font-medium text-muted-foreground sm:text-[11px]">
                 {t(`diff.${id}.age`)}
               </span>
             </button>

@@ -20,6 +20,7 @@ import { BackButton, ScreenFade } from "@/components/GameShell";
 import { TOKEN_HEX, TOKEN_ORDER, Token } from "@/components/Token";
 import { useBackButton } from "@/lib/back-button";
 import cardBack from "@/assets/ui/card-back.webp";
+import arrowArt from "@/assets/ui/arrow.webp";
 
 // Up to four players share the board, each with the colour of their round
 // token for the turn marker, the scoreboard and the pairs they find.
@@ -280,22 +281,16 @@ function ScrollArrow({
     <button
       onClick={go}
       aria-label={dir === "down" ? downLabel : upLabel}
-      className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-[max(1.25rem,env(safe-area-inset-right))] z-30 grid h-14 w-14 place-items-center rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-lg ring-4 ring-[oklch(0.99_0.012_85/0.85)] transition active:scale-90"
+      className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-[max(1.25rem,env(safe-area-inset-right))] z-30 grid h-16 w-16 place-items-center transition active:scale-90"
     >
-      <svg
-        width="26"
-        height="26"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-        className={dir === "up" ? "rotate-180" : ""}
-      >
-        <path d="M12 5v14M6 13l6 6 6-6" />
-      </svg>
+      <img
+        src={arrowArt}
+        alt=""
+        draggable={false}
+        className={`h-full w-full select-none drop-shadow-[0_4px_6px_oklch(0.3_0.06_50/0.4)] ${
+          dir === "up" ? "-rotate-90" : "rotate-90"
+        }`}
+      />
     </button>
   );
 }
@@ -434,8 +429,8 @@ function MemoryBoard({
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
       <ScreenFade />
       {/* Header stays pinned while the board scrolls underneath it. */}
-      <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 bg-[oklch(0.97_0.02_75/0.94)] backdrop-blur-sm">
-        <div className={`mx-auto w-full max-w-lg px-4 pt-4 ${wide.width}`}>
+      <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 px-2 pb-1 pt-2">
+        <div className={`paint-box paint-long mx-auto w-full max-w-lg px-5 pt-4 ${wide.width}`}>
           <header className="flex items-center gap-3 pb-2">
             <BackButton onClick={onExit} label={mt("mem.levels")} />
             <h1 className="min-w-0 flex-1 truncate font-display text-xl">

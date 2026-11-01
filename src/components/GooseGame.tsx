@@ -18,7 +18,7 @@ import {
 import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
-import { TOKEN_FACE_Y, TOKEN_ORDER, TOKEN_RATIO, Token } from "@/components/Token";
+import { PAWN_RATIO, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
 
 import gooseBg from "@/assets/goose-bg.webp";
 
@@ -148,7 +148,7 @@ const GooseBadge = ({ size = 28 }: { size?: number }) => (
 
 // Each player plays with one of the round tokens, numbered.
 function Pawn({ index, size }: { index: number; size: number }) {
-  return <Token color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
+  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
 }
 
 // Three crosses on a hill at dusk, for the square without a painting.
@@ -571,12 +571,13 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
                 key={i}
                 className={`absolute left-0 top-0 ${i === turn ? "z-20" : "z-10"}`}
                 style={{
-                  transform: `translate(${p.x - 23}px, ${p.y - 46 * TOKEN_RATIO * TOKEN_FACE_Y}px) ${i === turn && winner === null ? "scale(1.2)" : ""}`,
-                  transformOrigin: `23px ${46 * TOKEN_RATIO * TOKEN_FACE_Y}px`,
+                  // the pawn's foot stands on the spot
+                  transform: `translate(${p.x - 20}px, ${p.y - 40 * PAWN_RATIO * 0.85}px) ${i === turn && winner === null ? "scale(1.2)" : ""}`,
+                  transformOrigin: `20px ${40 * PAWN_RATIO * 0.85}px`,
                   transition: `transform ${hopMs}ms ease-out`,
                 }}
               >
-                <Pawn index={i} size={46} />
+                <Pawn index={i} size={40} />
               </span>
             );
           })}

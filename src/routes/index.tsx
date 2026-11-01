@@ -826,15 +826,13 @@ function Home() {
           <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
             {DIFFICULTIES.map((d) => {
               const isActive = d.id === selectedDifficulty;
-              const completed = d.puzzles.filter((p) => (progress[p.id]?.stars ?? 0) > 0).length;
               return (
                 <button
                   key={d.id}
                   onClick={() => setSelectedDifficulty(d.id)}
-                  className={`flex min-w-0 flex-col items-center justify-center rounded-xl px-1 py-2 text-[11px] font-semibold leading-tight shadow-sm transition active:scale-95 sm:text-sm ${
-                    isActive
-                      ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
-                      : "bg-card text-foreground/80 hover:bg-secondary"
+                  aria-pressed={isActive}
+                  className={`paint-box paint-square paint-thin flex min-w-0 flex-col items-center justify-center px-2 py-3 text-[11px] font-semibold leading-tight transition active:scale-95 sm:text-sm ${
+                    isActive ? "paint-picked z-10 scale-105 text-[var(--color-primary)]" : "text-foreground/80"
                   }`}
                 >
                   <span className="block w-full truncate text-center sm:hidden">
@@ -843,11 +841,8 @@ function Home() {
                   <span className="hidden w-full truncate text-center sm:block">
                     {t(`diff.${d.id}`)}
                   </span>
-                  <span className={`block w-full truncate text-center text-[9px] font-medium sm:text-[11px] ${isActive ? "opacity-80" : "text-muted-foreground"}`}>
+                  <span className="block w-full truncate text-center text-[9px] font-medium text-muted-foreground sm:text-[11px]">
                     {t(`diff.${d.id}.age`)}
-                  </span>
-                  <span className={`mt-0.5 text-[9px] font-bold sm:text-[10px] ${isActive ? "opacity-80" : "text-muted-foreground"}`}>
-                    {completed}/{d.puzzles.length}
                   </span>
                 </button>
               );

@@ -9,6 +9,8 @@ import {
 import { useAudio } from "@/lib/audio";
 import { useSettings } from "@/lib/i18n";
 import { localizeSceneTitle, localizeVerse } from "@/lib/scenes-i18n";
+import homeArt from "@/assets/ui/home.webp";
+import hintArt from "@/assets/ui/hint.webp";
 
 
 interface Piece {
@@ -516,9 +518,10 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
       <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-2">
         <button
           onClick={onExit}
-          className="rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground shadow-sm transition active:scale-95"
+          aria-label={t("puzzle.menu")}
+          className="grid h-12 w-12 shrink-0 place-items-center transition active:scale-90"
         >
-          ← {t("puzzle.menu")}
+          <img src={homeArt} alt="" draggable={false} className="h-full w-full select-none drop-shadow-[0_2px_4px_oklch(0.3_0.06_50/0.35)]" />
         </button>
         <div className="min-w-0 flex-1 text-center">
           <h2 className="truncate font-display text-base leading-tight sm:text-lg">{localizedTitle}</h2>
@@ -529,9 +532,10 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
         <button
           onClick={useHint}
           disabled={trayPieces.length === 0}
-          className="rounded-full bg-[var(--color-gold)]/90 px-4 py-2 text-sm font-semibold text-[oklch(0.3_0.05_50)] shadow-sm transition active:scale-95 disabled:opacity-40"
+          aria-label={t("puzzle.hint")}
+          className="grid h-12 w-12 shrink-0 place-items-center transition active:scale-90 disabled:opacity-40"
         >
-          ✨ {t("puzzle.hint")}
+          <img src={hintArt} alt="" draggable={false} className="h-full w-full select-none drop-shadow-[0_2px_4px_oklch(0.3_0.06_50/0.35)]" />
         </button>
       </div>
 
