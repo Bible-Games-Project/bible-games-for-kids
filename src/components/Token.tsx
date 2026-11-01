@@ -9,6 +9,9 @@ import orange from "@/assets/tokens/orange.webp";
 import bluePawn from "@/assets/tokens/pawn-blue.webp";
 import greenPawn from "@/assets/tokens/pawn-green.webp";
 import yellowPawn from "@/assets/tokens/pawn-yellow.webp";
+import redPawn from "@/assets/tokens/pawn-red.webp";
+import purplePawn from "@/assets/tokens/pawn-purple.webp";
+import orangePawn from "@/assets/tokens/pawn-orange.webp";
 
 export type TokenColor = "blue" | "red" | "yellow" | "green" | "purple" | "orange";
 
@@ -69,12 +72,14 @@ export function Token({
   );
 }
 
-// The standing pawns of the Goose and Parchís (supplied pictures). A colour
-// whose pawn picture hasn't arrived yet uses its round token instead.
-const PAWNS: Partial<Record<TokenColor, string>> = {
+// The standing pawns of the Goose and Parchís (supplied pictures).
+const PAWNS: Record<TokenColor, string> = {
   blue: bluePawn,
-  green: greenPawn,
+  red: redPawn,
   yellow: yellowPawn,
+  green: greenPawn,
+  purple: purplePawn,
+  orange: orangePawn,
 };
 
 // Height / width of a pawn's box; the pawn stands on the box's bottom edge
@@ -94,32 +99,27 @@ export function PlayerPawn({
   label?: string | number;
   className?: string;
 }) {
-  const src = PAWNS[color];
   return (
     <span
       className={`relative inline-flex shrink-0 items-end align-bottom ${size ? "" : "w-full"} ${className}`}
-      style={size ? { width: size, height: size * PAWN_RATIO } : { aspectRatio: `1 / ${PAWN_RATIO}` }}
+      style={
+        size ? { width: size, height: size * PAWN_RATIO } : { aspectRatio: `1 / ${PAWN_RATIO}` }
+      }
       aria-hidden
     >
-      {src ? (
-        <>
-          <img
-            src={src}
-            alt=""
-            draggable={false}
-            className="absolute inset-0 h-full w-full select-none object-contain object-bottom drop-shadow-[0_2px_2px_rgba(0,0,0,0.35)]"
-          />
-          {label !== undefined && (
-            <span
-              className="absolute inset-x-0 -translate-y-1/2 text-center font-bold leading-none text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
-              style={{ top: `${PAWN_HEAD_Y * 100}%`, fontSize: size ? size * 0.36 : "0.9em" }}
-            >
-              {label}
-            </span>
-          )}
-        </>
-      ) : (
-        <Token color={color} size={size} label={label} />
+      <img
+        src={PAWNS[color]}
+        alt=""
+        draggable={false}
+        className="absolute inset-0 h-full w-full select-none object-contain object-bottom drop-shadow-[0_2px_2px_rgba(0,0,0,0.35)]"
+      />
+      {label !== undefined && (
+        <span
+          className="absolute inset-x-0 -translate-y-1/2 text-center font-bold leading-none text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
+          style={{ top: `${PAWN_HEAD_Y * 100}%`, fontSize: size ? size * 0.36 : "0.9em" }}
+        >
+          {label}
+        </span>
       )}
     </span>
   );
