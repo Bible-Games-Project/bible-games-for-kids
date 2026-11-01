@@ -4,43 +4,105 @@ import { useAudio } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { memText } from "@/lib/memory-i18n";
 import {
-  BASE,
   EXIT,
   GOAL,
   HOME_LANE,
   LOOP,
   SAFE,
   SAFE_STORIES,
-  SIZE,
   loopSquare,
   seatColors,
   spot,
   target,
   type Color,
 } from "@/lib/parchis";
-import { findStory } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
 import { PlayerPawn } from "@/components/Token";
 
 import parchisBg from "@/assets/parchis-bg.webp";
+import boardArt from "@/assets/parchis-board.webp";
 
-// Base, shadow and highlight of each colour, like the painted board.
-const SHADES: Record<Color, [string, string, string]> = {
-  yellow: ["#e6b43c", "#b0841c", "#f7da8a"],
-  blue: ["#3f6fb5", "#2a4c85", "#7fa3dc"],
-  red: ["#c4444a", "#8f2a30", "#e8848a"],
-  green: ["#4f9a5e", "#336b40", "#8cc797"],
+// The colours of the painted board's home lanes.
+const LANE: Record<Color, string> = {
+  yellow: "#fcc80d",
+  blue: "#2684e1",
+  red: "#fc3e33",
+  green: "#3ea648",
 };
 
-// A painting inside each base.
-const BASE_STORY: Record<Color, string> = {
-  blue: "nativity",
-  red: "noahs-ark",
-  yellow: "creation",
-  green: "good-shepherd",
+// The board picture (its frame, the four bases with their pawn circles and
+// the cross in the middle) is the base; the squares are drawn over its arms.
+// The game's 19 x 19 grid is stretched to fit: grid lines 0, 8, 11 and 19
+// fall on these pixels of the picture, across and down.
+const BOARD_W = 1132;
+const BOARD_H = 1093;
+const X_STOPS: [number, number][] = [
+  [0, 40],
+  [8, 457],
+  [11, 673],
+  [19, 1092],
+];
+const Y_STOPS: [number, number][] = [
+  [0, 34],
+  [8, 431],
+  [11, 634],
+  [19, 1044],
+];
+const stretch = (v: number, stops: [number, number][]) => {
+  const k = Math.max(
+    1,
+    stops.findIndex(([g]) => g >= v),
+  );
+  const [g0, p0] = stops[Math.min(k, stops.length - 1) - 1];
+  const [g1, p1] = stops[Math.min(k, stops.length - 1)];
+  return p0 + ((v - g0) / (g1 - g0)) * (p1 - p0);
 };
+const bx = (col: number) => (stretch(col, X_STOPS) / BOARD_W) * 100;
+const by = (row: number) => (stretch(row, Y_STOPS) / BOARD_H) * 100;
+const cellStyle = (col: number, row: number, w = 1, h = 1) => ({
+  left: `${bx(col)}%`,
+  top: `${by(row)}%`,
+  width: `${bx(col + w) - bx(col)}%`,
+  height: `${by(row + h) - by(row)}%`,
+});
+
+// The four circles in each base of the picture (pixels), one per pawn.
+const BASE_SPOTS: Record<Color, [number, number][]> = {
+  blue: [
+    [187, 176],
+    [308, 176],
+    [187, 279],
+    [308, 279],
+  ],
+  red: [
+    [830, 176],
+    [951, 176],
+    [830, 279],
+    [951, 279],
+  ],
+  yellow: [
+    [187, 786],
+    [308, 786],
+    [187, 889],
+    [308, 889],
+  ],
+  green: [
+    [830, 786],
+    [951, 786],
+    [830, 889],
+    [951, 889],
+  ],
+};
+
+// The arms, under the squares (their colour shows as the lines between them).
+const ARMS: [number, number, number, number][] = [
+  [8, 0, 3, 8],
+  [8, 11, 3, 8],
+  [0, 8, 8, 3],
+  [11, 8, 8, 3],
+];
 
 export function ParchisGame({ onBack }: { onBack: () => void }) {
   const { lang, t } = useSettings();
@@ -112,28 +174,6 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
 // The pieces are the round tokens shared by all the board games.
 function Pawn({ color, size, dim = false }: { color: Color; size?: number; dim?: boolean }) {
   return <PlayerPawn color={color} size={size} className={dim ? "opacity-50" : ""} />;
-}
-
-// The middle of the board: the four colours meeting around the cross and an
-// open Bible.
-function Goal() {
-  return (
-    <svg viewBox="0 0 30 30" className="h-full w-full" aria-hidden>
-      <polygon points="0,0 30,0 15,15" fill={SHADES.blue[0]} />
-      <polygon points="30,0 30,30 15,15" fill={SHADES.red[0]} />
-      <polygon points="30,30 0,30 15,15" fill={SHADES.green[0]} />
-      <polygon points="0,30 0,0 15,15" fill={SHADES.yellow[0]} />
-      <circle cx="15" cy="15" r="10" fill="#2b4f8f" stroke="#e6b43c" strokeWidth="1.2" />
-      <path
-        d="M8.5 19.5 Q12 18 15 19.5 Q18 18 21.5 19.5 L21.5 22 Q18 20.6 15 22 Q12 20.6 8.5 22 Z"
-        fill="#fbf4e2"
-        stroke="#b0841c"
-        strokeWidth=".4"
-      />
-      <rect x="14" y="7" width="2" height="11" rx=".4" fill="#f2c94c" />
-      <rect x="11" y="9.5" width="8" height="2" rx=".4" fill="#f2c94c" />
-    </svg>
-  );
 }
 
 interface Seat {
@@ -359,14 +399,6 @@ function ParchisBoard({
     return { n: same.length, idx: same.indexOf(me) };
   };
 
-  const pct = (v: number) => `${(v / SIZE) * 100}%`;
-  const cellStyle = (col: number, row: number, w = 1, h = 1) => ({
-    left: pct(col),
-    top: pct(row),
-    width: pct(w),
-    height: pct(h),
-  });
-
   const seat = seats[turn];
   const human = seat.human && winner === null;
 
@@ -383,37 +415,29 @@ function ParchisBoard({
         </header>
 
         {/* The board */}
-        <div className="relative mx-auto aspect-square w-full max-w-[min(100%,72dvh)] rounded-2xl border-[6px] border-[oklch(0.55_0.08_55)] bg-[oklch(0.98_0.01_90)] shadow-[0_14px_30px_oklch(0.25_0.05_50/0.45)]">
-          {/* Bases, each with a painting and four pawn spots */}
-          {(Object.keys(BASE) as Color[]).map((c) => {
-            const [x, y] = BASE[c];
-            const story = findStory(BASE_STORY[c]);
-            return (
-              <div
-                key={c}
-                className="absolute overflow-hidden rounded-xl p-[3%]"
-                style={{ ...cellStyle(x, y, 8, 8), backgroundColor: SHADES[c][0] }}
-              >
-                <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-white/80">
-                  {story && (
-                    <img
-                      src={story.thumb}
-                      alt=""
-                      className="h-full w-full object-cover opacity-90"
-                    />
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="relative mx-auto aspect-[1132/1093] w-full max-w-[min(100%,72dvh)] drop-shadow-[0_14px_22px_oklch(0.25_0.05_50/0.45)]">
+          <img
+            src={boardArt}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none"
+          />
+          {ARMS.map(([x, y, w, h]) => (
+            <div
+              key={`${x}-${y}`}
+              className="absolute bg-[#c39d71]"
+              style={cellStyle(x, y, w, h)}
+            />
+          ))}
           {/* Home lanes */}
           {(Object.keys(HOME_LANE) as Color[]).flatMap((c) =>
             HOME_LANE[c].map(([x, y], i) => (
-              <div
-                key={`${c}${i}`}
-                className="absolute border border-white/70"
-                style={{ ...cellStyle(x, y), backgroundColor: SHADES[c][0] }}
-              />
+              <div key={`${c}${i}`} className="absolute p-[1.5px]" style={cellStyle(x, y)}>
+                <div
+                  className="h-full w-full rounded-[3px] border border-black/25 shadow-[inset_0_2px_0_rgba(255,255,255,0.35),inset_0_-2px_0_rgba(0,0,0,0.18)]"
+                  style={{ backgroundColor: LANE[c] }}
+                />
+              </div>
             )),
           )}
           {/* The loop; safe squares show a painting, exits take their colour */}
@@ -421,26 +445,25 @@ function ParchisBoard({
             const story = SAFE_STORIES.get(i);
             const exitOf = (Object.keys(EXIT) as Color[]).find((c) => EXIT[c] === i);
             return (
-              <div
-                key={i}
-                className="absolute overflow-hidden border border-[oklch(0.8_0.02_80)] bg-white"
-                style={{
-                  ...cellStyle(x, y),
-                  boxShadow: exitOf ? `inset 0 0 0 2px ${SHADES[exitOf][0]}` : undefined,
-                }}
-              >
-                {story && <img src={story.thumb} alt="" className="h-full w-full object-cover" />}
+              <div key={i} className="absolute p-[1.5px]" style={cellStyle(x, y)}>
+                <div
+                  className="h-full w-full overflow-hidden rounded-[3px] border border-[#b1774a] bg-[#faf7e4]"
+                  style={{ boxShadow: exitOf ? `inset 0 0 0 2.5px ${LANE[exitOf]}` : undefined }}
+                >
+                  {story && <img src={story.thumb} alt="" className="h-full w-full object-cover" />}
+                </div>
               </div>
             );
           })}
-          <div className="absolute" style={cellStyle(8, 8, 3, 3)}>
-            <Goal />
-          </div>
 
           {/* Pawns */}
           {placed.map((p, i) => {
             const { n, idx } = crowd(i);
             const shift = n > 1 ? (idx - (n - 1) / 2) * 0.32 : 0;
+            // in its base a pawn stands on one of the picture's circles
+            const circle = p.progress < 0 ? BASE_SPOTS[p.color][p.k] : null;
+            const left = circle ? (circle[0] / BOARD_W) * 100 : bx(p.at[0] + shift);
+            const top = circle ? (circle[1] / BOARD_H) * 100 : by(p.at[1]);
             const canPick = human && phase === "choose" && p.s === turn && options.includes(p.k);
             return (
               <button
@@ -451,7 +474,7 @@ function ParchisBoard({
                 className={`absolute -translate-x-1/2 -translate-y-[82%] transition-[left,top] duration-150 ease-out ${
                   canPick ? "z-30" : "z-20"
                 }`}
-                style={{ left: pct(p.at[0] + shift), top: pct(p.at[1]), width: pct(1.05) }}
+                style={{ left: `${left}%`, top: `${top}%`, width: "5.6%" }}
               >
                 {canPick && (
                   <span className="absolute inset-0 animate-ping rounded-full bg-[var(--color-gold)]/60" />
