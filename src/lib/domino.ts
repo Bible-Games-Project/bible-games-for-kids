@@ -111,3 +111,89 @@ export const PIPS: [number, number][][] = [
     [0.73, 0.78],
   ],
 ];
+
+// ---- Laying the line out on the table ----
+// The first tile played sits in the middle and the line grows from both of
+// its ends, tiles touching end to end, doubles placed crosswise. When an arm
+// reaches the edge of the table it turns the corner with an upright tile
+// (the right arm downwards, the left arm upwards) and comes back the other
+// way. `long` and `short` are a tile's sides; positions are top-left corners.
+export interface Spot {
+  x: number;
+  y: number;
+  vertical: boolean;
+  flipped: boolean; // show b before a (left to right, or top to bottom)
+}
+
+const GAP = 2;
+
+export function layoutLine(
+  line: Placed[],
+  firstId: number | null,
+  width: number,
+  long: number,
+  short: number,
+): { spots: Spot[]; height: number } {
+  const spots: Spot[] = [];
+  if (!line.length) return { spots, height: 0 };
+  const origin = Math.max(
+    0,
+    line.findIndex((t) => t.id === firstId),
+  );
+  const isDouble = (t: Tile) => t.a === t.b;
+  const minX = 2;
+  const maxX = width - 2;
+  const centre = width / 2;
+  const first = line[origin];
+  const firstAlong = isDouble(first) ? short : long;
+  spots[origin] = isDouble(first)
+    ? { x: centre - short / 2, y: -long / 2, vertical: true, flipped: false }
+    : { x: centre - long / 2, y: -short / 2, vertical: false, flipped: false };
+
+  // One arm of the line. `touchesA`: the half of each tile that touches the
+  // tile before it (a on the right arm, b on the left one).
+  const arm = (indices: number[], startDir: 1 | -1, down: boolean, touchesA: boolean) => {
+    let dir = startDir;
+    let x = centre + (dir * firstAlong) / 2; // where the next tile touches, on the row's axis
+    let y = 0;
+    // how far the last tile reaches above and below the row's axis
+    let reach = isDouble(first) ? long / 2 : short / 2;
+    for (const i of indices) {
+      const tile = line[i];
+      const along = isDouble(tile) ? short : long;
+      const fits = dir > 0 ? x + GAP + along <= maxX : x - GAP - along >= minX;
+      if (!fits) {
+        // Round the corner: an upright tile below (or above) the row's end.
+        const left = dir > 0 ? x - short : x;
+        const top = down ? y + reach + GAP : y - reach - GAP - long;
+        spots[i] = { x: left, y: top, vertical: true, flipped: false };
+        x = dir > 0 ? left - GAP : left + short + GAP;
+        // the new row runs through the far half of the upright tile
+        y = down ? top + long - short / 2 : top + short / 2;
+        reach = short / 2;
+        dir = dir > 0 ? -1 : 1;
+        continue;
+      }
+      const left = dir > 0 ? x + GAP : x - GAP - along;
+      spots[i] = isDouble(tile)
+        ? { x: left, y: y - long / 2, vertical: true, flipped: false }
+        : { x: left, y: y - short / 2, vertical: false, flipped: touchesA ? dir < 0 : dir > 0 };
+      x = dir > 0 ? left + along : left;
+      reach = isDouble(tile) ? long / 2 : short / 2;
+    }
+  };
+  arm(line.map((_, i) => i).slice(origin + 1), 1, true, true);
+  arm(
+    line
+      .map((_, i) => i)
+      .slice(0, origin)
+      .reverse(),
+    -1,
+    false,
+    false,
+  );
+
+  const top = Math.min(...spots.map((s) => s.y));
+  const bottom = Math.max(...spots.map((s) => s.y + (s.vertical ? long : short)));
+  return { spots: spots.map((s) => ({ ...s, y: s.y - top })), height: bottom - top };
+}

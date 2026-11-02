@@ -33,6 +33,7 @@ import { ParchisGame } from "@/components/ParchisGame";
 import { ChessGame } from "@/components/ChessGame";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, ScreenFade } from "@/components/GameShell";
+import { preloadGameArt } from "@/lib/preload-ui";
 import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
 import { isFreePuzzle } from "@/lib/freemium";
@@ -141,6 +142,27 @@ const GAMES: GameDef[] = [
   { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.85 0.045 6 / 0.6)", playable: false },
   { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.8 0.07 258 / 0.6)", playable: false },
 ];
+
+// Where the family's faces are in each home painting (fractions of its
+// height), and how the painting is placed (cover, 40% down), so the screen
+// can keep its title above them and its games below them.
+const FACES = {
+  tall: { w: 941, h: 1671, top: 0.29, bottom: 0.565 },
+  wide: { w: 1672, h: 941, top: 0.26, bottom: 0.63 },
+};
+const HOME_BG_Y = 0.4;
+const HOME_TOP = 64; // the title's top padding
+const HOME_BOTTOM = 24; // the bottom padding under the favourites
+const TITLE_RATIO = 1000 / 346;
+
+function facesOnScreen(wide: boolean) {
+  const f = wide ? FACES.wide : FACES.tall;
+  const screen = window.innerHeight;
+  const scale = Math.max(window.innerWidth / f.w, screen / f.h);
+  const shown = f.h * scale;
+  const offset = (screen - shown) * HOME_BG_Y;
+  return { top: offset + f.top * shown, bottom: offset + f.bottom * shown, screen };
+}
 
 function GameTile({
   game,
@@ -331,13 +353,9 @@ function GameShelf({
   );
 
   return (
-    <div className="flex w-full items-center gap-1.5">
-      <button onClick={() => move(-1)} disabled={spinning} aria-label={prevLabel} className={`${roundButton} shrink-0`}>
-        {paint(arrowArt, "-scale-x-100 rtl:scale-x-100")}
-      </button>
-
+    <div className="w-full">
       <div
-        className="min-w-0 flex-1 overflow-hidden px-1 py-4"
+        className="w-full overflow-hidden py-3"
         style={{ touchAction: "none" }}
         onPointerDown={(e) => {
           const tile = (e.target as HTMLElement).closest<HTMLElement>("[data-game]");
@@ -402,7 +420,7 @@ function GameShelf({
                 className={`relative w-[calc((100%-1.5rem)/3)] shrink-0 transition-transform duration-300 ease-out motion-reduce:transition-none ${
                   middle ? "z-10" : ""
                 }`}
-                style={{ transform: middle ? "scale(1.14)" : "scale(0.88)" }}
+                style={{ transform: middle ? "scale(1.1)" : "scale(0.92)" }}
                 data-game={i}
                 inert={!visible}
                 aria-hidden={!visible}
@@ -420,19 +438,27 @@ function GameShelf({
         </div>
       </div>
 
-      {/* The arrow lines up with the left one; the dice sits just below it. */}
-      <div className="relative shrink-0">
-        <button onClick={() => move(1)} disabled={spinning} aria-label={nextLabel} className={roundButton}>
-          {paint(arrowArt, "rtl:-scale-x-100")}
-        </button>
-        <button
-          onClick={spin}
-          disabled={spinning}
-          aria-label={randomLabel}
-          className="absolute left-1/2 top-full mt-2 grid h-10 w-10 -translate-x-1/2 place-items-center transition active:scale-90"
-        >
-          {paint(diceArt, spinning ? "animate-spin" : "")}
-        </button>
+      {/* The arrows sit under the side cards, the dice beside the right one. */}
+      <div className="grid grid-cols-3">
+        <div className="flex justify-center">
+          <button onClick={() => move(-1)} disabled={spinning} aria-label={prevLabel} className={roundButton}>
+            {paint(arrowArt, "-scale-x-100 rtl:scale-x-100")}
+          </button>
+        </div>
+        <div />
+        <div className="relative flex justify-center">
+          <button onClick={() => move(1)} disabled={spinning} aria-label={nextLabel} className={roundButton}>
+            {paint(arrowArt, "rtl:-scale-x-100")}
+          </button>
+          <button
+            onClick={spin}
+            disabled={spinning}
+            aria-label={randomLabel}
+            className="absolute left-[calc(50%+1.5rem)] top-0 grid h-10 w-10 place-items-center transition active:scale-90 rtl:left-auto rtl:right-[calc(50%+1.5rem)]"
+          >
+            {paint(diceArt, spinning ? "animate-spin" : "")}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -493,7 +519,7 @@ function FavoriteSlots({
   const any = favorites.some(Boolean);
 
   return (
-    <div className="mt-5 w-full">
+    <div className="mt-2 w-full">
       <p className="pb-1 text-xs font-semibold text-[oklch(0.99_0.01_85)] [text-shadow:0_1px_4px_oklch(0.25_0.05_50/0.8)]">
         ⭐ {any ? title : hint}
       </p>
@@ -594,6 +620,38 @@ function Home() {
       mq.removeEventListener?.("change", update);
     };
   }, []);
+  // The title and the games stay clear of the family's faces in the
+  // painting: the title is kept above them, and the shelf and favourites
+  // shrink, if they have to, to fit below them.
+  const [faces, setFaces] = useState<ReturnType<typeof facesOnScreen> | null>(null);
+  useEffect(() => {
+    const update = () => setFaces(facesOnScreen(wide));
+    update();
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("resize", update);
+    };
+  }, [wide]);
+  // While the home screen is open, fetch the games' pictures in the background.
+  useEffect(() => {
+    if (screen === "home") preloadGameArt();
+  }, [screen]);
+  const homeUi = useRef<HTMLDivElement>(null);
+  const [uiScale, setUiScale] = useState(1);
+  useEffect(() => {
+    const el = homeUi.current;
+    if (!el || !faces) return;
+    const fit = () => {
+      const room = faces.screen - HOME_BOTTOM - (faces.bottom + 8);
+      setUiScale(Math.max(0.5, Math.min(1, room / el.offsetHeight)));
+    };
+    fit();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
+    ro?.observe(el);
+    return () => {
+      ro?.disconnect();
+    };
+  }, [faces, screen]);
   const audio = useAudio();
   const [favorites, setFavorites] = useState<Favorites>(() => Array(FAV_SLOTS).fill(null));
   // A game being dragged to (or between) the favorites slots.
@@ -759,6 +817,11 @@ function Home() {
               className={`w-[82%] max-w-sm ${
                 titleIntro ? "animate-in fade-in slide-in-from-top-10 duration-[1400ms] ease-out motion-reduce:animate-none" : ""
               }`}
+              style={
+                faces
+                  ? { maxWidth: `min(24rem, ${Math.max(150, (faces.top - HOME_TOP - 8) * TITLE_RATIO)}px)` }
+                  : undefined
+              }
             >
               <img
                 src={titleImg}
@@ -770,28 +833,34 @@ function Home() {
 
             <div className="min-h-8 flex-1" />
 
-            <GameShelf
-              games={GAMES}
-              labelFor={(g) => t(g.labelKey)}
-              comingLabel={t("game.comingSoon")}
-              prevLabel={t("home.prevGames")}
-              nextLabel={t("home.nextGames")}
-              randomLabel={t("home.randomGame")}
-              onPlay={openGame}
-              onDragStart={(g, x, y) => beginDrag(g, null, x, y)}
-            />
+            <div
+              ref={homeUi}
+              className="w-full origin-bottom"
+              style={uiScale < 1 ? { transform: `scale(${uiScale})` } : undefined}
+            >
+              <GameShelf
+                games={GAMES}
+                labelFor={(g) => t(g.labelKey)}
+                comingLabel={t("game.comingSoon")}
+                prevLabel={t("home.prevGames")}
+                nextLabel={t("home.nextGames")}
+                randomLabel={t("home.randomGame")}
+                onPlay={openGame}
+                onDragStart={(g, x, y) => beginDrag(g, null, x, y)}
+              />
 
-            <FavoriteSlots
-              favorites={favorites}
-              dragging={drag?.from ?? null}
-              over={drag?.over ?? -1}
-              title={t("home.favorites")}
-              hint={t("home.favoritesHint")}
-              labelFor={(g) => t(g.labelKey)}
-              slotRefs={slotRefs}
-              onPlay={openGame}
-              onDragStart={(g, slot, x, y) => beginDrag(g, slot, x, y)}
-            />
+              <FavoriteSlots
+                favorites={favorites}
+                dragging={drag?.from ?? null}
+                over={drag?.over ?? -1}
+                title={t("home.favorites")}
+                hint={t("home.favoritesHint")}
+                labelFor={(g) => t(g.labelKey)}
+                slotRefs={slotRefs}
+                onPlay={openGame}
+                onDragStart={(g, slot, x, y) => beginDrag(g, slot, x, y)}
+              />
+            </div>
           </div>
         </div>
         {drag?.game.icon && (

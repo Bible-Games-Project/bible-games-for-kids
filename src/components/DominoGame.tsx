@@ -11,6 +11,7 @@ import {
   computerChoice,
   deal,
   dots,
+  layoutLine,
   pickFaces,
   sidesFor,
   type Placed,
@@ -133,6 +134,7 @@ interface GameState {
   hands: Tile[][];
   pile: Tile[];
   line: Placed[];
+  firstId: number | null; // the first tile played, in the middle of the table
   turn: number;
   passes: number; // passes in a row; everybody passing means a blocked game
   winner: number | null;
@@ -146,6 +148,7 @@ function newGame(players: number): GameState {
     hands,
     pile,
     line: [],
+    firstId: null,
     turn: 0,
     passes: 0,
     winner: null,
@@ -225,7 +228,13 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
   const commit = (tile: Tile, side: Side) => {
     const s = gRef.current;
     const hands = s.hands.map((h, i) => (i === s.turn ? h.filter((x) => x.id !== tile.id) : h));
-    const next = { ...s, hands, line: addTile(s.line, tile, side), passes: 0 };
+    const next = {
+      ...s,
+      hands,
+      line: addTile(s.line, tile, side),
+      firstId: s.line.length ? s.firstId : tile.id,
+      passes: 0,
+    };
     setChoosing(null);
     audio.playClick();
     if (!hands[s.turn].length) finish(next, s.turn, false);
@@ -284,14 +293,11 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
     setCover(false);
   };
 
-  // ---- The line on the table, laid out as a snake ----
-  const S = Math.round(Math.min(46, Math.max(30, width / 9)));
+  // ---- The line on the table: from the middle out, turning at the edges ----
+  const S = Math.round(Math.min(42, Math.max(26, width / 11)));
   const tileW = 2 * S + 9;
   const tileH = S + 6;
-  const gap = 6;
-  const perRow = Math.max(2, Math.floor((width + gap) / (tileW + gap)));
-  const rows = Math.max(1, Math.ceil(g.line.length / perRow));
-  const offset = (width - (perRow * tileW + (perRow - 1) * gap)) / 2;
+  const laid = layoutLine(g.line, g.firstId, width, tileW, tileH);
 
   const handSize = Math.round(Math.min(40, Math.max(28, width / 11)));
   const first = g.line[0];
@@ -348,13 +354,13 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
 
         {/* The table */}
         <div className="rounded-3xl bg-[oklch(0.62_0.08_60/0.85)] p-3 shadow-[inset_0_2px_8px_oklch(0.3_0.05_50/0.4)]">
-          <div ref={table} className="relative w-full" style={{ height: rows * (tileH + gap) + 4 }}>
+          <div
+            ref={table}
+            className="relative w-full transition-[height] duration-500"
+            style={{ height: Math.max(laid.height, tileH) + 4 }}
+          >
             {g.line.map((tile, i) => {
-              const row = Math.floor(i / perRow);
-              const col = i % perRow;
-              const back = row % 2 === 1;
-              const x = offset + (back ? perRow - 1 - col : col) * (tileW + gap);
-              const y = row * (tileH + gap);
+              const { x, y, vertical, flipped } = laid.spots[i];
               const isEnd = choosing && (i === 0 || i === g.line.length - 1);
               return (
                 <span
@@ -366,7 +372,8 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
                     tile={tile}
                     faces={g.faces}
                     size={S}
-                    flipped={back}
+                    vertical={vertical}
+                    flipped={flipped}
                     className={isEnd ? "ring-4 ring-[var(--color-gold)]" : ""}
                   />
                 </span>
