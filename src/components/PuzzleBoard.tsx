@@ -47,6 +47,7 @@ interface Props {
 }
 
 const ASPECT = 896 / 1152;
+const FRAME = 16;
 const TAB_RATIO = 0.15;
 const DRAG_THRESHOLD = 6; // px of movement before a tap becomes a drag
 
@@ -263,8 +264,9 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
       const padding = 16;
       const trayH = window.innerWidth < 640 ? 130 : 150;
       const headerH = 64;
-      const availH = window.innerHeight - headerH - trayH - padding * 3;
-      const availW = container.clientWidth - padding * 2;
+      // the painted panel around the board takes FRAME on each side
+      const availH = window.innerHeight - headerH - trayH - padding * 3 - FRAME * 2;
+      const availW = container.clientWidth - padding * 2 - FRAME * 2;
       let w = availW;
       let h = w / ASPECT;
       if (h > availH) {
@@ -540,79 +542,81 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
       </div>
 
 
-      {/* Board */}
+      {/* Board, on a painted panel */}
       <div className="flex flex-1 items-center justify-center px-4">
-        <div
-          ref={boardRef}
-          onClick={handleBoardClick}
-          className="relative overflow-visible rounded-2xl bg-[oklch(0.94_0.02_75)] shadow-[var(--shadow-soft)]"
-          style={{
-            width: boardSize.w,
-            height: boardSize.h,
-            backgroundImage: `linear-gradient(oklch(0.97 0.015 80 / 0.75), oklch(0.97 0.015 80 / 0.75)), url(${puzzle.image})`,
-            backgroundSize: `cover, ${boardSize.w}px ${boardSize.h}px`,
-            backgroundPosition: "center, top left",
-            cursor: selectedId != null ? "crosshair" : "default",
-          }}
-        >
-          {hint !== null && boardSize.w > 0 && (() => {
-            const hp = pieces.find((p) => p.id === hint);
-            if (!hp) return null;
-            return (
-              <div
-                className="pointer-events-none absolute"
-                style={{
-                  left: hp.col * pieceW - tab,
-                  top: hp.row * pieceH - tab,
-                  width: paddedW,
-                  height: paddedH,
-                  filter: "drop-shadow(0 0 14px oklch(0.85 0.14 85 / 0.9))",
-                  animation: "pulse 1.2s ease-in-out infinite",
-                }}
-              >
-                {renderPieceSvg(hp, paddedW, paddedH, { dim: true })}
-              </div>
-            );
-          })()}
-
-
-          {boardSize.w > 0 &&
-            pieces
-              .filter((p) => p.placed)
-              .map((p) => (
+        <div className="paint-box paint-tall" style={{ padding: FRAME }}>
+          <div
+            ref={boardRef}
+            onClick={handleBoardClick}
+            className="relative overflow-visible rounded-xl bg-[oklch(0.94_0.02_75)] shadow-[inset_0_1px_6px_oklch(0.4_0.06_50/0.25)]"
+            style={{
+              width: boardSize.w,
+              height: boardSize.h,
+              backgroundImage: `linear-gradient(oklch(0.97 0.015 80 / 0.75), oklch(0.97 0.015 80 / 0.75)), url(${puzzle.image})`,
+              backgroundSize: `cover, ${boardSize.w}px ${boardSize.h}px`,
+              backgroundPosition: "center, top left",
+              cursor: selectedId != null ? "crosshair" : "default",
+            }}
+          >
+            {hint !== null && boardSize.w > 0 && (() => {
+              const hp = pieces.find((p) => p.id === hint);
+              if (!hp) return null;
+              return (
                 <div
-                  key={p.id}
-                  className="absolute"
+                  className="pointer-events-none absolute"
                   style={{
-                    left: p.col * pieceW - tab,
-                    top: p.row * pieceH - tab,
+                    left: hp.col * pieceW - tab,
+                    top: hp.row * pieceH - tab,
                     width: paddedW,
                     height: paddedH,
+                    filter: "drop-shadow(0 0 14px oklch(0.85 0.14 85 / 0.9))",
+                    animation: "pulse 1.2s ease-in-out infinite",
                   }}
                 >
-                  {renderPieceSvg(p, paddedW, paddedH)}
+                  {renderPieceSvg(hp, paddedW, paddedH, { dim: true })}
                 </div>
-              ))}
+              );
+            })()}
 
-          {done && (
-            <div className="absolute inset-0 flex animate-fade-in flex-col items-center justify-center bg-[oklch(0.97_0.015_80/0.9)] p-6 text-center">
-              <div className="mb-2 text-5xl">
-                {"⭐".repeat(stars)}
-                {"☆".repeat(3 - stars)}
-              </div>
-              <h3 className="font-display text-2xl">{t("puzzle.done")}</h3>
-              <p className="mt-1 text-sm italic text-muted-foreground">"{localizedVerse}"</p>
-              <div className="mt-5 flex gap-2">
-                <button
-                  onClick={onExit}
-                  className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm active:scale-95"
-                >
-                  {t("puzzle.continue")}
-                </button>
-              </div>
 
-            </div>
-          )}
+            {boardSize.w > 0 &&
+              pieces
+                .filter((p) => p.placed)
+                .map((p) => (
+                  <div
+                    key={p.id}
+                    className="absolute"
+                    style={{
+                      left: p.col * pieceW - tab,
+                      top: p.row * pieceH - tab,
+                      width: paddedW,
+                      height: paddedH,
+                    }}
+                  >
+                    {renderPieceSvg(p, paddedW, paddedH)}
+                  </div>
+                ))}
+
+            {done && (
+              <div className="absolute inset-0 flex animate-fade-in flex-col items-center justify-center bg-[oklch(0.97_0.015_80/0.9)] p-6 text-center">
+                <div className="mb-2 text-5xl">
+                  {"⭐".repeat(stars)}
+                  {"☆".repeat(3 - stars)}
+                </div>
+                <h3 className="font-display text-2xl">{t("puzzle.done")}</h3>
+                <p className="mt-1 text-sm italic text-muted-foreground">"{localizedVerse}"</p>
+                <div className="mt-5 flex gap-2">
+                  <button
+                    onClick={onExit}
+                    className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm active:scale-95"
+                  >
+                    {t("puzzle.continue")}
+                  </button>
+                </div>
+
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

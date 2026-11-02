@@ -1,4 +1,4 @@
-// Who's Hiding?: the computer hides one Bible character among the cards and
+// Who am I?: the computer hides one Bible character among the cards and
 // the child asks yes / no questions about what they look like until only one
 // card is left standing. Two players can race, each looking for their own
 // hidden character. Portraits are cut from the story paintings by

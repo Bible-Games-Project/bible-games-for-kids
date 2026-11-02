@@ -17,7 +17,7 @@ import {
 import memoryBg from "@/assets/memory-bedtime.webp";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, ScreenFade } from "@/components/GameShell";
-import { TOKEN_HEX, TOKEN_ORDER, Token } from "@/components/Token";
+import { PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
 import { useBackButton } from "@/lib/back-button";
 import cardBack from "@/assets/ui/card-back.webp";
 import arrowArt from "@/assets/ui/arrow.webp";
@@ -181,8 +181,9 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
 }
 
 // Players are shown by the round tokens shared with the board games.
-function PlayerDot({ index, size = 28 }: { index: number; size?: number }) {
-  return <Token color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
+// A player's standing pawn (the Parchís pawns), numbered.
+function PlayerDot({ index, size = 20 }: { index: number; size?: number }) {
+  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
 }
 
 // ---------- How many players? ----------
@@ -222,7 +223,7 @@ function PlayerPicker({
             >
               <span className="flex flex-wrap justify-center gap-1.5">
                 {Array.from({ length: n }, (_, i) => (
-                  <PlayerDot key={i} index={i} size={40} />
+                  <PlayerDot key={i} index={i} size={32} />
                 ))}
               </span>
               <span className="text-lg font-semibold">

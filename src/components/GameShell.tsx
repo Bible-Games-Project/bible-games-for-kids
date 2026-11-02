@@ -7,23 +7,53 @@ import { useSettings } from "@/lib/i18n";
 import type { DifficultyId } from "@/lib/puzzles";
 import { storiesForLevel, type Story } from "@/lib/stories";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
+import { loaded, preloadUi } from "@/lib/preload-ui";
 import backArt from "@/assets/ui/back.webp";
 
 export const LEVEL_IDS: DifficultyId[] = ["easy", "easy-medium", "medium", "medium-hard", "hard"];
 
-// A half-second fade from black when a screen opens, so its paintings
-// appear smoothly instead of popping in while they load.
+// A fade from black when a screen opens. It waits (never long) until the
+// screen's pictures in view, its background painting, the painted boxes and
+// the fonts are ready, so text, boxes and pictures all appear together
+// instead of popping in one after another.
+const MAX_WAIT = 900;
+
+function screenReady(): Promise<unknown> {
+  const inView = (el: Element) => {
+    const r = el.getBoundingClientRect();
+    return r.bottom > 0 && r.top < window.innerHeight && r.width > 0;
+  };
+  const pictures = Array.from(document.images)
+    .filter((img) => !img.complete && img.loading !== "lazy" && inView(img))
+    .map(
+      (img) =>
+        new Promise((resolve) => {
+          img.addEventListener("load", resolve, { once: true });
+          img.addEventListener("error", resolve, { once: true });
+        }),
+    );
+  const paintings = Array.from(document.querySelectorAll<HTMLElement>("[data-wait-src]")).map(
+    (el) => loaded(el.dataset.waitSrc ?? ""),
+  );
+  return Promise.all([...pictures, ...paintings, preloadUi(), document.fonts?.ready]);
+}
+
 export function ScreenFade() {
   const [clear, setClear] = useState(false);
   const [gone, setGone] = useState(false);
   useEffect(() => {
-    let raf = requestAnimationFrame(() => {
-      raf = requestAnimationFrame(() => setClear(true));
-    });
-    const id = window.setTimeout(() => setGone(true), 650);
+    let alive = true;
+    let fadeTimer = 0;
+    const reveal = () => {
+      if (!alive) return;
+      // a moment for the background painting's own quick fade-in
+      window.setTimeout(() => alive && setClear(true), 120);
+      fadeTimer = window.setTimeout(() => alive && setGone(true), 700);
+    };
+    Promise.race([screenReady(), new Promise((r) => window.setTimeout(r, MAX_WAIT))]).then(reveal);
     return () => {
-      cancelAnimationFrame(raf);
-      window.clearTimeout(id);
+      alive = false;
+      window.clearTimeout(fadeTimer);
     };
   }, []);
   if (gone) return null;
@@ -143,6 +173,42 @@ export function LevelList({
   );
 }
 
+// The five difficulty tabs: painted boxes with the level and its ages; the
+// chosen one glows.
+export function LevelTabs({
+  level,
+  onLevel,
+}: {
+  level: DifficultyId;
+  onLevel: (id: DifficultyId) => void;
+}) {
+  const { t } = useSettings();
+  return (
+    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+      {LEVEL_IDS.map((id) => {
+        const active = id === level;
+        return (
+          <button
+            key={id}
+            onClick={() => onLevel(id)}
+            aria-pressed={active}
+            className={`paint-box paint-square paint-thin min-w-0 truncate px-2 py-3 text-[11px] font-semibold transition active:scale-95 sm:text-sm ${
+              active
+                ? "paint-picked z-10 scale-105 text-[var(--color-primary)]"
+                : "text-foreground/80"
+            }`}
+          >
+            <span className="block truncate">{t(`diff.${id}`)}</span>
+            <span className="block truncate text-[9px] font-medium text-muted-foreground sm:text-[11px]">
+              {t(`diff.${id}.age`)}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // Five difficulty tabs over a grid of story paintings: pick a level, then a
 // story. `badge` shows progress for a story on the selected level.
 export function StoryPicker({
@@ -167,26 +233,7 @@ export function StoryPicker({
   const ordered = useMemo(() => storiesForLevel(stories, level), [stories, level]);
   return (
     <>
-      <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-        {LEVEL_IDS.map((id) => {
-          const active = id === level;
-          return (
-            <button
-              key={id}
-              onClick={() => onLevel(id)}
-              aria-pressed={active}
-              className={`paint-box paint-square paint-thin min-w-0 truncate px-2 py-3 text-[11px] font-semibold transition active:scale-95 sm:text-sm ${
-                active ? "paint-picked z-10 scale-105 text-[var(--color-primary)]" : "text-foreground/80"
-              }`}
-            >
-              <span className="block truncate">{t(`diff.${id}`)}</span>
-              <span className="block truncate text-[9px] font-medium text-muted-foreground sm:text-[11px]">
-                {t(`diff.${id}.age`)}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <LevelTabs level={level} onLevel={onLevel} />
       <p className="mt-2 text-center text-xs italic text-muted-foreground">{describe(level)}</p>
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {ordered.map((s) => (

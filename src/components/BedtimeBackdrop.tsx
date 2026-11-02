@@ -27,11 +27,12 @@ export function BedtimeBackdrop({
   return (
     <div
       aria-hidden
+      data-wait-src={image}
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[oklch(0.95_0.03_70)]"
     >
       {/* Fades in once loaded rather than drawing in strips. */}
       <div
-        className={`absolute inset-0 transition-opacity duration-500 ${blur ? "scale-110 blur-md" : ""}`}
+        className={`absolute inset-0 transition-opacity duration-200 ${blur ? "scale-110 blur-md" : ""}`}
         style={{
           backgroundImage: `${fade}url(${image})`,
           backgroundSize: "cover",

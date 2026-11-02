@@ -6,7 +6,6 @@ import { memText } from "@/lib/memory-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import type { DifficultyId } from "@/lib/puzzles";
 import {
-  CHARACTERS,
   CHARACTER_COUNTS,
   QUESTIONS,
   characterName,
@@ -19,18 +18,20 @@ import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import {
   BackButton,
-  LevelList,
+  LevelTabs,
   MenuScreen,
   ResultCard,
   loadBest,
   saveBest,
   starText,
   ScreenFade,
+  Stars,
 } from "@/components/GameShell";
 
-import { TOKEN_HEX, TOKEN_ORDER, Token } from "@/components/Token";
+import { PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
 
 import guessBg from "@/assets/guesswho-bg.webp";
+import hintArt from "@/assets/ui/hint.webp";
 
 const BEST_KEY = "guesswho-best-v1";
 // Each player's rack takes the colour of their token.
@@ -38,26 +39,27 @@ const PLAYER_COLORS = TOKEN_ORDER.map((c) => TOKEN_HEX[c]);
 
 export function GuessWhoGame({ onBack }: { onBack: () => void }) {
   const { lang, t } = useSettings();
-  const [level, setLevel] = useState<DifficultyId | null>(null);
-  const [players, setPlayers] = useState(1);
+  const [level, setLevel] = useState<DifficultyId>("easy");
+  const [game, setGame] = useState<{ level: DifficultyId; players: number } | null>(null);
   const [best, setBest] = useState(() => loadBest(BEST_KEY));
   const gt = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
   const mt = (k: string) => memText(lang, k);
 
-  useBackButton(level !== null, () => setLevel(null));
+  useBackButton(game !== null, () => setGame(null));
 
-  if (level) {
+  if (game) {
     return (
       <GuessBoard
-        key={`${level}:${players}`}
-        level={level}
-        players={players}
-        onExit={() => setLevel(null)}
-        onComplete={(stars) => setBest(saveBest(BEST_KEY, level, stars))}
+        key={`${game.level}:${game.players}`}
+        level={game.level}
+        players={game.players}
+        onExit={() => setGame(null)}
+        onComplete={(stars) => setBest(saveBest(BEST_KEY, game.level, stars))}
       />
     );
   }
 
+  // Pick the level on the tabs, then the number of players starts the game.
   return (
     <MenuScreen
       title={t("game.guesswho")}
@@ -66,52 +68,43 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
       onBack={onBack}
       backLabel={t("select.back")}
     >
-      <div className="mb-4 grid grid-cols-2 gap-3">
+      <LevelTabs level={level} onLevel={setLevel} />
+      <p className="mt-2 flex items-center justify-center gap-2 text-center text-xs italic text-muted-foreground">
+        {gt("gw.charactersCount", { n: CHARACTER_COUNTS[level] })}
+        <Stars value={best[level] ?? 0} className="text-sm not-italic" />
+      </p>
+      <h2 className="mt-5 text-center font-display text-2xl text-[oklch(0.99_0.01_85)] [text-shadow:0_2px_8px_oklch(0.25_0.05_50/0.85)]">
+        {mt("mem.howManyPlayers")}
+      </h2>
+      <div className="mt-3 grid grid-cols-2 gap-3">
         {[1, 2, 3, 4].map((n) => (
           <button
             key={n}
-            onClick={() => setPlayers(n)}
-            aria-pressed={players === n}
-            className={`paint-box paint-square flex items-center justify-center gap-2 px-4 py-4 text-base font-semibold transition active:scale-[0.97] ${
-              players === n ? "paint-picked" : ""
-            }`}
+            onClick={() => {
+              window.scrollTo(0, 0);
+              setGame({ level, players: n });
+            }}
+            className="paint-box paint-square flex flex-col items-center justify-center gap-2 p-4 text-base font-semibold transition active:scale-[0.97]"
           >
-            {Array.from({ length: n }, (_, i) => (
-              <PlayerDot key={i} index={i} />
-            ))}
+            <span className="flex gap-1">
+              {Array.from({ length: n }, (_, i) => (
+                <PlayerDot key={i} index={i} size={22} />
+              ))}
+            </span>
             {n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))}
           </button>
         ))}
       </div>
-      {players > 1 && (
-        <p className="-mt-1 mb-4 text-center text-sm text-muted-foreground">
-          {gt("gw.twoPlayers")}
-        </p>
-      )}
-      <LevelList
-        describe={(id) => gt("gw.charactersCount", { n: CHARACTER_COUNTS[id] })}
-        picture={(id, i) => (
-          // A little rack of faces (up to 9 shown).
-          <span className="absolute inset-0 grid grid-cols-3 gap-0.5 bg-[oklch(0.5_0.13_262)] p-1">
-            {CHARACTERS.slice(i * 4, i * 4 + Math.min(9, CHARACTER_COUNTS[id])).map((c) => (
-              <img
-                key={c.id}
-                src={c.image}
-                alt=""
-                className="aspect-square w-full rounded-sm object-cover"
-              />
-            ))}
-          </span>
-        )}
-        best={(id) => best[id] ?? 0}
-        onPick={setLevel}
-      />
+      <p className="paint-box paint-long mt-4 px-5 py-3.5 text-center text-sm text-foreground/80">
+        {gt("gw.twoPlayers")}
+      </p>
     </MenuScreen>
   );
 }
 
-function PlayerDot({ index, size = 26 }: { index: number; size?: number }) {
-  return <Token color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
+// A player's standing pawn (the Parchís pawns), numbered.
+function PlayerDot({ index, size = 20 }: { index: number; size?: number }) {
+  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
 }
 
 // What one player has found out so far about their hidden character.
@@ -303,58 +296,51 @@ function GuessBoard({
           </div>
         )}
 
-        {/* The rack of cards, like the blue board on the table, in the
-            colour of the player whose turn it is. */}
+        {/* The cards, each standing in a painted frame. A card that is
+            ruled out tips over backwards and falls flat, like on the real
+            game's board. */}
         <div
-          className="rounded-3xl p-2 shadow-[0_10px_24px_oklch(0.25_0.06_262/0.45),inset_0_2px_0_oklch(1_0_0/0.25)] transition-colors duration-500"
-          style={{
-            backgroundColor: players > 1 ? PLAYER_COLORS[winner ?? turn] : PLAYER_COLORS[0],
-          }}
+          className="grid gap-2"
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
         >
-          <div
-            className="grid gap-1.5"
-            style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-          >
-            {shown.cards.map((c) => {
-              const isDown = shown.down.has(c.id);
-              const isSecret = winner !== null && c === shown.secret;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => guess(c)}
-                  disabled={isDown || winner !== null}
-                  aria-label={name(c)}
-                  className="relative aspect-[4/5] w-full [perspective:600px]"
+          {shown.cards.map((c) => {
+            const isDown = shown.down.has(c.id);
+            const isSecret = winner !== null && c === shown.secret;
+            return (
+              <button
+                key={c.id}
+                onClick={() => guess(c)}
+                disabled={isDown || winner !== null}
+                aria-label={name(c)}
+                className="relative aspect-[4/5] w-full [perspective:500px]"
+              >
+                {/* where the card stood */}
+                <span className="absolute inset-x-[8%] bottom-0 h-[14%] rounded-[50%] bg-[oklch(0.3_0.05_50/0.22)] blur-[2px]" />
+                <span
+                  className={`paint-box paint-tall paint-flat paint-tiny absolute inset-0 flex origin-bottom flex-col p-[9%] transition-[transform,opacity] duration-700 ${
+                    isSecret ? "paint-picked" : ""
+                  }`}
+                  style={{
+                    transform: isDown ? "rotateX(84deg)" : "none",
+                    opacity: isDown ? 0.55 : 1,
+                    transitionTimingFunction: isDown
+                      ? "cubic-bezier(0.55, 0, 0.85, 0.35)"
+                      : "cubic-bezier(0.2, 0.7, 0.3, 1)",
+                  }}
                 >
-                  <span
-                    className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d]"
-                    style={{ transform: isDown ? "rotateX(-180deg)" : "none" }}
-                  >
-                    {/* Front: the portrait and the name */}
-                    <span
-                      className={`absolute inset-0 flex flex-col overflow-hidden rounded-lg bg-[oklch(0.98_0.015_85)] p-0.5 shadow [backface-visibility:hidden] ${
-                        isSecret ? "ring-4 ring-[var(--color-gold)]" : ""
-                      }`}
-                    >
-                      <img
-                        src={c.image}
-                        alt=""
-                        draggable={false}
-                        className="min-h-0 w-full flex-1 rounded-md object-cover"
-                      />
-                      <span className="line-clamp-1 px-0.5 pt-0.5 text-center text-[8px] font-semibold leading-tight text-foreground sm:text-[11px]">
-                        {name(c)}
-                      </span>
-                    </span>
-                    {/* Back: a card with a star */}
-                    <span className="absolute inset-0 grid place-items-center rounded-lg border-2 border-[oklch(0.97_0.02_85)] bg-[oklch(0.4_0.08_262)] text-xl text-[var(--color-gold)] shadow [backface-visibility:hidden] [transform:rotateX(180deg)]">
-                      ✦
-                    </span>
+                  <img
+                    src={c.image}
+                    alt=""
+                    draggable={false}
+                    className="min-h-0 w-full flex-1 select-none rounded-[6px] object-cover"
+                  />
+                  <span className="line-clamp-1 px-0.5 pt-0.5 text-center text-[8px] font-semibold leading-tight text-foreground sm:text-[11px]">
+                    {name(c)}
                   </span>
-                </button>
-              );
-            })}
-          </div>
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="paint-box paint-long mt-3 px-5 pb-4 pt-3">
@@ -390,9 +376,15 @@ function GuessBoard({
           <button
             onClick={() => setSheet(true)}
             disabled={busy || winner !== null}
-            className="mx-auto mt-3 flex w-full max-w-xs items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-4 py-3 text-base font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95 disabled:opacity-50"
+            className="paint-box paint-wide paint-flat paint-thin mx-auto mt-3 flex w-full max-w-xs items-center justify-center gap-3 px-5 py-3.5 font-display text-xl text-[oklch(0.42_0.11_50)] transition active:scale-95 disabled:opacity-50"
           >
-            <span aria-hidden>❓</span>
+            <img
+              src={hintArt}
+              alt=""
+              aria-hidden
+              draggable={false}
+              className="h-9 w-9 select-none"
+            />
             {gt("gw.ask")}
           </button>
           <p className="pt-2 text-center text-[11px] italic text-muted-foreground">

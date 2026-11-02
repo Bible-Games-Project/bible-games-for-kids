@@ -319,6 +319,15 @@ function ColoringBoard({
   const [confirmClear, setConfirmClear] = useState(false);
   const [wrongId, setWrongId] = useState<number | null>(null);
   const [finished, setFinished] = useState(false);
+  // Once the page is done, the finished painting fades in over it before
+  // the well-done card.
+  const [celebrate, setCelebrate] = useState(false);
+  const celebrateTimer = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(celebrateTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -406,6 +415,7 @@ function ColoringBoard({
         audio.playWin();
         setFinished(true);
       }, 400);
+      celebrateTimer.current = window.setTimeout(() => setCelebrate(true), 2600);
     }
   };
 
@@ -479,79 +489,79 @@ function ColoringBoard({
         </header>
 
         {/* Zoomed in, the page is twice as big and scrolls with a finger. */}
-        <div
-          className={`w-full rounded-3xl bg-white shadow-lg ${zoom ? "max-h-[62dvh] overflow-auto" : "overflow-hidden"}`}
-        >
+        <div className="paint-box paint-tall w-full p-4">
           <div
-            onClick={paintAt}
-            className="relative cursor-pointer"
-            style={{ width: zoom ? "200%" : "100%", aspectRatio: `${MAP_W} / ${MAP_H}` }}
+            className={`w-full rounded-2xl bg-white ${zoom ? "max-h-[62dvh] overflow-auto" : "overflow-hidden"}`}
           >
-            <img
-              src={page.story.image}
-              alt=""
-              draggable={false}
-              className="pointer-events-none absolute inset-0 h-full w-full select-none opacity-30"
-            />
-            <canvas
-              ref={canvasRef}
-              width={MAP_W}
-              height={MAP_H}
-              className="absolute inset-0 h-full w-full"
-            />
-            <img
-              src={page.lines}
-              alt=""
-              draggable={false}
-              className="pointer-events-none absolute inset-0 h-full w-full select-none"
-            />
-            {data && (
-              <svg
-                viewBox={`0 0 ${MAP_W} ${MAP_H}`}
-                className="pointer-events-none absolute inset-0 h-full w-full select-none"
-                aria-hidden
-              >
-                {data.labels
-                  .filter((l) => !fills[l.id])
-                  .map((l) => {
-                    const mine = data.colorOf[l.id] === selected;
-                    return (
-                      <text
-                        key={l.id}
-                        x={l.x}
-                        y={l.y}
-                        fontSize={l.size}
-                        textAnchor="middle"
-                        dominantBaseline="central"
-                        fontWeight={mine ? 800 : 600}
-                        fill={mine ? "oklch(0.3 0.08 262)" : "oklch(0.42 0.03 60)"}
-                        style={{ fontFamily: "var(--font-body)" }}
-                      >
-                        {data.colorOf[l.id] + 1}
-                      </text>
-                    );
-                  })}
-                {wrongLabel && (
-                  <circle
-                    cx={wrongLabel.x}
-                    cy={wrongLabel.y}
-                    r={wrongLabel.size}
-                    fill="none"
-                    stroke="oklch(0.62 0.18 25)"
-                    strokeWidth={2}
-                  />
-                )}
-              </svg>
-            )}
-            {peek && (
+            <div
+              onClick={paintAt}
+              className="relative cursor-pointer"
+              style={{ width: zoom ? "200%" : "100%", aspectRatio: `${MAP_W} / ${MAP_H}` }}
+            >
+              <canvas
+                ref={canvasRef}
+                width={MAP_W}
+                height={MAP_H}
+                className="absolute inset-0 h-full w-full"
+              />
               <img
-                src={page.story.image}
+                src={page.lines}
                 alt=""
                 draggable={false}
-                className="pointer-events-none absolute inset-0 h-full w-full select-none animate-in fade-in"
+                className="pointer-events-none absolute inset-0 h-full w-full select-none"
               />
-            )}
-            {!data && <span className="absolute inset-0 grid place-items-center text-3xl">🎨</span>}
+              {data && (
+                <svg
+                  viewBox={`0 0 ${MAP_W} ${MAP_H}`}
+                  className="pointer-events-none absolute inset-0 h-full w-full select-none"
+                  aria-hidden
+                >
+                  {data.labels
+                    .filter((l) => !fills[l.id])
+                    .map((l) => {
+                      const mine = data.colorOf[l.id] === selected;
+                      return (
+                        <text
+                          key={l.id}
+                          x={l.x}
+                          y={l.y}
+                          fontSize={l.size}
+                          textAnchor="middle"
+                          dominantBaseline="central"
+                          fontWeight={mine ? 800 : 600}
+                          fill={mine ? "oklch(0.3 0.08 262)" : "oklch(0.42 0.03 60)"}
+                          style={{ fontFamily: "var(--font-body)" }}
+                        >
+                          {data.colorOf[l.id] + 1}
+                        </text>
+                      );
+                    })}
+                  {wrongLabel && (
+                    <circle
+                      cx={wrongLabel.x}
+                      cy={wrongLabel.y}
+                      r={wrongLabel.size}
+                      fill="none"
+                      stroke="oklch(0.62 0.18 25)"
+                      strokeWidth={2}
+                    />
+                  )}
+                </svg>
+              )}
+              {(peek || finished) && (
+                <img
+                  src={page.story.image}
+                  alt=""
+                  draggable={false}
+                  className={`pointer-events-none absolute inset-0 h-full w-full select-none animate-in fade-in ${
+                    finished ? "duration-[1800ms]" : ""
+                  }`}
+                />
+              )}
+              {!data && (
+                <span className="absolute inset-0 grid place-items-center text-3xl">🎨</span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -591,7 +601,7 @@ function ColoringBoard({
         )}
       </div>
 
-      {finished && (
+      {celebrate && (
         <ResultCard
           top="🎨"
           title={ct("color.done")}
@@ -599,7 +609,9 @@ function ColoringBoard({
           onReplay={() => {
             setFills({});
             setHistory([]);
+            window.clearTimeout(celebrateTimer.current);
             setFinished(false);
+            setCelebrate(false);
           }}
           backLabel={ct("color.back")}
           onBack={onExit}

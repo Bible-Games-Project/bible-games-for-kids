@@ -283,11 +283,12 @@
     isolation: isolate;
   }
 
-  /* The blur is cut to the panel's own outline (the picture as a mask). */
+  /* The blur is cut to the panel's outline (the picture as a mask), a little
+     inside it so it never shows past the painted edge. */
   .paint-box::before {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: calc(var(--paint-w) * 0.35);
     z-index: -1;
     -webkit-backdrop-filter: blur(10px) saturate(1.1);
     backdrop-filter: blur(10px) saturate(1.1);
@@ -311,16 +312,31 @@
     border-image-width: var(--paint-w);
     border-image-repeat: stretch;
     /* the whole picture stretched underneath fills the hairline seams
-       between the nine slices */
+       between the nine slices; it is kept inside the painted edge so its own
+       outline never shows as a second box */
     background-image: var(--paint);
     background-origin: border-box;
-    background-size: 100% 100%;
+    background-position: center;
+    background-size: calc(100% - var(--paint-w)) calc(100% - var(--paint-w));
     background-repeat: no-repeat;
     opacity: 0.9;
   }
 
   .paint-thin {
     --paint-w: 15px;
+  }
+
+  .paint-tiny {
+    --paint-w: 10px;
+  }
+
+  /* Opaque, without the blur: for panels that move in 3D, like cards. */
+  .paint-flat::before {
+    display: none;
+  }
+
+  .paint-flat::after {
+    opacity: 1;
   }
 
   .paint-solid {
