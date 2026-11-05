@@ -8,19 +8,20 @@ export interface MemoryLevel {
   // existing diff.* translations.
   id: DifficultyId;
   pairs: number;
-  // Columns on tablets and desktops; phones always use 3 large columns and
-  // scroll. Card counts are multiples of 3 so phone rows are always full.
-  wideCols: 3 | 4 | 6;
+  // Columns on phones (at most 4, so a big deck scrolls instead of shrinking
+  // to tiny cards) and on tablets and desktops. A short last row is centred.
+  cols: 3 | 4;
+  wideCols: 4 | 6 | 8 | 10;
   // Painting shown on the level's cards in the level menu.
   cover: string;
 }
 
 export const MEMORY_LEVELS: MemoryLevel[] = [
-  { id: "easy", pairs: 3, wideCols: 3, cover: "noahs-ark" },
-  { id: "easy-medium", pairs: 6, wideCols: 4, cover: "nativity" },
-  { id: "medium", pairs: 9, wideCols: 6, cover: "walking-water" },
-  { id: "medium-hard", pairs: 12, wideCols: 6, cover: "good-shepherd" },
-  { id: "hard", pairs: 15, wideCols: 6, cover: "creation" },
+  { id: "easy", pairs: 4, cols: 3, wideCols: 4, cover: "noahs-ark" },
+  { id: "easy-medium", pairs: 8, cols: 4, wideCols: 4, cover: "nativity" },
+  { id: "medium", pairs: 12, cols: 4, wideCols: 6, cover: "walking-water" },
+  { id: "medium-hard", pairs: 20, cols: 4, wideCols: 8, cover: "good-shepherd" },
+  { id: "hard", pairs: 25, cols: 4, wideCols: 10, cover: "creation" },
 ];
 
 export const findScene = (slug: string): Scene | undefined =>

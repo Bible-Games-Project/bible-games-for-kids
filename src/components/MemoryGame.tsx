@@ -41,10 +41,11 @@ const formatTime = (sec: number) =>
 
 // Static class names so Tailwind generates them. The width class is shared
 // by the pinned header and the board so both line up.
-const WIDE_LAYOUT: Record<MemoryLevel["wideCols"], { cols: string; width: string }> = {
-  3: { cols: "sm:grid-cols-3", width: "sm:max-w-xl" },
-  4: { cols: "sm:grid-cols-4", width: "sm:max-w-2xl" },
-  6: { cols: "sm:grid-cols-6", width: "sm:max-w-4xl" },
+const WIDE_LAYOUT: Record<MemoryLevel["wideCols"], { width: string }> = {
+  4: { width: "sm:max-w-2xl" },
+  6: { width: "sm:max-w-4xl" },
+  8: { width: "sm:max-w-5xl" },
+  10: { width: "sm:max-w-6xl" },
 };
 
 // The face-down side of every card: terracotta paper with a soft dot
@@ -161,11 +162,12 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                     ))}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-display text-xl leading-snug">{t(`diff.${lv.id}`)}</h2>
-                  <p className="text-[11px] font-semibold text-muted-foreground/90">{t(`diff.${lv.id}.age`)}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {mt("mem.pairsCount").replace("{n}", String(lv.pairs))}
-                  </p>
+                  <h2 className="font-display text-xl leading-snug">
+                    {t(`diff.${lv.id}.age`)}{" "}
+                    <span className="text-base text-muted-foreground">
+                      ({mt("mem.pairsCount").replace("{n}", String(lv.pairs))})
+                    </span>
+                  </h2>
                   <span className="mt-1.5 block text-base tracking-wider" aria-label={`${best} of 3 stars`}>
                     <span className="text-[var(--color-gold)]">{"★".repeat(best)}</span>
                     <span className="text-foreground/20">{"★".repeat(3 - best)}</span>
@@ -208,26 +210,24 @@ function PlayerPicker({
         <header className="flex items-center gap-3 pb-2">
           <BackButton onClick={onBack} label={mt("mem.levels")} />
           <h1 className="font-display text-2xl">
-            {t("game.memory")} · {t(`diff.${level.id}`)}
+            {t("game.memory")} · {t(`diff.${level.id}.age`)}
           </h1>
         </header>
         <h2 className="mt-6 text-center font-display text-3xl">{mt("mem.howManyPlayers")}</h2>
-        <div className="mt-6 grid grid-cols-2 gap-4">
+        <div className="mx-auto mt-6 grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((n) => (
             <button
               key={n}
               onClick={() => onPick(n)}
-              className={`paint-box paint-square flex aspect-square flex-col items-center justify-center gap-3 p-4 transition active:scale-[0.97] ${
+              aria-label={n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))}
+              className={`paint-box paint-square paint-thin grid h-24 w-24 place-items-center p-3 transition active:scale-[0.95] ${
                 n === last ? "paint-picked" : ""
               }`}
             >
-              <span className="flex flex-wrap justify-center gap-1.5">
+              <span className="flex max-w-[3.5rem] flex-wrap justify-center gap-1">
                 {Array.from({ length: n }, (_, i) => (
-                  <PlayerDot key={i} index={i} size={32} />
+                  <PlayerPawn key={i} color={TOKEN_ORDER[i]} size={18} />
                 ))}
-              </span>
-              <span className="text-lg font-semibold">
-                {n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))}
               </span>
             </button>
           ))}
@@ -434,8 +434,11 @@ function MemoryBoard({
         <div className={`paint-box paint-long mx-auto w-full max-w-lg px-5 pt-4 ${wide.width}`}>
           <header className="flex items-center gap-3 pb-2">
             <BackButton onClick={onExit} label={mt("mem.levels")} />
-            <h1 className="min-w-0 flex-1 truncate font-display text-xl">
-              {t("game.memory")} · {t(`diff.${level.id}`)}
+            <h1 className="min-w-0 flex-1 font-display text-lg leading-tight">
+              <span className="block truncate">{t("game.memory")}</span>
+              <span className="block truncate font-sans text-xs font-semibold text-muted-foreground">
+                {t(`diff.${level.id}.age`)} ({mt("mem.pairsCount").replace("{n}", String(level.pairs))})
+              </span>
             </h1>
             {!multi && (
               <div className="flex shrink-0 gap-3 text-right text-xs text-muted-foreground tabular-nums">
@@ -493,7 +496,8 @@ function MemoryBoard({
           don't all fit, so cards never shrink to fit the screen. */}
       <div
         ref={gridRef}
-        className={`mx-auto grid w-full max-w-lg grid-cols-3 gap-3 px-4 pb-28 pt-1 sm:gap-4 ${wide.cols} ${wide.width}`}
+        className={`mx-auto flex w-full max-w-lg flex-wrap justify-center gap-[var(--gap)] px-4 pb-28 pt-1 [--gap:0.6rem] sm:[--cols:var(--cols-wide)] sm:[--gap:0.9rem] ${wide.width}`}
+        style={{ ["--cols" as string]: level.cols, ["--cols-wide" as string]: level.wideCols }}
       >
         {deck.map((card, i) => {
           const finder = matched.get(card.scene.slug);
@@ -506,7 +510,7 @@ function MemoryBoard({
               onClick={() => flip(i)}
               disabled={isMatched}
               aria-label={faceUp ? title : mt("mem.hidden")}
-              className="relative aspect-[13/20] w-full [perspective:800px]"
+              className="relative aspect-[13/20] w-[calc((100%-(var(--cols)-1)*var(--gap))/var(--cols))] [perspective:800px]"
             >
               <span
                 className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d] motion-reduce:transition-none"
