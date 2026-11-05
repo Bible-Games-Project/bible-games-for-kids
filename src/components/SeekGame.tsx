@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import type { DifficultyId } from "@/lib/puzzles";
@@ -26,6 +26,7 @@ import homeBg from "@/assets/home-bedtime.webp";
 const BEST_KEY = "seek-best-v2";
 
 export function SeekGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("seek");
   const { lang, t } = useSettings();
   const [level, setLevel] = useState<DifficultyId>("easy");
   const [story, setStory] = useState<Story | null>(null);

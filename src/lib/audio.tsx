@@ -16,8 +16,84 @@ const TRACKS: string[] = [s1, s2, s3, s4, s6, s7, s8, s9, s10].map((a) => a.url)
 
 export type MusicScope = "menu" | "puzzle";
 
+// Sound effects: free CC0 recordings (Kenney's packs and others, see
+// src/assets/sfx/README.md), one short MP3 each, named by file.
+const SFX: Record<string, string> = Object.fromEntries(
+  Object.entries(
+    import.meta.glob<string>("../assets/sfx/*.mp3", { eager: true, import: "default" }),
+  ).map(([path, url]) => [path.slice(path.lastIndexOf("/") + 1, -4), url]),
+);
+
+// Each game sounds different: its own effects for the moments every game has
+// (a tap or move, a right answer, a wrong one) and its own winning tune.
+export type SoundTheme =
+  | "puzzle"
+  | "memory"
+  | "dragdrop"
+  | "coloring"
+  | "seek"
+  | "order"
+  | "guesswho"
+  | "goose"
+  | "domino"
+  | "parchis"
+  | "chess";
+
+const THEMES: Record<
+  SoundTheme,
+  { tap: string[]; correct: string[]; incorrect: string[]; win: string }
+> = {
+  puzzle: { tap: [], correct: ["puzzle-snap"], incorrect: ["puzzle-wrong"], win: "win-puzzle" },
+  memory: {
+    tap: ["card-flip-1", "card-flip-2", "card-flip-3"],
+    correct: ["pair-found"],
+    incorrect: ["card-back"],
+    win: "win-memory",
+  },
+  dragdrop: { tap: [], correct: ["drop-right"], incorrect: ["drop-wrong"], win: "win-dragdrop" },
+  coloring: { tap: ["paint"], correct: ["paint"], incorrect: ["paint-wrong"], win: "win-coloring" },
+  seek: { tap: [], correct: ["seek-found"], incorrect: ["seek-miss"], win: "win-seek" },
+  order: { tap: [], correct: ["order-right"], incorrect: ["order-wrong"], win: "win-order" },
+  guesswho: {
+    tap: ["ask"],
+    correct: ["answer-yes"],
+    incorrect: ["answer-no"],
+    win: "win-guesswho",
+  },
+  goose: {
+    tap: ["die-throw"],
+    correct: ["goose-bonus"],
+    incorrect: ["goose-prison"],
+    win: "win-goose",
+  },
+  domino: {
+    tap: ["domino-place"],
+    correct: ["domino-place"],
+    incorrect: ["domino-pass"],
+    win: "win-domino",
+  },
+  parchis: {
+    tap: ["dice-throw"],
+    correct: ["parchis-goal"],
+    incorrect: ["parchis-home"],
+    win: "win-parchis",
+  },
+  chess: {
+    tap: ["chess-move"],
+    correct: ["chess-capture"],
+    incorrect: ["chess-capture"],
+    win: "win-chess",
+  },
+};
+
+const pick = (list: string[]) => list[Math.floor(Math.random() * list.length)];
+
 interface AudioApi {
   setScope: (scope: MusicScope) => void;
+  // The game whose sounds play (null on menus and the home screen).
+  setTheme: (theme: SoundTheme | null) => void;
+  // One named effect from src/assets/sfx.
+  play: (name: string, volume?: number) => void;
   playClick: () => void;
   playCorrect: () => void;
   playIncorrect: () => void;
@@ -47,6 +123,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const fadeRafRef = useRef<number | null>(null);
   const sfxCtxRef = useRef<AudioContext | null>(null);
   const startedRef = useRef(false);
+  const themeRef = useRef<SoundTheme | null>(null);
+  const buffersRef = useRef(new Map<string, Promise<AudioBuffer | null>>());
 
   // Create audio element once
   useEffect(() => {
@@ -162,7 +240,51 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   };
 
   const api = useMemo<AudioApi>(() => {
-    const playClick = () => {
+    const load = (ctx: AudioContext, name: string) => {
+      let buf = buffersRef.current.get(name);
+      if (!buf) {
+        buf = fetch(SFX[name])
+          .then((r) => r.arrayBuffer())
+          .then((data) => ctx.decodeAudioData(data))
+          .catch(() => null);
+        buffersRef.current.set(name, buf);
+      }
+      return buf;
+    };
+    // Played a touch faster or slower each time, so a sound heard often
+    // doesn't feel repeated.
+    const play = (name: string, volume = 1) => {
+      const ctx = getSfxCtx();
+      if (!ctx || !SFX[name]) return;
+      if (ctx.state === "suspended") void ctx.resume();
+      void load(ctx, name).then((buffer) => {
+        if (!buffer) return;
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+        src.playbackRate.value = 0.95 + Math.random() * 0.1;
+        const g = ctx.createGain();
+        g.gain.value = volume * 0.85;
+        src.connect(g).connect(ctx.destination);
+        src.start();
+      });
+    };
+    const setTheme = (theme: SoundTheme | null) => {
+      themeRef.current = theme;
+      // decode the game's sounds now, so the first one plays at once
+      const ctx = theme ? getSfxCtx() : null;
+      if (ctx && theme) {
+        const t = THEMES[theme];
+        [...t.tap, ...t.correct, ...t.incorrect, t.win].forEach((n) => void load(ctx, n));
+      }
+    };
+    const themed = (part: "tap" | "correct" | "incorrect") => {
+      const theme = themeRef.current;
+      const list = theme ? THEMES[theme][part] : [];
+      if (!list.length) return false;
+      play(pick(list));
+      return true;
+    };
+    const synthClick = () => {
       const ctx = getSfxCtx();
       if (!ctx) return;
       const o = ctx.createOscillator();
@@ -177,7 +299,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       o.start();
       o.stop(ctx.currentTime + 0.12);
     };
+    const playClick = () => {
+      if (!themed("tap")) synthClick();
+    };
     const playCorrect = () => {
+      if (themed("correct")) return;
       const ctx = getSfxCtx();
       if (!ctx) return;
       const o = ctx.createOscillator();
@@ -193,6 +319,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       o.stop(ctx.currentTime + 0.4);
     };
     const playIncorrect = () => {
+      if (themed("incorrect")) return;
       const ctx = getSfxCtx();
       if (!ctx) return;
       const o = ctx.createOscillator();
@@ -208,6 +335,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       o.stop(ctx.currentTime + 0.3);
     };
     const playWin = () => {
+      const theme = themeRef.current;
+      if (theme) return play(THEMES[theme].win);
       const ctx = getSfxCtx();
       if (!ctx) return;
       const notes = [523.25, 659.25, 783.99, 1046.5];
@@ -229,11 +358,12 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       scopeRef.current = scope;
       if (sound) fadeTo(VOLUMES[scope]);
     };
-    return { setScope, playClick, playCorrect, playIncorrect, playWin };
+    return { setScope, setTheme, play, playClick, playCorrect, playIncorrect, playWin };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sound]);
 
-  // Global UI click sound — soft click on every <button> press.
+  // Global UI click — a soft tick on every <button> press on menus. Inside a
+  // game its own sounds take over.
   useEffect(() => {
     const onDown = (e: PointerEvent) => {
       const target = e.target as Element | null;
@@ -241,7 +371,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       const btn = target.closest("button");
       if (!btn) return;
       if (btn.disabled) return;
-      api.playClick();
+      if (themeRef.current) return;
+      api.play("ui-click", 0.8);
     };
     document.addEventListener("pointerdown", onDown, true);
     return () => document.removeEventListener("pointerdown", onDown, true);
@@ -256,6 +387,8 @@ export function useAudio(): AudioApi {
     // Safe no-op fallback for components rendered outside provider (shouldn't happen).
     return {
       setScope: () => {},
+      setTheme: () => {},
+      play: () => {},
       playClick: () => {},
       playCorrect: () => {},
       playIncorrect: () => {},
@@ -263,4 +396,15 @@ export function useAudio(): AudioApi {
     };
   }
   return ctx;
+}
+
+// Gives a game its own sounds while it is on screen.
+export function useSoundTheme(theme: SoundTheme) {
+  const audio = useAudio();
+  useEffect(() => {
+    audio.setTheme(theme);
+    return () => {
+      audio.setTheme(null);
+    };
+  }, [audio, theme]);
 }

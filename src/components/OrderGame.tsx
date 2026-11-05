@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import type { DifficultyId } from "@/lib/puzzles";
@@ -42,6 +42,7 @@ import orderMap from "@/assets/order-map.webp";
 const BEST_KEY = "order-best-v1";
 
 export function OrderGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("order");
   const { lang, t } = useSettings();
   const [level, setLevel] = useState<DifficultyId | null>(null);
   const [best, setBest] = useState(() => loadBest(BEST_KEY));

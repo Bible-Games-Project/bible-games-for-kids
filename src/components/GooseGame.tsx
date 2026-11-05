@@ -1,6 +1,6 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { memText } from "@/lib/memory-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
@@ -19,6 +19,8 @@ import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
 import { PAWN_RATIO, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
+import { StoryQuiz } from "@/components/StoryQuiz";
+import type { Story } from "@/lib/stories";
 
 import gooseBg from "@/assets/goose-bg.webp";
 
@@ -34,6 +36,7 @@ function loadPlayers(): number {
 }
 
 export function GooseGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("goose");
   const { lang, t } = useSettings();
   const [players, setPlayers] = useState<number | null>(null);
   const gt = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
@@ -64,22 +67,23 @@ export function GooseGame({ onBack }: { onBack: () => void }) {
       backLabel={t("select.back")}
     >
       <h2 className="text-center font-display text-2xl">{mt("mem.howManyPlayers")}</h2>
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      {/* Small boxes with just the pawns, like Memory's */}
+      <div className="mx-auto mt-4 grid w-fit grid-cols-3 gap-3">
         {[1, 2, 3, 4, 5, 6].map((n) => (
           <button
             key={n}
             onClick={() => pick(n)}
-            className={`paint-box paint-square flex aspect-square flex-col items-center justify-center gap-2 p-3 transition active:scale-[0.97] ${
+            aria-label={
+              n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))
+            }
+            className={`paint-box paint-square paint-thin grid h-24 w-24 place-items-center p-3 transition active:scale-[0.95] ${
               n === last ? "paint-picked" : ""
             }`}
           >
-            <span className="flex max-w-[5.5rem] flex-wrap justify-center gap-1">
+            <span className="flex max-w-[4.2rem] flex-wrap justify-center gap-1">
               {Array.from({ length: n }, (_, i) => (
-                <Pawn key={i} index={i} size={26} />
+                <Pawn key={i} index={i} size={16} />
               ))}
-            </span>
-            <span className="text-sm font-semibold">
-              {n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))}
             </span>
           </button>
         ))}
@@ -146,9 +150,9 @@ const GooseBadge = ({ size = 28 }: { size?: number }) => (
   </Badge>
 );
 
-// Each player plays with one of the round tokens, numbered.
+// Each player plays with one of the standing pawns.
 function Pawn({ index, size }: { index: number; size: number }) {
-  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
+  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} />;
 }
 
 // Three crosses on a hill at dusk, for the square without a painting.
@@ -279,6 +283,8 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   const [busy, setBusy] = useState(true); // the opening zoom
   const [message, setMessage] = useState<string | null>(null);
   const [winner, setWinner] = useState<number | null>(null);
+  // After a New Testament square: name its story to roll again.
+  const [quiz, setQuiz] = useState<{ player: number; story: Story } | null>(null);
   const [hopMs, setHopMs] = useState(220);
   // Camera: the whole board, or close up on a square.
   const [view, setView] = useState<{ all: boolean; n: number; ms: number }>({
@@ -384,12 +390,17 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
     };
     if (sq.kind === "goose") {
       audio.playCorrect();
+      const ask = (m: number) => {
+        const story = SQUARES[m].story;
+        if (story) later(() => setQuiz({ player: i, story }), 500);
+        else again();
+      };
       if (rule.to === n) {
         setMessage(gt("goose.lastGoose"));
-        again();
+        ask(n);
       } else {
         setMessage(gt("goose.gooseJump"));
-        later(() => jump(i, rule.to, again), 900);
+        later(() => jump(i, rule.to, () => ask(rule.to)), 900);
       }
     } else if (sq.kind === "ladder") {
       audio.playCorrect();
@@ -401,7 +412,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
       setMessage(gt("goose.prison"));
       later(nextTurn, 1600);
     } else if (sq.kind === "death") {
-      audio.playIncorrect();
+      audio.play("goose-back");
       setMessage(gt("goose.death"));
       later(() => jump(i, 0, () => later(nextTurn, 500)), 1200);
     } else {
@@ -412,6 +423,18 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
     }
   };
 
+  const answer = (right: boolean) => {
+    const i = quiz?.player ?? turnRef.current;
+    setQuiz(null);
+    if (right) {
+      setBusy(false);
+      setView({ all: false, n: posRef.current[i], ms: 400 });
+    } else {
+      setMessage(gt("quiz.missed"));
+      later(nextTurn, 700);
+    }
+  };
+
   const roll = () => {
     if (busy || winner !== null) return;
     const i = turnRef.current;
@@ -419,6 +442,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
     setRolling(true);
     setMessage(null);
     rolls.current[i] += 1;
+    audio.play("dice-shake");
     setView({ all: false, n: posRef.current[i], ms: 400 });
     for (let k = 0; k < 8; k++) later(() => setDie(1 + Math.floor(Math.random() * 6)), k * 80);
     const d = 1 + Math.floor(Math.random() * 6);
@@ -435,7 +459,15 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
         p += dir;
         path.push(p);
       }
-      path.forEach((n, k) => later(() => place(i, n), 350 + k * 260));
+      path.forEach((n, k) =>
+        later(
+          () => {
+            place(i, n);
+            audio.play("goose-step", 0.55);
+          },
+          350 + k * 260,
+        ),
+      );
       later(() => land(i, p, dir < 0), 350 + path.length * 260 + 200);
     }, 700);
   };
@@ -451,6 +483,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
     rolls.current = Array(players).fill(0);
     setMessage(null);
     setWinner(null);
+    setQuiz(null);
     setBusy(false);
     setView({ all: false, n: 0, ms: 600 });
   };
@@ -569,8 +602,10 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
             return (
               <span
                 key={i}
-                className={`absolute left-0 top-0 ${i === turn ? "z-20" : "z-10"}`}
+                className="absolute left-0 top-0"
                 style={{
+                  // a pawn lower on the board stands in front of one above it
+                  zIndex: 10 + Math.round(p.y),
                   // the pawn's foot stands on the spot
                   transform: `translate(${p.x - 20}px, ${p.y - 40 * PAWN_RATIO * 0.85}px) ${i === turn && winner === null ? "scale(1.2)" : ""}`,
                   transformOrigin: `20px ${40 * PAWN_RATIO * 0.85}px`,
@@ -613,6 +648,8 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
           </button>
         </div>
       </div>
+
+      {quiz && <StoryQuiz story={quiz.story} onAnswer={answer} />}
 
       {winner !== null && (
         <ResultCard

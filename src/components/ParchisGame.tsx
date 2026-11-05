@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { memText } from "@/lib/memory-i18n";
 import {
@@ -20,6 +20,8 @@ import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
 import { PlayerPawn } from "@/components/Token";
+import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
+import type { Story } from "@/lib/stories";
 
 import parchisBg from "@/assets/parchis-bg.webp";
 import boardArt from "@/assets/parchis-board.webp";
@@ -105,6 +107,7 @@ const ARMS: [number, number, number, number][] = [
 ];
 
 export function ParchisGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("parchis");
   const { lang, t } = useSettings();
   const [setup, setSetup] = useState<{ players: number; pawns: number } | null>(null);
   const [quick, setQuick] = useState(false);
@@ -127,7 +130,9 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
       onBack={onBack}
       backLabel={t("select.back")}
     >
-      <div className="grid grid-cols-2 gap-3">
+      <h2 className="text-center font-display text-2xl">{mt("mem.howManyPlayers")}</h2>
+      {/* Small boxes with just the pawns, like Memory's; one pawn plays the computer */}
+      <div className="mx-auto mt-4 grid w-fit grid-cols-2 gap-3">
         {[1, 2, 3, 4].map((n) => (
           <button
             key={n}
@@ -135,15 +140,17 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
               window.scrollTo(0, 0);
               setSetup({ players: n, pawns: quick ? 2 : 4 });
             }}
-            className="paint-box paint-square flex flex-col items-center justify-center gap-2 p-4 text-center transition active:scale-[0.97]"
+            aria-label={
+              n === 1 ? pt("dom.vsComputer") : mt("mem.playersMany").replace("{n}", String(n))
+            }
+            className="paint-box paint-square paint-thin grid h-24 w-24 place-items-center p-3 transition active:scale-[0.95]"
           >
-            <span className="flex gap-0.5">
-              {seatColors(n).map((c, i) => (
-                <Pawn key={c} color={c} size={22} dim={n === 1 && i > 0} />
-              ))}
-            </span>
-            <span className="text-sm font-semibold leading-tight">
-              {n === 1 ? pt("dom.vsComputer") : mt("mem.playersMany").replace("{n}", String(n))}
+            <span className="flex max-w-[3.5rem] flex-wrap justify-center gap-1">
+              {seatColors(n)
+                .slice(0, n)
+                .map((c) => (
+                  <Pawn key={c} color={c} size={18} />
+                ))}
             </span>
           </button>
         ))}
@@ -161,7 +168,7 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
         <h3 className="font-display text-lg">{pt("par.rules")}</h3>
         <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm">
           <li>{pt("par.rule5")}</li>
-          <li>{pt("par.rule6")}</li>
+          <li>{pt("par.ruleSix")}</li>
           <li>{pt("par.ruleSafe")}</li>
           <li>{pt("par.ruleCapture")}</li>
           <li>{pt("par.ruleGoal")}</li>
@@ -217,6 +224,8 @@ function ParchisBoard({
   const [options, setOptions] = useState<number[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [winner, setWinner] = useState<number | null>(null);
+  // A 6 earns another roll only for naming the story in a painting.
+  const [quiz, setQuiz] = useState<{ seat: number; story: Story } | null>(null);
   const dieRef = useRef(5);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => {
@@ -261,11 +270,37 @@ function ParchisBoard({
 
   const nextTurn = () => startTurn((turnRef.current + 1) % seatsRef.current.length);
 
+  // After a 6: players answer a story question for the extra roll; the
+  // computer gets it right most of the time.
+  const sixAgain = (s: number) => {
+    if (seatsRef.current[s].human) {
+      setQuiz({ seat: s, story: randomStory() });
+    } else if (Math.random() < 0.75) {
+      setMessage(pt("par.again"));
+      later(() => startTurn(s), 900);
+    } else {
+      setMessage(pt("quiz.missed"));
+      later(nextTurn, 900);
+    }
+  };
+
+  const answer = (right: boolean) => {
+    const s = quiz?.seat ?? turnRef.current;
+    setQuiz(null);
+    if (right) {
+      setMessage(pt("par.again"));
+      later(() => startTurn(s), 300);
+    } else {
+      setMessage(pt("quiz.missed"));
+      later(nextTurn, 600);
+    }
+  };
+
   // What landing on `to` does: send others home, reach the goal.
   const settle = (s: number, k: number, to: number, d: number) => {
     const seat = seatsRef.current[s];
-    let again = d === 6;
-    let note: string | null = d === 6 ? pt("par.again") : null;
+    let again = false;
+    let note: string | null = null;
     if (to >= GOAL) {
       again = true;
       note = pt("par.goal");
@@ -300,6 +335,7 @@ function ParchisBoard({
       return;
     }
     if (again) later(() => startTurn(s), 700);
+    else if (d === 6) later(() => sixAgain(s), 700);
     else later(nextTurn, 600);
   };
 
@@ -312,7 +348,12 @@ function ParchisBoard({
     setPhase("busy");
     setOptions([]);
     const path = from < 0 ? [0] : Array.from({ length: to - from }, (_, i) => from + 1 + i);
-    path.forEach((p, i) => later(() => setPawn(s, k, p), i * 170));
+    path.forEach((p, i) =>
+      later(() => {
+        setPawn(s, k, p);
+        audio.play("parchis-step", 0.5);
+      }, i * 170),
+    );
     later(() => settle(s, k, to, d), path.length * 170 + 120);
   };
 
@@ -346,6 +387,7 @@ function ParchisBoard({
     setPhase("busy");
     setRolling(true);
     setMessage(null);
+    audio.play("dice-shake");
     for (let k = 0; k < 7; k++) later(() => setDie(1 + Math.floor(Math.random() * 6)), k * 80);
     const d = 1 + Math.floor(Math.random() * 6);
     later(() => {
@@ -357,7 +399,7 @@ function ParchisBoard({
       if (!choices.length) {
         const waiting = seatsRef.current[s].pawns.every((p) => p < 0);
         setMessage(waiting ? pt("par.need5") : pt("par.noMove"));
-        if (d === 6) later(() => startTurn(s), 1200);
+        if (d === 6) later(() => sixAgain(s), 1200);
         else later(nextTurn, 1200);
       } else if (choices.length === 1) {
         later(() => move(choices[0]), 350);
@@ -377,6 +419,7 @@ function ParchisBoard({
     setSeats(fresh());
     setWinner(null);
     setMessage(null);
+    setQuiz(null);
     startTurn(0);
   };
 
@@ -525,6 +568,8 @@ function ParchisBoard({
           </button>
         </div>
       </div>
+
+      {quiz && <StoryQuiz story={quiz.story} onAnswer={answer} />}
 
       {winner !== null && (
         <ResultCard

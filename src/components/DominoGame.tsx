@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { memText } from "@/lib/memory-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
@@ -21,11 +21,12 @@ import {
 import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
-import { TOKEN_ORDER, Token } from "@/components/Token";
+import { PlayerPawn, TOKEN_ORDER } from "@/components/Token";
 
 import dominoBg from "@/assets/domino-bg.webp";
 
 export function DominoGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("domino");
   const { lang, t } = useSettings();
   const [players, setPlayers] = useState<number | null>(null);
   const dt = (k: string) => gameText(lang, k);
@@ -117,7 +118,7 @@ function DominoTile({
   const [first, second] = flipped ? [tile.b, tile.a] : [tile.a, tile.b];
   return (
     <span
-      className={`relative flex shrink-0 items-center gap-[3px] rounded-lg border border-[oklch(0.85_0.02_80)] bg-[oklch(0.98_0.012_85)] p-[3px] shadow-[0_3px_6px_oklch(0.3_0.04_60/0.35)] ${
+      className={`paint-box paint-long paint-flat paint-tiny relative flex shrink-0 items-center gap-[2px] p-[5px] drop-shadow-[0_2px_3px_oklch(0.3_0.04_60/0.35)] ${
         vertical ? "flex-col" : "flex-row"
       } ${className}`}
     >
@@ -180,7 +181,6 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
   const [choosing, setChoosing] = useState<Tile | null>(null);
   const [shake, setShake] = useState<number | null>(null);
   // Two players share the phone: hide the hand until the next one is ready.
-  const [cover, setCover] = useState(false);
   const [width, setWidth] = useState(340);
   const table = useRef<HTMLDivElement | null>(null);
   const timers = useRef<number[]>([]);
@@ -222,7 +222,6 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
     const next = { ...state, turn };
     set(next);
     if (vsComputer && turn === 1) later(computerTurn, 900);
-    else if (!vsComputer) setCover(true);
   };
 
   const commit = (tile: Tile, side: Side) => {
@@ -258,7 +257,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
     if (!s.pile.length) return;
     const [tile, ...pile] = s.pile;
     set({ ...s, pile, hands: s.hands.map((h, i) => (i === s.turn ? [...h, tile] : h)) });
-    audio.playClick();
+    audio.play("domino-draw");
   };
 
   function computerTurn() {
@@ -290,13 +289,13 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
     timers.current = [];
     set(newGame(seats));
     setChoosing(null);
-    setCover(false);
   };
 
   // ---- The line on the table: from the middle out, turning at the edges ----
   const S = Math.round(Math.min(42, Math.max(26, width / 11)));
-  const tileW = 2 * S + 9;
-  const tileH = S + 6;
+  // a tile's sides: two halves, the gap between them and the painted frame
+  const tileW = 2 * S + 12;
+  const tileH = S + 10;
   const laid = layoutLine(g.line, g.firstId, width, tileW, tileH);
 
   const handSize = Math.round(Math.min(40, Math.max(28, width / 11)));
@@ -336,7 +335,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
                   i === g.turn ? "ring-2 ring-[var(--color-gold)]" : ""
                 }`}
               >
-                <Token color={TOKEN_ORDER[i]} size={22} />
+                <PlayerPawn color={TOKEN_ORDER[i]} size={16} />
                 {nameOf(i)}
                 <span className="flex">
                   {h.slice(0, 10).map((x) => (
@@ -374,7 +373,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
                     size={S}
                     vertical={vertical}
                     flipped={flipped}
-                    className={isEnd ? "ring-4 ring-[var(--color-gold)]" : ""}
+                    className={isEnd ? "paint-picked" : ""}
                   />
                 </span>
               );
@@ -392,7 +391,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
             className="flex min-h-[1.25rem] items-center justify-center gap-2 text-center text-sm font-semibold"
             aria-live="polite"
           >
-            {g.winner === null && <Token color={TOKEN_ORDER[g.turn]} size={22} />}
+            {g.winner === null && <PlayerPawn color={TOKEN_ORDER[g.turn]} size={16} />}
             {status}
           </p>
 
@@ -450,7 +449,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
                     faces={g.faces}
                     size={handSize}
                     vertical
-                    className={fits ? "ring-2 ring-[var(--color-gold)]" : ""}
+                    className={fits ? "paint-picked" : ""}
                   />
                 </button>
               );
@@ -458,23 +457,6 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
           </div>
         </div>
       </div>
-
-      {cover && g.winner === null && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[oklch(0.3_0.05_262/0.75)] p-6">
-          <div className="paint-box paint-square paint-solid w-full max-w-sm p-7 text-center">
-            <div className="text-4xl">📱</div>
-            <p className="mt-3 text-lg font-semibold text-foreground">
-              {dt("dom.passDevice", { name: nameOf(g.turn) })}
-            </p>
-            <button
-              onClick={() => setCover(false)}
-              className="mt-5 w-full rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-base font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
-            >
-              {dt("dom.ready")}
-            </button>
-          </div>
-        </div>
-      )}
 
       {g.winner !== null && (
         <ResultCard

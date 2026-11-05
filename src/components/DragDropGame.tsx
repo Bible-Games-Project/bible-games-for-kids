@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { localizeSceneTitle, localizeVerse } from "@/lib/scenes-i18n";
 import {
@@ -27,6 +27,7 @@ import {
 import homeBg from "@/assets/home-bedtime.webp";
 
 export function DragDropGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("dragdrop");
   const { lang, t } = useSettings();
   const [level, setLevel] = useState<DifficultyId>("easy");
   const [story, setStory] = useState<Story | null>(null);

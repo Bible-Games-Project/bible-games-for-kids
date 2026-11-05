@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { memText } from "@/lib/memory-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
@@ -38,6 +38,7 @@ const BEST_KEY = "guesswho-best-v1";
 const PLAYER_COLORS = TOKEN_ORDER.map((c) => TOKEN_HEX[c]);
 
 export function GuessWhoGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("guesswho");
   const { lang, t } = useSettings();
   const [level, setLevel] = useState<DifficultyId>("easy");
   const [game, setGame] = useState<{ level: DifficultyId; players: number } | null>(null);
@@ -206,13 +207,19 @@ function GuessBoard({
       tone: answer ? "yes" : "no",
     });
     if (answer) audio.playCorrect();
-    else audio.playClick();
+    else audio.playIncorrect();
     // The cards that don't fit the answer fall one after another.
     const falling = standing(board).filter((c) => c.traits.has(trait) !== answer);
     const me = turn;
     setBusy(true);
     falling.forEach((c, k) =>
-      later(() => update(me, (b) => ({ ...b, down: new Set(b.down).add(c.id) })), 450 + k * 80),
+      later(
+        () => {
+          update(me, (b) => ({ ...b, down: new Set(b.down).add(c.id) }));
+          if (k < 10) audio.play("card-fall", 0.45);
+        },
+        450 + k * 80,
+      ),
     );
     const left = standing(board).filter((c) => !falling.includes(c));
     const done = 500 + falling.length * 80;
@@ -374,7 +381,10 @@ function GuessBoard({
             </div>
           )}
           <button
-            onClick={() => setSheet(true)}
+            onClick={() => {
+              audio.playClick();
+              setSheet(true);
+            }}
             disabled={busy || winner !== null}
             className="paint-box paint-wide paint-flat paint-thin mx-auto mt-3 flex w-full max-w-xs items-center justify-center gap-3 px-5 py-3.5 font-display text-xl text-[oklch(0.42_0.11_50)] transition active:scale-95 disabled:opacity-50"
           >

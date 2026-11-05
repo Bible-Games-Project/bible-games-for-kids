@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { memText } from "@/lib/memory-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import {
@@ -77,6 +77,7 @@ function CardFace({ src, className = "" }: { src: string; className?: string }) 
 }
 
 export function MemoryGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("memory");
   const { lang, t } = useSettings();
   const [level, setLevel] = useState<MemoryLevel | null>(null);
   const [players, setPlayers] = useState<number | null>(null);
@@ -162,12 +163,10 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                     ))}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-display text-xl leading-snug">
-                    {t(`diff.${lv.id}.age`)}{" "}
-                    <span className="text-base text-muted-foreground">
-                      ({mt("mem.pairsCount").replace("{n}", String(lv.pairs))})
-                    </span>
-                  </h2>
+                  <h2 className="font-display text-xl leading-snug">{t(`diff.${lv.id}`)}</h2>
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    {t(`diff.${lv.id}.age`)} ({mt("mem.pairsCount").replace("{n}", String(lv.pairs))})
+                  </p>
                   <span className="mt-1.5 block text-base tracking-wider" aria-label={`${best} of 3 stars`}>
                     <span className="text-[var(--color-gold)]">{"★".repeat(best)}</span>
                     <span className="text-foreground/20">{"★".repeat(3 - best)}</span>
@@ -210,7 +209,7 @@ function PlayerPicker({
         <header className="flex items-center gap-3 pb-2">
           <BackButton onClick={onBack} label={mt("mem.levels")} />
           <h1 className="font-display text-2xl">
-            {t("game.memory")} · {t(`diff.${level.id}.age`)}
+            {t("game.memory")} · {t(`diff.${level.id}`)}
           </h1>
         </header>
         <h2 className="mt-6 text-center font-display text-3xl">{mt("mem.howManyPlayers")}</h2>
@@ -437,7 +436,7 @@ function MemoryBoard({
             <h1 className="min-w-0 flex-1 font-display text-lg leading-tight">
               <span className="block truncate">{t("game.memory")}</span>
               <span className="block truncate font-sans text-xs font-semibold text-muted-foreground">
-                {t(`diff.${level.id}.age`)} ({mt("mem.pairsCount").replace("{n}", String(level.pairs))})
+                {`${t(`diff.${level.id}`)} · ${t(`diff.${level.id}.age`)} (${mt("mem.pairsCount").replace("{n}", String(level.pairs))})`}
               </span>
             </h1>
             {!multi && (

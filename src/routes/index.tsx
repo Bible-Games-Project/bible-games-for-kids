@@ -138,8 +138,6 @@ const GAMES: GameDef[] = [
   { id: "domino", labelKey: "game.domino", icon: dominoIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
   { id: "parchis", labelKey: "game.parchis", icon: parchisIcon, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
   { id: "chess", labelKey: "game.chess", icon: chessIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
-  { id: "spot", labelKey: "game.spot", emoji: "🔍", tint: "oklch(0.87 0.07 62 / 0.6)", playable: false },
-  { id: "wordsearch", labelKey: "game.wordsearch", emoji: "🔤", tint: "oklch(0.85 0.045 6 / 0.6)", playable: false },
   { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.8 0.07 258 / 0.6)", playable: false },
 ];
 
@@ -355,7 +353,7 @@ function GameShelf({
   return (
     <div className="w-full">
       <div
-        className="w-full overflow-hidden py-3"
+        className="w-full overflow-hidden py-2"
         style={{ touchAction: "none" }}
         onPointerDown={(e) => {
           const tile = (e.target as HTMLElement).closest<HTMLElement>("[data-game]");
@@ -420,7 +418,7 @@ function GameShelf({
                 className={`relative w-[calc((100%-1.5rem)/3)] shrink-0 transition-transform duration-300 ease-out motion-reduce:transition-none ${
                   middle ? "z-10" : ""
                 }`}
-                style={{ transform: middle ? "scale(1.1)" : "scale(0.92)" }}
+                style={{ transform: middle ? "scale(1.06)" : "scale(0.94)" }}
                 data-game={i}
                 inert={!visible}
                 aria-hidden={!visible}
@@ -519,8 +517,8 @@ function FavoriteSlots({
   const any = favorites.some(Boolean);
 
   return (
-    <div className="mt-2 w-full">
-      <p className="pb-1 text-xs font-semibold text-[oklch(0.99_0.01_85)] [text-shadow:0_1px_4px_oklch(0.25_0.05_50/0.8)]">
+    <div className="mt-1 w-full">
+      <p className="pb-0.5 text-[11px] font-semibold text-[oklch(0.99_0.01_85)] [text-shadow:0_1px_4px_oklch(0.25_0.05_50/0.8)]">
         ⭐ {any ? title : hint}
       </p>
       <div className="relative w-full" style={{ aspectRatio: "1100 / 298" }}>
@@ -812,7 +810,7 @@ function Home() {
         <BedtimeBackdrop image={wide ? homeWideBg : homeBg} position="center 40%" fadeEnd={0} />
         <div className="relative z-10 min-h-[100dvh] w-full">
           {settingsButton}
-          <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-4 pt-16 pb-6 text-center">
+          <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-6 pt-16 pb-6 text-center">
             <h1
               className={`w-[82%] max-w-sm ${
                 titleIntro ? "animate-in fade-in slide-in-from-top-10 duration-[1400ms] ease-out motion-reduce:animate-none" : ""

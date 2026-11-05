@@ -6,7 +6,7 @@ import {
   saveSession,
   type SavedSession,
 } from "@/lib/progress";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { useSettings } from "@/lib/i18n";
 import { localizeSceneTitle, localizeVerse } from "@/lib/scenes-i18n";
 import homeArt from "@/assets/ui/home.webp";
@@ -178,6 +178,7 @@ const buildPiecePath = (
   ].join(" ");
 
 export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }: Props) {
+  useSoundTheme("puzzle");
   const total = pieceCount(puzzle);
   const boardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

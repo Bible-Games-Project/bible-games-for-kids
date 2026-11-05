@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import type { DifficultyId } from "@/lib/puzzles";
@@ -27,6 +27,7 @@ import {
 import homeBg from "@/assets/home-bedtime.webp";
 
 export function ColoringGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("coloring");
   const { lang, t } = useSettings();
   const [level, setLevel] = useState<DifficultyId>("easy");
   const [page, setPage] = useState<ColoringPage | null>(null);

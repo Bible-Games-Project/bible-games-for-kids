@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/i18n";
-import { useAudio } from "@/lib/audio";
+import { useAudio, useSoundTheme } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { memText } from "@/lib/memory-i18n";
 import type { DifficultyId } from "@/lib/puzzles";
@@ -68,6 +68,7 @@ const KINDS: Kind[] = ["k", "q", "r", "b", "n", "p"];
 const BEST_KEY = "chess-wins-v1";
 
 export function ChessGame({ onBack }: { onBack: () => void }) {
+  useSoundTheme("chess");
   const { lang, t } = useSettings();
   const [game, setGame] = useState<{ players: number; level: DifficultyId } | null>(null);
   const [choosingLevel, setChoosingLevel] = useState(false);
@@ -381,8 +382,13 @@ function ChessBoard({
       }, ms + 400);
       return;
     }
-    if (victim) later(() => audio.playCorrect(), ms);
+    if (victim)
+      later(() => {
+        audio.playCorrect();
+        audio.play("chess-sparkle", 0.7);
+      }, ms);
     else audio.playClick();
+    if (inCheck(next)) later(() => audio.play("chess-check"), ms + 120);
     if (vsComputer && next.turn === "ot") {
       setThinking(true);
       // let the board show the move before the computer starts thinking
@@ -415,6 +421,7 @@ function ChessBoard({
     }
     if (victim) later(() => audio.playIncorrect(), ms);
     else audio.playClick();
+    if (inCheck(next)) later(() => audio.play("chess-check"), ms + 120);
   };
 
   const tap = (sq: number) => {
