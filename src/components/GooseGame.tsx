@@ -362,7 +362,13 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   const [winner, setWinner] = useState<number | null>(null);
   // After a New Testament square: name its story to roll again. In the
   // lions' den: name a story to get out (`jail`).
-  const [quiz, setQuiz] = useState<{ player: number; story: Story; jail?: boolean } | null>(null);
+  // At the foot of Jacob's ladder: name a story to climb it (`ladder`).
+  const [quiz, setQuiz] = useState<{
+    player: number;
+    story: Story;
+    jail?: boolean;
+    ladder?: boolean;
+  } | null>(null);
   const [hopMs, setHopMs] = useState(220);
   // Camera: the whole board, or close up on a square.
   const [view, setView] = useState<{ all: boolean; n: number; ms: number }>({
@@ -475,6 +481,10 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
         setMessage(gt("goose.gooseJump"));
         later(() => jump(i, rule.to, () => ask(rule.to)), 900);
       }
+    } else if (sq.kind === "ladder" && rule.to > n) {
+      // the foot of the ladder: only a right story lets you climb it
+      setMessage(gt("goose.ladderAsk"));
+      later(() => setQuiz({ player: i, story: randomStory(), ladder: true }), 700);
     } else if (sq.kind === "ladder") {
       audio.playCorrect();
       setMessage(gt("goose.ladderJump"));
@@ -499,7 +509,21 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   const answer = (right: boolean) => {
     const i = quiz?.player ?? turnRef.current;
     const jail = quiz?.jail ?? false;
+    const ladder = quiz?.ladder ?? false;
     setQuiz(null);
+    if (ladder) {
+      if (right) {
+        setMessage(gt("goose.ladderUp"));
+        jump(i, ruleFor(posRef.current[i]).to, () => {
+          setBusy(false);
+          setView({ all: false, n: posRef.current[i], ms: 400 });
+        });
+      } else {
+        setMessage(gt("goose.ladderMissed"));
+        later(nextTurn, 1200);
+      }
+      return;
+    }
     if (jail) {
       if (right) {
         // out of the den: this turn's roll is theirs
@@ -740,7 +764,13 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
       {quiz && (
         <StoryQuiz
           story={quiz.story}
-          reward={quiz.jail ? gt("goose.prisonReward") : undefined}
+          reward={
+            quiz.jail
+              ? gt("goose.prisonReward")
+              : quiz.ladder
+                ? gt("goose.ladderReward")
+                : undefined
+          }
           onAnswer={answer}
         />
       )}

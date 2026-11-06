@@ -46,6 +46,12 @@ CHARACTERS = {
     "cleopas": ("emmaus", 1),
     "sower": ("sower-seed", 0),
     "temple-teacher": ("boy-temple", 1),
+    "jacob": ("joseph-coat", 2),
+    "joseph-egypt": ("joseph-forgives", 0),
+    "baby-moses": ("moses-basket", 2),
+    "baby-jesus": ("nativity", 0),
+    "blindman": ("heals-blind", 1),
+    "fisherman": ("catch-fish", 3),
 }
 
 # Framing tweaks for faces not centred in their circle: shift (in radii)

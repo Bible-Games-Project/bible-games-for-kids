@@ -462,6 +462,19 @@
     --paint-w: 15px;
   }
 
+  /* For boxes shaped like the picture itself (the home game cards): the
+     whole picture stretched, not cut in nine, so no seams can show and the
+     frame grows with the box. */
+  .paint-whole::before {
+    inset: 2px;
+  }
+
+  .paint-whole::after {
+    border: 0;
+    border-image: none;
+    background-size: 100% 100%;
+  }
+
   .paint-tiny {
     --paint-w: 10px;
   }

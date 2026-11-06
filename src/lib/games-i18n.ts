@@ -65,7 +65,7 @@ const en: Dict = {
   "goose.instruction": "Roll the die and race through the Bible stories",
   "goose.rules": "Special squares",
   "goose.ruleGoose": "New Testament: jump to the next one; name its story to roll again",
-  "goose.ruleLadder": "Jacob's ladder: go to the other ladder and roll again",
+  "goose.ruleLadder": "Jacob's ladder: name a story to climb it and roll again; from the top, you go back down",
   "goose.rulePrison": "Lions' den: name a story to get out",
   "goose.ruleDeath": "The death of Jesus: back to the start",
   "goose.ruleFinish": "Reach square 65 exactly to win",
@@ -75,7 +75,7 @@ const en: Dict = {
   "goose.board": "See the whole board",
   "goose.gooseJump": "New Testament! Jump to the next one, then name its story to roll again",
   "goose.lastGoose": "New Testament! Name its story to roll again",
-  "goose.ladderJump": "Jacob's ladder! Go to the other ladder and roll again",
+  "goose.ladderJump": "Top of Jacob's ladder! Go back down and roll again",
   "goose.prison": "The lions' den! To get out, name a story on your next turn",
   "goose.death": "The death of Jesus: back to the start!",
   "goose.bounce": "Too far! Bounce back",
@@ -190,6 +190,10 @@ const en: Dict = {
   "chess.captureRule": "To capture a piece, first name the story in the picture. Get it wrong and your piece stays put: you lose your turn.",
   "chess.captureReward": "Get it right to capture the piece!",
   "chess.captureMissed": "Not this time! Your piece stays put and the turn passes",
+  "goose.ladderAsk": "Jacob's ladder! Name the story to climb it",
+  "goose.ladderReward": "Get it right to climb Jacob's ladder!",
+  "goose.ladderUp": "Up Jacob's ladder! Roll again",
+  "goose.ladderMissed": "Not this time: you stay at the foot of the ladder",
 };
 
 const es: Dict = {
@@ -254,7 +258,7 @@ const es: Dict = {
   "goose.instruction": "Tira el dado y recorre las historias de la Biblia",
   "goose.rules": "Casillas especiales",
   "goose.ruleGoose": "Nuevo Testamento: salta a la siguiente; si aciertas su historia, vuelve a tirar",
-  "goose.ruleLadder": "Escalera de Jacob: ve a la otra escalera y vuelve a tirar",
+  "goose.ruleLadder": "Escalera de Jacob: acierta una historia para subirla y vuelve a tirar; desde arriba, bajas",
   "goose.rulePrison": "Foso de los leones: acierta una historia para salir",
   "goose.ruleDeath": "La muerte de Jesús: vuelves a la salida",
   "goose.ruleFinish": "Llega justo a la casilla 65 para ganar",
@@ -264,7 +268,7 @@ const es: Dict = {
   "goose.board": "Ver todo el tablero",
   "goose.gooseJump": "¡Nuevo Testamento! Saltas a la siguiente: acierta su historia y vuelves a tirar",
   "goose.lastGoose": "¡Nuevo Testamento! Acierta su historia y vuelves a tirar",
-  "goose.ladderJump": "¡Escalera de Jacob! Vas a la otra escalera y vuelves a tirar",
+  "goose.ladderJump": "¡Lo alto de la escalera de Jacob! Bajas y vuelves a tirar",
   "goose.prison": "¡El foso de los leones! Para salir, acierta una historia en tu próximo turno",
   "goose.death": "La muerte de Jesús: ¡vuelves a la salida!",
   "goose.bounce": "¡Te pasaste! Rebotas hacia atrás",
@@ -379,6 +383,10 @@ const es: Dict = {
   "chess.captureRule": "Para capturar una ficha, primero acierta la historia de la imagen. Si fallas, tu ficha no se mueve y pierdes el turno.",
   "chess.captureReward": "¡Acierta y captura la ficha!",
   "chess.captureMissed": "¡Esta vez no! Tu ficha no se mueve y pierdes el turno",
+  "goose.ladderAsk": "¡Escalera de Jacob! Acierta la historia para subirla",
+  "goose.ladderReward": "¡Acierta y sube la escalera de Jacob!",
+  "goose.ladderUp": "¡Subes por la escalera de Jacob! Vuelve a tirar",
+  "goose.ladderMissed": "Esta vez no: te quedas al pie de la escalera",
 };
 
 const de: Dict = {
@@ -443,7 +451,7 @@ const de: Dict = {
   "goose.instruction": "Würfle und lauf durch die Geschichten der Bibel",
   "goose.rules": "Besondere Felder",
   "goose.ruleGoose": "Neues Testament: spring zum nächsten; errätst du die Geschichte, würfelst du noch einmal",
-  "goose.ruleLadder": "Jakobsleiter: geh zur anderen Leiter und würfle nochmal",
+  "goose.ruleLadder": "Jakobsleiter: Errate eine Geschichte, um hinaufzusteigen, und würfle nochmal; von oben geht es wieder hinunter",
   "goose.rulePrison": "Löwengrube: Errate eine Geschichte, um herauszukommen",
   "goose.ruleDeath": "Der Tod Jesu: zurück zum Start",
   "goose.ruleFinish": "Erreiche genau Feld 65, um zu gewinnen",
@@ -453,7 +461,7 @@ const de: Dict = {
   "goose.board": "Ganzes Spielbrett ansehen",
   "goose.gooseJump": "Neues Testament! Spring zum nächsten und errate die Geschichte, dann darfst du noch einmal würfeln",
   "goose.lastGoose": "Neues Testament! Errate die Geschichte, dann darfst du noch einmal würfeln",
-  "goose.ladderJump": "Jakobsleiter! Zur anderen Leiter und nochmal würfeln",
+  "goose.ladderJump": "Oben auf der Jakobsleiter! Geh wieder hinunter und würfle nochmal",
   "goose.prison": "Die Löwengrube! Um herauszukommen, errate in deiner nächsten Runde eine Geschichte",
   "goose.death": "Der Tod Jesu: zurück zum Start!",
   "goose.bounce": "Zu weit! Zurückspringen",
@@ -568,6 +576,10 @@ const de: Dict = {
   "chess.captureRule": "Um eine Figur zu schlagen, errate zuerst die Geschichte auf dem Bild. Liegst du falsch, bleibt deine Figur stehen und du setzt aus.",
   "chess.captureReward": "Richtig geraten: Du schlägst die Figur!",
   "chess.captureMissed": "Diesmal nicht! Deine Figur bleibt stehen und der andere ist dran",
+  "goose.ladderAsk": "Jakobsleiter! Errate die Geschichte, um hinaufzusteigen",
+  "goose.ladderReward": "Richtig geraten: Du steigst die Jakobsleiter hinauf!",
+  "goose.ladderUp": "Hinauf die Jakobsleiter! Würfle nochmal",
+  "goose.ladderMissed": "Diesmal nicht: Du bleibst unten an der Leiter",
 };
 
 const fr: Dict = {
@@ -632,7 +644,7 @@ const fr: Dict = {
   "goose.instruction": "Lance le dé et parcours les histoires de la Bible",
   "goose.rules": "Cases spéciales",
   "goose.ruleGoose": "Nouveau Testament : saute au suivant ; trouve son histoire pour relancer",
-  "goose.ruleLadder": "Échelle de Jacob : va à l'autre échelle et rejoue",
+  "goose.ruleLadder": "Échelle de Jacob : trouve une histoire pour y monter et rejoue ; d'en haut, tu redescends",
   "goose.rulePrison": "Fosse aux lions : trouve une histoire pour en sortir",
   "goose.ruleDeath": "La mort de Jésus : retour au départ",
   "goose.ruleFinish": "Arrive pile sur la case 65 pour gagner",
@@ -642,7 +654,7 @@ const fr: Dict = {
   "goose.board": "Voir tout le plateau",
   "goose.gooseJump": "Nouveau Testament ! Saute au suivant, puis trouve son histoire pour relancer",
   "goose.lastGoose": "Nouveau Testament ! Trouve son histoire pour relancer",
-  "goose.ladderJump": "Échelle de Jacob ! Va à l'autre échelle et rejoue",
+  "goose.ladderJump": "En haut de l'échelle de Jacob ! Redescends et rejoue",
   "goose.prison": "La fosse aux lions ! Pour en sortir, trouve une histoire à ton prochain tour",
   "goose.death": "La mort de Jésus : retour au départ !",
   "goose.bounce": "Trop loin ! Tu recules",
@@ -757,6 +769,10 @@ const fr: Dict = {
   "chess.captureRule": "Pour prendre une pièce, trouve d'abord l'histoire de l'image. Si tu te trompes, ta pièce ne bouge pas et tu passes ton tour.",
   "chess.captureReward": "Trouve la bonne réponse pour prendre la pièce !",
   "chess.captureMissed": "Pas cette fois ! Ta pièce ne bouge pas et tu passes ton tour",
+  "goose.ladderAsk": "Échelle de Jacob ! Trouve l'histoire pour y monter",
+  "goose.ladderReward": "Trouve la bonne réponse pour monter l'échelle de Jacob !",
+  "goose.ladderUp": "Tu montes l'échelle de Jacob ! Rejoue",
+  "goose.ladderMissed": "Pas cette fois : tu restes au pied de l'échelle",
 };
 
 const it: Dict = {
@@ -821,7 +837,7 @@ const it: Dict = {
   "goose.instruction": "Tira il dado e percorri le storie della Bibbia",
   "goose.rules": "Caselle speciali",
   "goose.ruleGoose": "Nuovo Testamento: salta al prossimo; se indovini la storia, tiri di nuovo",
-  "goose.ruleLadder": "Scala di Giacobbe: vai all'altra scala e tira ancora",
+  "goose.ruleLadder": "Scala di Giacobbe: indovina una storia per salirla e tira ancora; dalla cima, torni giù",
   "goose.rulePrison": "Fossa dei leoni: indovina una storia per uscire",
   "goose.ruleDeath": "La morte di Gesù: torni alla partenza",
   "goose.ruleFinish": "Arriva esattamente alla casella 65 per vincere",
@@ -831,7 +847,7 @@ const it: Dict = {
   "goose.board": "Vedi tutto il tabellone",
   "goose.gooseJump": "Nuovo Testamento! Salta al prossimo e indovina la sua storia per tirare di nuovo",
   "goose.lastGoose": "Nuovo Testamento! Indovina la sua storia per tirare di nuovo",
-  "goose.ladderJump": "Scala di Giacobbe! Vai all'altra scala e tira ancora",
+  "goose.ladderJump": "In cima alla scala di Giacobbe! Torna giù e tira ancora",
   "goose.prison": "La fossa dei leoni! Per uscire, indovina una storia al prossimo turno",
   "goose.death": "La morte di Gesù: torni alla partenza!",
   "goose.bounce": "Troppo lontano! Torni indietro",
@@ -946,6 +962,10 @@ const it: Dict = {
   "chess.captureRule": "Per catturare un pezzo, prima indovina la storia dell'immagine. Se sbagli, il tuo pezzo resta fermo e perdi il turno.",
   "chess.captureReward": "Indovina e cattura il pezzo!",
   "chess.captureMissed": "Non questa volta! Il tuo pezzo resta fermo e perdi il turno",
+  "goose.ladderAsk": "Scala di Giacobbe! Indovina la storia per salirla",
+  "goose.ladderReward": "Indovina e sali la scala di Giacobbe!",
+  "goose.ladderUp": "Sali la scala di Giacobbe! Tira ancora",
+  "goose.ladderMissed": "Non questa volta: resti ai piedi della scala",
 };
 
 const pt: Dict = {
@@ -1010,7 +1030,7 @@ const pt: Dict = {
   "goose.instruction": "Jogue o dado e percorra as histórias da Bíblia",
   "goose.rules": "Casas especiais",
   "goose.ruleGoose": "Novo Testamento: salte para o próximo; acerte a história e jogue de novo",
-  "goose.ruleLadder": "Escada de Jacó: vá para a outra escada e jogue de novo",
+  "goose.ruleLadder": "Escada de Jacó: acerte uma história para subir e jogue de novo; lá de cima, você desce",
   "goose.rulePrison": "Cova dos leões: acerte uma história para sair",
   "goose.ruleDeath": "A morte de Jesus: volte ao início",
   "goose.ruleFinish": "Chegue exatamente à casa 65 para ganhar",
@@ -1020,7 +1040,7 @@ const pt: Dict = {
   "goose.board": "Ver o tabuleiro todo",
   "goose.gooseJump": "Novo Testamento! Salte para o próximo e acerte a história para jogar de novo",
   "goose.lastGoose": "Novo Testamento! Acerte a história para jogar de novo",
-  "goose.ladderJump": "Escada de Jacó! Vá à outra escada e jogue de novo",
+  "goose.ladderJump": "No alto da escada de Jacó! Desça e jogue de novo",
   "goose.prison": "A cova dos leões! Para sair, acerte uma história na sua próxima vez",
   "goose.death": "A morte de Jesus: volte ao início!",
   "goose.bounce": "Passou! Volte para trás",
@@ -1135,6 +1155,10 @@ const pt: Dict = {
   "chess.captureRule": "Para capturar uma peça, primeiro acerte a história da imagem. Se errar, sua peça não se mexe e você perde a vez.",
   "chess.captureReward": "Acerte e capture a peça!",
   "chess.captureMissed": "Desta vez não! Sua peça não se mexe e você perde a vez",
+  "goose.ladderAsk": "Escada de Jacó! Acerte a história para subir",
+  "goose.ladderReward": "Acerte e suba a escada de Jacó!",
+  "goose.ladderUp": "Você sobe a escada de Jacó! Jogue de novo",
+  "goose.ladderMissed": "Desta vez não: você fica no pé da escada",
 };
 
 const pl: Dict = {
@@ -1199,7 +1223,7 @@ const pl: Dict = {
   "goose.instruction": "Rzuć kostką i przejdź przez historie biblijne",
   "goose.rules": "Specjalne pola",
   "goose.ruleGoose": "Nowy Testament: skacz do następnego; zgadnij historię, a rzucisz jeszcze raz",
-  "goose.ruleLadder": "Drabina Jakuba: idź do drugiej drabiny i rzucaj znowu",
+  "goose.ruleLadder": "Drabina Jakuba: odgadnij historię, żeby wejść, i rzucaj znowu; ze szczytu schodzisz w dół",
   "goose.rulePrison": "Lwia jama: odgadnij historię, żeby wyjść",
   "goose.ruleDeath": "Śmierć Jezusa: wracasz na start",
   "goose.ruleFinish": "Dojdź dokładnie na pole 65, by wygrać",
@@ -1209,7 +1233,7 @@ const pl: Dict = {
   "goose.board": "Zobacz całą planszę",
   "goose.gooseJump": "Nowy Testament! Skacz do następnego i zgadnij jego historię, by rzucić jeszcze raz",
   "goose.lastGoose": "Nowy Testament! Zgadnij jego historię, by rzucić jeszcze raz",
-  "goose.ladderJump": "Drabina Jakuba! Idź do drugiej drabiny i rzucaj znowu",
+  "goose.ladderJump": "Szczyt drabiny Jakuba! Schodzisz w dół i rzucasz znowu",
   "goose.prison": "Lwia jama! Żeby wyjść, odgadnij historię w następnej turze",
   "goose.death": "Śmierć Jezusa: wracasz na start!",
   "goose.bounce": "Za daleko! Cofasz się",
@@ -1324,6 +1348,10 @@ const pl: Dict = {
   "chess.captureRule": "Żeby zbić figurę, najpierw odgadnij historię z obrazka. Jeśli się pomylisz, twoja figura zostaje na miejscu i tracisz ruch.",
   "chess.captureReward": "Odgadnij i zbij figurę!",
   "chess.captureMissed": "Tym razem nie! Twoja figura zostaje na miejscu i tracisz ruch",
+  "goose.ladderAsk": "Drabina Jakuba! Odgadnij historię, żeby wejść",
+  "goose.ladderReward": "Odgadnij i wejdź po drabinie Jakuba!",
+  "goose.ladderUp": "Wchodzisz po drabinie Jakuba! Rzucaj znowu",
+  "goose.ladderMissed": "Tym razem nie: zostajesz u stóp drabiny",
 };
 
 const ru: Dict = {
@@ -1388,7 +1416,7 @@ const ru: Dict = {
   "goose.instruction": "Бросай кубик и проходи библейские истории",
   "goose.rules": "Особые клетки",
   "goose.ruleGoose": "Новый Завет: прыгай к следующему; угадаешь историю — бросай ещё раз",
-  "goose.ruleLadder": "Лестница Иакова: переходи к другой лестнице и бросай снова",
+  "goose.ruleLadder": "Лестница Иакова: угадай историю, чтобы подняться, и бросай снова; сверху спускаешься вниз",
   "goose.rulePrison": "Львиный ров: угадай историю, чтобы выбраться",
   "goose.ruleDeath": "Смерть Иисуса: назад на старт",
   "goose.ruleFinish": "Попади точно на клетку 65, чтобы победить",
@@ -1398,7 +1426,7 @@ const ru: Dict = {
   "goose.board": "Показать всё поле",
   "goose.gooseJump": "Новый Завет! Прыгай к следующему и угадай его историю, чтобы бросить ещё раз",
   "goose.lastGoose": "Новый Завет! Угадай его историю, чтобы бросить ещё раз",
-  "goose.ladderJump": "Лестница Иакова! К другой лестнице и бросай снова",
+  "goose.ladderJump": "Верх лестницы Иакова! Спускайся и бросай снова",
   "goose.prison": "Львиный ров! Чтобы выбраться, угадай историю в следующий ход",
   "goose.death": "Смерть Иисуса: назад на старт!",
   "goose.bounce": "Перебор! Отскок назад",
@@ -1513,6 +1541,10 @@ const ru: Dict = {
   "chess.captureRule": "Чтобы взять фигуру, сначала угадай историю на картинке. Ошибёшься — твоя фигура останется на месте, и ты пропустишь ход.",
   "chess.captureReward": "Угадай — и возьмёшь фигуру!",
   "chess.captureMissed": "Не в этот раз! Фигура остаётся на месте, и ход переходит",
+  "goose.ladderAsk": "Лестница Иакова! Угадай историю, чтобы подняться",
+  "goose.ladderReward": "Угадай — и поднимешься по лестнице Иакова!",
+  "goose.ladderUp": "Вверх по лестнице Иакова! Бросай снова",
+  "goose.ladderMissed": "Не в этот раз: ты остаёшься у подножия лестницы",
 };
 
 const ja: Dict = {
@@ -1577,7 +1609,7 @@ const ja: Dict = {
   "goose.instruction": "サイコロをふって聖書のおはなしを進もう",
   "goose.rules": "とくべつなマス",
   "goose.ruleGoose": "しんやく：つぎへ とぶ。おはなしを あてたら もういちど ふれる",
-  "goose.ruleLadder": "ヤコブのはしご：もうひとつのはしごへ行って、もういちど",
+  "goose.ruleLadder": "ヤコブのはしご：おはなしをあてたら上って、もういちど。上からは下におりる",
   "goose.rulePrison": "ライオンのあな：おはなしをあてたら出られる",
   "goose.ruleDeath": "イエスさまの死：スタートにもどる",
   "goose.ruleFinish": "ぴったり65マスめでゴール",
@@ -1587,7 +1619,7 @@ const ja: Dict = {
   "goose.board": "ボードぜんたいを見る",
   "goose.gooseJump": "しんやく！ つぎへ とんで、おはなしを あてたら もういちど ふれるよ",
   "goose.lastGoose": "しんやく！ おはなしを あてたら もういちど ふれるよ",
-  "goose.ladderJump": "ヤコブのはしご！もうひとつのはしごへ、もういちど",
+  "goose.ladderJump": "ヤコブのはしごの上！ 下におりて、もういちど",
   "goose.prison": "ライオンのあな！ つぎのばんで おはなしをあてたら出られるよ",
   "goose.death": "イエスさまの死：スタートにもどる！",
   "goose.bounce": "行きすぎ！もどるよ",
@@ -1702,6 +1734,10 @@ const ja: Dict = {
   "chess.captureRule": "こまをとるには、まず えのおはなしをあてよう。まちがえると こまは動かず、ばんがおわるよ。",
   "chess.captureReward": "あたったら こまをとれるよ！",
   "chess.captureMissed": "ざんねん！ こまは動かず、ばんがおわるよ",
+  "goose.ladderAsk": "ヤコブのはしご！ おはなしをあてて上ろう",
+  "goose.ladderReward": "あたったら ヤコブのはしごを上れるよ！",
+  "goose.ladderUp": "ヤコブのはしごを上ったよ！ もういちど ふろう",
+  "goose.ladderMissed": "ざんねん：はしごの下にのこるよ",
 };
 
 const ko: Dict = {
@@ -1766,7 +1802,7 @@ const ko: Dict = {
   "goose.instruction": "주사위를 던져 성경 이야기를 따라가요",
   "goose.rules": "특별한 칸",
   "goose.ruleGoose": "신약: 다음 칸으로 뛰어요. 이야기를 맞히면 한 번 더 던져요",
-  "goose.ruleLadder": "야곱의 사다리: 다른 사다리로 가고 한 번 더",
+  "goose.ruleLadder": "야곱의 사다리: 이야기를 맞히면 올라가서 한 번 더 던져요. 꼭대기에서는 내려가요",
   "goose.rulePrison": "사자 굴: 이야기를 맞히면 나갈 수 있어요",
   "goose.ruleDeath": "예수님의 죽음: 출발점으로",
   "goose.ruleFinish": "정확히 65칸에 도착하면 이겨요",
@@ -1776,7 +1812,7 @@ const ko: Dict = {
   "goose.board": "판 전체 보기",
   "goose.gooseJump": "신약! 다음 칸으로 뛰고, 이야기를 맞히면 한 번 더 던져요",
   "goose.lastGoose": "신약! 이야기를 맞히면 한 번 더 던져요",
-  "goose.ladderJump": "야곱의 사다리! 다른 사다리로 가고 한 번 더",
+  "goose.ladderJump": "야곱의 사다리 꼭대기예요! 내려가서 한 번 더 던져요",
   "goose.prison": "사자 굴이에요! 다음 차례에 이야기를 맞히면 나갈 수 있어요",
   "goose.death": "예수님의 죽음: 출발점으로!",
   "goose.bounce": "너무 갔어요! 뒤로 돌아가요",
@@ -1891,6 +1927,10 @@ const ko: Dict = {
   "chess.captureRule": "말을 잡으려면 먼저 그림 속 이야기를 맞혀요. 틀리면 내 말은 움직이지 않고 차례를 잃어요.",
   "chess.captureReward": "맞히면 말을 잡을 수 있어요!",
   "chess.captureMissed": "이번엔 아니에요! 말은 그대로이고 차례가 넘어가요",
+  "goose.ladderAsk": "야곱의 사다리예요! 이야기를 맞히면 올라가요",
+  "goose.ladderReward": "맞히면 야곱의 사다리를 올라가요!",
+  "goose.ladderUp": "야곱의 사다리를 올라가요! 한 번 더 던져요",
+  "goose.ladderMissed": "이번엔 아니에요: 사다리 아래에 남아요",
 };
 
 const ar: Dict = {
@@ -1955,7 +1995,7 @@ const ar: Dict = {
   "goose.instruction": "ارمِ النرد وتنقّل بين قصص الكتاب المقدس",
   "goose.rules": "خانات خاصة",
   "goose.ruleGoose": "العهد الجديد: اقفز إلى التالي؛ أجب عن قصته لترمي مرة أخرى",
-  "goose.ruleLadder": "سلّم يعقوب: انتقل إلى السلّم الآخر وارمِ مجددًا",
+  "goose.ruleLadder": "سلّم يعقوب: احزر قصة لتصعده وارمِ مرة أخرى؛ ومن القمة تنزل",
   "goose.rulePrison": "جبّ الأسود: احزر قصة لتخرج",
   "goose.ruleDeath": "موت يسوع: عُد إلى البداية",
   "goose.ruleFinish": "اصل إلى الخانة 65 تمامًا لتفوز",
@@ -1965,7 +2005,7 @@ const ar: Dict = {
   "goose.board": "اعرض اللوحة كلها",
   "goose.gooseJump": "العهد الجديد! اقفز إلى التالي وأجب عن قصته لترمي مرة أخرى",
   "goose.lastGoose": "العهد الجديد! أجب عن قصته لترمي مرة أخرى",
-  "goose.ladderJump": "سلّم يعقوب! انتقل إلى السلّم الآخر وارمِ مجددًا",
+  "goose.ladderJump": "قمة سلّم يعقوب! انزل وارمِ مرة أخرى",
   "goose.prison": "جبّ الأسود! لتخرج، احزر قصة في دورك القادم",
   "goose.death": "موت يسوع: عُد إلى البداية!",
   "goose.bounce": "تجاوزت! ارجع للخلف",
@@ -2080,6 +2120,10 @@ const ar: Dict = {
   "chess.captureRule": "لتأسر قطعة، احزر أولًا قصة الصورة. إن أخطأت، تبقى قطعتك مكانها وتخسر دورك.",
   "chess.captureReward": "أجب صحيحًا لتأسر القطعة!",
   "chess.captureMissed": "ليس هذه المرة! تبقى قطعتك مكانها وتخسر دورك",
+  "goose.ladderAsk": "سلّم يعقوب! احزر القصة لتصعده",
+  "goose.ladderReward": "أجب صحيحًا لتصعد سلّم يعقوب!",
+  "goose.ladderUp": "صعدت سلّم يعقوب! ارمِ مرة أخرى",
+  "goose.ladderMissed": "ليس هذه المرة: تبقى عند أسفل السلّم",
 };
 
 const tr: Dict = {
@@ -2144,7 +2188,7 @@ const tr: Dict = {
   "goose.instruction": "Zarı at ve Kutsal Kitap hikâyelerinde ilerle",
   "goose.rules": "Özel kareler",
   "goose.ruleGoose": "Yeni Ahit: sonrakine zıpla; hikâyesini bilirsen yeniden at",
-  "goose.ruleLadder": "Yakup'un merdiveni: öbür merdivene git ve tekrar at",
+  "goose.ruleLadder": "Yakup'un merdiveni: tırmanmak için bir hikâyeyi bil ve tekrar at; tepeden aşağı inersin",
   "goose.rulePrison": "Aslan çukuru: çıkmak için bir hikâyeyi bil",
   "goose.ruleDeath": "İsa'nın ölümü: başa dön",
   "goose.ruleFinish": "Kazanmak için tam 65. kareye gel",
@@ -2154,7 +2198,7 @@ const tr: Dict = {
   "goose.board": "Tüm tahtayı gör",
   "goose.gooseJump": "Yeni Ahit! Sonrakine zıpla, hikâyesini bilirsen yeniden at",
   "goose.lastGoose": "Yeni Ahit! Hikâyesini bilirsen yeniden at",
-  "goose.ladderJump": "Yakup'un merdiveni! Öbürüne git ve tekrar at",
+  "goose.ladderJump": "Yakup'un merdiveninin tepesi! Aşağı in ve tekrar at",
   "goose.prison": "Aslan çukuru! Çıkmak için sıradaki turunda bir hikâyeyi bil",
   "goose.death": "İsa'nın ölümü: başa dön!",
   "goose.bounce": "Fazla geldin! Geri sek",
@@ -2269,6 +2313,10 @@ const tr: Dict = {
   "chess.captureRule": "Bir taşı almak için önce resimdeki hikâyeyi bil. Yanlış bilirsen taşın yerinde kalır ve sıranı kaybedersin.",
   "chess.captureReward": "Doğru bil, taşı al!",
   "chess.captureMissed": "Bu sefer olmadı! Taşın yerinde kalıyor ve sıra geçiyor",
+  "goose.ladderAsk": "Yakup'un merdiveni! Tırmanmak için hikâyeyi bil",
+  "goose.ladderReward": "Doğru bil, Yakup'un merdivenine tırman!",
+  "goose.ladderUp": "Yakup'un merdiveninden yukarı! Tekrar at",
+  "goose.ladderMissed": "Bu sefer olmadı: merdivenin dibinde kalıyorsun",
 };
 
 export const GAME_STRINGS: Record<Lang, Dict> = {

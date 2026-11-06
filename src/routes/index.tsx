@@ -141,24 +141,39 @@ const GAMES: GameDef[] = [
 ];
 
 // Where the family's faces are in each home painting (fractions of its
-// height), and how the painting is placed (cover, 40% down), so the screen
-// can keep its title above them and its games below them.
+// height). The title stays above them and the games below them.
 const FACES = {
   tall: { w: 941, h: 1671, top: 0.29, bottom: 0.565 },
   wide: { w: 1672, h: 941, top: 0.26, bottom: 0.63 },
 };
-const HOME_BG_Y = 0.4;
 const HOME_TOP = 64; // the title's top padding
 const HOME_BOTTOM = 24; // the bottom padding under the favourites
+const HOME_SIDE = 24; // the side padding
 const TITLE_RATIO = 1000 / 346;
+// The home controls are laid out at a phone's width and then scaled as one
+// piece (cards, arrows, dice, slots and labels together) to fit the screen.
+const UI_W = 342;
+const UI_GAP = 28; // between the games and the favourites when side by side
 
+// How the painting is placed (cover) and where the faces land. When the
+// painting is taller than the screen it is moved up as far as the title
+// allows, which leaves the most room for the games under the faces.
 function facesOnScreen(wide: boolean) {
   const f = wide ? FACES.wide : FACES.tall;
-  const screen = window.innerHeight;
-  const scale = Math.max(window.innerWidth / f.w, screen / f.h);
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const scale = Math.max(W / f.w, H / f.h);
   const shown = f.h * scale;
-  const offset = (screen - shown) * HOME_BG_Y;
-  return { top: offset + f.top * shown, bottom: offset + f.bottom * shown, screen };
+  const spare = H - shown; // ≤ 0: the part of the painting cut off
+  const titleH = Math.min(0.82 * (W - 2 * HOME_SIDE), 420) / TITLE_RATIO;
+  const wanted = HOME_TOP + titleH + 8 - f.top * shown;
+  const offset = Math.min(0, Math.max(spare, wanted));
+  return {
+    top: offset + f.top * shown,
+    bottom: offset + f.bottom * shown,
+    screen: H,
+    bgY: spare < 0 ? (offset / spare) * 100 : 50,
+  };
 }
 
 function GameTile({
@@ -179,10 +194,11 @@ function GameTile({
       onClick={() => game.playable && onPlay()}
       disabled={!game.playable}
       aria-label={label}
-      className={`paint-box paint-tall paint-thin group relative flex aspect-[4/5] w-full flex-col p-[9px] transition active:scale-[0.97] disabled:active:scale-100 ${
+      className={`paint-box paint-tall paint-whole group relative flex aspect-[4/5] w-full flex-col transition active:scale-[0.97] disabled:active:scale-100 ${
         highlighted ? "paint-picked scale-[1.04]" : ""
       }`}
-      style={{ containerType: "inline-size" }}
+      // inside the painted frame, which is a little thicker at the top
+      style={{ containerType: "inline-size", padding: "9% 7% 6.5% 7.5%" }}
     >
       <div
         className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl"
@@ -639,18 +655,28 @@ function Home() {
   useEffect(() => {
     if (screen === "home") preloadGameArt();
   }, [screen]);
-  const homeUi = useRef<HTMLDivElement>(null);
-  const [uiScale, setUiScale] = useState(1);
+  // The games and the favourites, one above the other or side by side,
+  // whichever lets them be bigger, scaled to the room under the faces.
+  const shelfBox = useRef<HTMLDivElement>(null);
+  const favBox = useRef<HTMLDivElement>(null);
+  const [ui, setUi] = useState({ scale: 1, row: false });
   useEffect(() => {
-    const el = homeUi.current;
-    if (!el || !faces) return;
+    const shelf = shelfBox.current;
+    const fav = favBox.current;
+    if (!shelf || !fav || !faces) return;
     const fit = () => {
       const room = faces.screen - HOME_BOTTOM - (faces.bottom + 8);
-      setUiScale(Math.max(0.5, Math.min(1, room / el.offsetHeight)));
+      const across = window.innerWidth - 2 * HOME_SIDE;
+      const [a, b] = [shelf.offsetHeight, fav.offsetHeight];
+      const stacked = Math.min(across / UI_W, room / (a + b));
+      const side = Math.min(across / (2 * UI_W + UI_GAP), room / Math.max(a, b));
+      const row = side > stacked;
+      setUi({ scale: Math.max(0.5, Math.min(4, row ? side : stacked)), row });
     };
     fit();
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
-    ro?.observe(el);
+    ro?.observe(shelf);
+    ro?.observe(fav);
     return () => {
       ro?.disconnect();
     };
@@ -796,6 +822,8 @@ function Home() {
       onClick={() => setSettingsOpen(true)}
       aria-label={t("settings.title")}
       className="absolute right-4 top-4 z-10 grid h-12 w-12 place-items-center transition active:scale-90"
+      // grows with the games on big screens
+      style={ui.scale > 1 ? { width: 48 * Math.min(ui.scale, 2), height: 48 * Math.min(ui.scale, 2) } : undefined}
     >
       <img
         src={gearArt}
@@ -812,17 +840,21 @@ function Home() {
         <ScreenFade />
         {/* The family scene in the middle of the painting stays at full color
             behind the frosted tiles. */}
-        <BedtimeBackdrop image={wide ? homeWideBg : homeBg} position="center 40%" fadeEnd={0} />
+        <BedtimeBackdrop
+          image={wide ? homeWideBg : homeBg}
+          position={`center ${faces?.bgY ?? 40}%`}
+          fadeEnd={0}
+        />
         <div className="relative z-10 min-h-[100dvh] w-full">
           {settingsButton}
-          <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center px-6 pt-16 pb-6 text-center">
+          <div className="mx-auto flex min-h-[100dvh] w-full flex-col items-center overflow-x-clip px-6 pt-16 pb-6 text-center">
             <h1
-              className={`w-[82%] max-w-sm ${
+              className={`w-[82%] ${
                 titleIntro ? "animate-in fade-in slide-in-from-top-10 duration-[1400ms] ease-out motion-reduce:animate-none" : ""
               }`}
               style={
                 faces
-                  ? { maxWidth: `min(24rem, ${Math.max(150, (faces.top - HOME_TOP - 8) * TITLE_RATIO)}px)` }
+                  ? { maxWidth: `min(28rem, ${Math.max(150, (faces.top - HOME_TOP - 8) * TITLE_RATIO)}px)` }
                   : undefined
               }
             >
@@ -837,32 +869,39 @@ function Home() {
             <div className="min-h-8 flex-1" />
 
             <div
-              ref={homeUi}
-              className="w-full origin-bottom"
-              style={uiScale < 1 ? { transform: `scale(${uiScale})` } : undefined}
+              className={`flex shrink-0 origin-bottom ${ui.row ? "flex-row items-end" : "flex-col"}`}
+              style={{
+                width: ui.row ? 2 * UI_W + UI_GAP : UI_W,
+                gap: ui.row ? UI_GAP : 0,
+                transform: ui.scale !== 1 ? `scale(${ui.scale})` : undefined,
+              }}
             >
-              <GameShelf
-                games={GAMES}
-                labelFor={(g) => t(g.labelKey)}
-                comingLabel={t("game.comingSoon")}
-                prevLabel={t("home.prevGames")}
-                nextLabel={t("home.nextGames")}
-                randomLabel={t("home.randomGame")}
-                onPlay={openGame}
-                onDragStart={(g, x, y) => beginDrag(g, null, x, y)}
-              />
+              <div ref={shelfBox} style={{ width: UI_W }}>
+                <GameShelf
+                  games={GAMES}
+                  labelFor={(g) => t(g.labelKey)}
+                  comingLabel={t("game.comingSoon")}
+                  prevLabel={t("home.prevGames")}
+                  nextLabel={t("home.nextGames")}
+                  randomLabel={t("home.randomGame")}
+                  onPlay={openGame}
+                  onDragStart={(g, x, y) => beginDrag(g, null, x, y)}
+                />
+              </div>
 
-              <FavoriteSlots
-                favorites={favorites}
-                dragging={drag?.from ?? null}
-                over={drag?.over ?? -1}
-                title={t("home.favorites")}
-                hint={t("home.favoritesHint")}
-                labelFor={(g) => t(g.labelKey)}
-                slotRefs={slotRefs}
-                onPlay={openGame}
-                onDragStart={(g, slot, x, y) => beginDrag(g, slot, x, y)}
-              />
+              <div ref={favBox} style={{ width: UI_W }}>
+                <FavoriteSlots
+                  favorites={favorites}
+                  dragging={drag?.from ?? null}
+                  over={drag?.over ?? -1}
+                  title={t("home.favorites")}
+                  hint={t("home.favoritesHint")}
+                  labelFor={(g) => t(g.labelKey)}
+                  slotRefs={slotRefs}
+                  onPlay={openGame}
+                  onDragStart={(g, slot, x, y) => beginDrag(g, slot, x, y)}
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -91,13 +91,19 @@ const LIST: [id: string, story: string, traits: string][] = [
   ["ruth", "ruth-fields", "woman covered veil blue smile old"],
   ["naomi", "ruth-fields", "woman white covered veil blue old"],
   ["orpah", "ruth-fields", "woman covered veil red hand old"],
-  ["samuel", "samuel-call", "child down old"],
+  ["samuel", "samuel-call", "child down hand old"],
   ["david", "david-shepherd", "child old"],
   ["goliath", "david-goliath", "beard covered crown old"],
   ["elijah", "elijah-ravens", "beard white fur up old"],
   ["jonah", "jonah-fish", "beard red up hand old"],
   ["daniel", "daniel-lions", "beard blue up old"],
   ["esther", "queen-esther", "woman covered crown old"],
+  ["jacob", "joseph-coat", "beard white covered headband smile old"],
+  ["joseph-egypt", "joseph-forgives", "covered headband blue smile down old"],
+  ["baby-moses", "moses-basket", "child down old"],
+  ["baby-jesus", "nativity", "child down"],
+  ["blindman", "heals-blind", "beard covered up"],
+  ["fisherman", "catch-fish", "beard up hand"],
 ];
 
 export const CHARACTERS: Character[] = LIST.flatMap(([id, slug, traits]) => {
@@ -110,6 +116,48 @@ export const CHARACTERS: Character[] = LIST.flatMap(([id, slug, traits]) => {
 
 // Names for the characters who aren't simply a word in seek-words.ts.
 const NAMES: Record<string, string[]> = {
+  "joseph-egypt": [
+    "Joseph, governor of Egypt",
+    "José, gobernador de Egipto",
+    "Josef, Verwalter von Ägypten",
+    "Joseph, gouverneur d'Égypte",
+    "Giuseppe, governatore d'Egitto",
+    "José, governador do Egito",
+    "Józef, zarządca Egiptu",
+    "Иосиф, правитель Египта",
+    "エジプトの大臣ヨセフ",
+    "이집트 총리 요셉",
+    "يوسف حاكم مصر",
+    "Mısır valisi Yusuf",
+  ],
+  "baby-moses": [
+    "Baby Moses",
+    "Moisés bebé",
+    "Der kleine Mose",
+    "Moïse bébé",
+    "Mosè neonato",
+    "Moisés bebê",
+    "Mały Mojżesz",
+    "Младенец Моисей",
+    "赤ちゃんのモーセ",
+    "아기 모세",
+    "موسى الرضيع",
+    "Bebek Musa",
+  ],
+  "baby-jesus": [
+    "Baby Jesus",
+    "Jesús bebé",
+    "Das Jesuskind",
+    "Jésus bébé",
+    "Gesù Bambino",
+    "Jesus bebê",
+    "Dzieciątko Jezus",
+    "Младенец Иисус",
+    "赤ちゃんのイエスさま",
+    "아기 예수님",
+    "الطفل يسوع",
+    "Bebek İsa",
+  ],
   "boy-jesus": [
     "Jesus as a boy",
     "Jesús niño",
@@ -257,12 +305,22 @@ export function characterName(c: Character, lang: Lang): string {
   return NAMES[c.id]?.[Math.max(0, i)] ?? wordName(c.id, lang);
 }
 
+// How many cards each level has, and in how many columns they stand
+// (3 x 3, 3 x 4, 4 x 5, 4 x 7, 4 x 9).
 export const CHARACTER_COUNTS: Record<DifficultyId, number> = {
-  easy: 6,
+  easy: 9,
   "easy-medium": 12,
-  medium: 18,
-  "medium-hard": 24,
-  hard: 30,
+  medium: 20,
+  "medium-hard": 28,
+  hard: 36,
+};
+
+export const CHARACTER_COLS: Record<DifficultyId, number> = {
+  easy: 3,
+  "easy-medium": 3,
+  medium: 4,
+  "medium-hard": 4,
+  hard: 4,
 };
 
 function shuffle<T>(arr: T[]): T[] {

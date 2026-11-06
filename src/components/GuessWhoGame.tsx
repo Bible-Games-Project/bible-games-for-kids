@@ -6,6 +6,7 @@ import { memText } from "@/lib/memory-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import type { DifficultyId } from "@/lib/puzzles";
 import {
+  CHARACTER_COLS,
   CHARACTER_COUNTS,
   QUESTIONS,
   characterName,
@@ -260,7 +261,7 @@ function GuessBoard({
     setBusy(false);
   };
 
-  const cols = cards.length <= 6 ? 3 : cards.length <= 12 ? 4 : 6;
+  const cols = CHARACTER_COLS[level];
   const asked = QUESTIONS.filter((q) => board.asked.has(q.trait));
   const shown = winner !== null ? boards[winner] : board;
 
