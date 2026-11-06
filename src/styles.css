@@ -14,6 +14,7 @@
 
   --font-display: "Fredoka", "Nunito", ui-rounded, system-ui, sans-serif;
   --font-body: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -197,6 +198,141 @@
           drop-shadow(0 0 2px oklch(0.85 0.14 85 / 0.95));
 }
 
+
+/* Things that show up after the screen has opened (a palette, a dialog's
+   contents, a new tile) fade in instead of popping. A delay can be set
+   inline with --appear-delay to stagger a row. */
+@keyframes appear {
+  from { opacity: 0; transform: translateY(6px) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+
+.appear {
+  animation: appear 0.45s ease-out var(--appear-delay, 0s) both;
+}
+
+@keyframes appear-soft {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.appear-soft {
+  animation: appear-soft 0.6s ease-out var(--appear-delay, 0s) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appear, .appear-soft { animation: none; }
+}
+
+/* Chess: some characters come alive. Each effect is placed in its figure's
+   box (--x, --y in % of the box) and sized in % of the figure's width (cqw):
+   Elijah's chariot horse burns, the smoke of the sacrifice rises from the
+   Temple, Jesus shines and David plays his harp. */
+.fx {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  pointer-events: none;
+}
+
+.fx-flame {
+  width: 16cqw;
+  height: 22cqw;
+  border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+  background: radial-gradient(ellipse 50% 60% at 50% 70%, #fff6c2 0%, #ffd34d 28%, #ff8a1f 58%, rgb(230 60 20 / 0) 100%);
+  animation: fx-flame 1s ease-out var(--d, 0s) infinite both;
+}
+
+@keyframes fx-flame {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  25% { transform: translate(-50%, -80%) scale(1); opacity: 0.95; }
+  100% { transform: translate(calc(-50% + var(--dx, 0cqw)), -260%) scale(0.25); opacity: 0; }
+}
+
+.fx-ember {
+  width: 3.5cqw;
+  height: 3.5cqw;
+  border-radius: 50%;
+  background: #ffe48a;
+  box-shadow: 0 0 3cqw 1cqw #ff9a2a;
+  animation: fx-ember 1.7s ease-out var(--d, 0s) infinite both;
+}
+
+@keyframes fx-ember {
+  0% { transform: translate(-50%, -50%); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx, 0cqw)), -900%); opacity: 0; }
+}
+
+.fx-smoke {
+  width: 42cqw;
+  height: 42cqw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(196 190 184 / 0.95) 0%, rgb(220 214 206 / 0.75) 35%, rgb(240 236 228 / 0) 70%);
+  animation: fx-smoke 3.6s ease-out var(--d, 0s) infinite both;
+}
+
+@keyframes fx-smoke {
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+  20% { opacity: 0.95; }
+  100% { transform: translate(calc(-50% + var(--dx, 0cqw)), -200%) scale(1.5); opacity: 0; }
+}
+
+.fx-halo {
+  width: 170cqw;
+  height: 170cqw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 250 215) 0%, rgb(255 228 140 / 0.9) 25%, rgb(255 205 90 / 0.45) 45%, rgb(255 200 90 / 0) 68%);
+  animation: fx-halo 2.8s ease-in-out infinite;
+}
+
+@keyframes fx-halo {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; }
+  50% { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+}
+
+.fx-rays {
+  width: 175cqw;
+  height: 175cqw;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgb(255 214 110 / 0.85) 0deg 7deg, transparent 7deg 22.5deg);
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 68%);
+  mask: radial-gradient(circle, #000 18%, transparent 68%);
+  animation: fx-rays 24s linear infinite;
+}
+
+@keyframes fx-rays {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.fx-note {
+  font-size: 40cqw;
+  line-height: 1;
+  font-weight: 700;
+  color: #ffd75a;
+  -webkit-text-stroke: 1.2cqw #6b3d0a;
+  paint-order: stroke fill;
+  text-shadow: 0 0 3cqw rgb(255 220 120 / 0.8);
+  animation: fx-note 3s ease-out var(--d, 0s) infinite both;
+}
+
+@keyframes fx-note {
+  0% { transform: translate(-50%, -50%) scale(0.4) rotate(-10deg); opacity: 0; }
+  15% { opacity: 1; }
+  50% { transform: translate(calc(-50% + var(--dx, 0cqw) * 0.5 + 4cqw), -150%) scale(1) rotate(8deg); }
+  100% { transform: translate(calc(-50% + var(--dx, 0cqw)), -300%) scale(0.9) rotate(-6deg); opacity: 0; }
+}
+
+/* Jesus himself glows a little too. */
+.fx-glow {
+  filter: drop-shadow(0 0 2.5cqw rgb(255 220 120)) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-flame, .fx-ember, .fx-smoke, .fx-note, .fx-rays { display: none; }
+  .fx-halo { animation: none; transform: translate(-50%, -50%); }
+}
 
 /* Chess: a captured piece spins away while a flash, a ring of light and
    sparks burst out of it when the attacker lands (the delay is set inline). */

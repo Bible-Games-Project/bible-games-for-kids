@@ -60,7 +60,7 @@ export function ScreenFade() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-[100] bg-black transition-opacity duration-500 ease-out motion-reduce:hidden"
+      className="pointer-events-none fixed inset-0 z-[100] bg-[#fce8c8] transition-opacity duration-500 ease-out motion-reduce:hidden"
       style={{ opacity: clear ? 0 : 1 }}
     />
   );

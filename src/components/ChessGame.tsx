@@ -8,6 +8,7 @@ import {
   computerMove,
   inCheck,
   legalMoves,
+  other,
   outcome,
   play,
   startPosition,
@@ -17,7 +18,9 @@ import {
   type Position,
   type Side,
 } from "@/lib/chess";
+import type { Story } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
+import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import {
   BackButton,
@@ -124,8 +127,8 @@ export function ChessGame({ onBack }: { onBack: () => void }) {
               onClick={() => setChoosingLevel(true)}
               className="paint-box paint-square flex items-center gap-4 p-4 text-left transition active:scale-[0.98]"
             >
-              <PieceFigure side="nt" kind="k" size={60} />
-              <span className="text-lg font-semibold">{ct("dom.vsComputer")}</span>
+              <PieceFigure side="nt" kind="k" size={60} fx />
+              <span className="font-display text-xl">{ct("dom.vsComputer")}</span>
             </button>
             <button
               onClick={() => {
@@ -135,14 +138,17 @@ export function ChessGame({ onBack }: { onBack: () => void }) {
               className="paint-box paint-square flex items-center gap-4 p-4 text-left transition active:scale-[0.98]"
             >
               <span className="flex -space-x-3">
-                <PieceFigure side="nt" kind="k" size={60} />
-                <PieceFigure side="ot" kind="k" size={60} />
+                <PieceFigure side="nt" kind="k" size={60} fx />
+                <PieceFigure side="ot" kind="k" size={60} fx />
               </span>
-              <span className="text-lg font-semibold">
+              <span className="font-display text-xl">
                 {memText(lang, "mem.playersMany").replace("{n}", "2")}
               </span>
             </button>
           </div>
+          <p className="paint-box paint-long mt-4 px-5 py-3.5 text-center text-sm text-foreground/80">
+            {ct("chess.captureRule")}
+          </p>
           <PieceGuide />
         </>
       )}
@@ -160,8 +166,8 @@ function PieceGuide() {
       <div className="mt-3 grid gap-2">
         {KINDS.map((kind) => (
           <div key={kind} className="flex items-center gap-3 rounded-2xl bg-card/70 p-2">
-            <PieceFigure side="nt" kind={kind} size={62} />
-            <PieceFigure side="ot" kind={kind} size={62} />
+            <PieceFigure side="nt" kind={kind} size={62} fx />
+            <PieceFigure side="ot" kind={kind} size={62} fx />
             <div className="min-w-0 flex-1 text-sm leading-snug">
               <p className="font-semibold">
                 {ct(`chess.role.${kind}`)} ·{" "}
@@ -181,17 +187,36 @@ function PieceGuide() {
 // New Testament, black for the Old), with the chess symbol in a corner so
 // children can tell how it moves. With a size it is that tall; without, it
 // fills its box, standing on the box's bottom edge.
-function PieceFigure({ side, kind, size }: { side: Side; kind: Kind; size?: number }) {
+function PieceFigure({
+  side,
+  kind,
+  size,
+  fx = false,
+}: {
+  side: Side;
+  kind: Kind;
+  size?: number;
+  fx?: boolean;
+}) {
   return (
     <span
       className={`relative flex shrink-0 items-end justify-center ${size ? "" : "h-full w-full"}`}
-      style={size ? { height: size, width: size * 0.62 } : { containerType: "inline-size" }}
+      style={
+        size
+          ? { height: size, width: size * 0.62, containerType: "inline-size" }
+          : { containerType: "inline-size" }
+      }
     >
+      {fx && <PieceFx side={side} kind={kind} layer="back" />}
       <img
         src={ART[`${side}-${kind}`]}
         alt=""
         draggable={false}
-        className="block h-full w-full select-none object-contain object-bottom drop-shadow-[0_3px_3px_rgba(0,0,0,0.35)]"
+        className={`block h-full w-full select-none object-contain object-bottom ${
+          fx && side === "nt" && kind === "k"
+            ? "fx-glow"
+            : "drop-shadow-[0_3px_3px_rgba(0,0,0,0.35)]"
+        }`}
       />
       <span
         className={`absolute bottom-0 right-0 grid aspect-square place-items-center rounded-full leading-none shadow ${
@@ -203,8 +228,92 @@ function PieceFigure({ side, kind, size }: { side: Side; kind: Kind; size?: numb
       >
         {GLYPH[side][kind]}
       </span>
+      {fx && <PieceFx side={side} kind={kind} layer="front" />}
     </span>
   );
+}
+
+// Places in the figure's box (in %) and timings of each character's effect.
+type Spot = { x: number; y: number; d: number; dx?: number };
+const FLAMES: Spot[] = [
+  { x: 34, y: 30, d: 0, dx: -4 },
+  { x: 44, y: 24, d: 0.35, dx: -2 },
+  { x: 54, y: 22, d: 0.7, dx: 3 },
+  { x: 63, y: 27, d: 0.15, dx: 5 },
+  { x: 49, y: 26, d: 0.55, dx: 0 },
+  { x: 71, y: 36, d: 0.85, dx: 6 },
+];
+const EMBERS: Spot[] = [
+  { x: 40, y: 24, d: 0.2, dx: -8 },
+  { x: 58, y: 22, d: 0.9, dx: 6 },
+  { x: 67, y: 30, d: 1.4, dx: 10 },
+];
+const SMOKE: Spot[] = [
+  { x: 50, y: 36, d: 0, dx: 6 },
+  { x: 46, y: 36, d: 0.9, dx: -5 },
+  { x: 54, y: 36, d: 1.8, dx: 9 },
+  { x: 50, y: 36, d: 2.7, dx: -2 },
+];
+const NOTES: (Spot & { glyph: string })[] = [
+  { x: 80, y: 52, d: 0, dx: 14, glyph: "♪" },
+  { x: 78, y: 56, d: 1, dx: 22, glyph: "♫" },
+  { x: 82, y: 50, d: 2, dx: 8, glyph: "♩" },
+  { x: 76, y: 54, d: 1.5, dx: 18, glyph: "♬" },
+];
+
+const fxStyle = (p: Spot) =>
+  ({
+    "--x": `${p.x}%`,
+    "--y": `${p.y}%`,
+    "--d": `${p.d}s`,
+    "--dx": `${p.dx ?? 0}cqw`,
+  }) as React.CSSProperties;
+
+// Little touches of life: Elijah's chariot horse burns, the smoke of the
+// sacrifice rises from the Temple, Jesus shines and David plays his harp.
+// Drawn behind the figure ("back") or over it ("front").
+function PieceFx({ side, kind, layer }: { side: Side; kind: Kind; layer: "back" | "front" }) {
+  const who = `${side}-${kind}`;
+  if (who === "ot-n")
+    return layer === "back" ? (
+      <>
+        {FLAMES.map((p, i) => (
+          <span key={i} className="fx fx-flame" style={fxStyle(p)} />
+        ))}
+      </>
+    ) : (
+      <>
+        {EMBERS.map((p, i) => (
+          <span key={i} className="fx fx-ember" style={fxStyle(p)} />
+        ))}
+      </>
+    );
+  if (who === "nt-r" && layer === "front")
+    return (
+      <>
+        {SMOKE.map((p, i) => (
+          <span key={i} className="fx fx-smoke" style={fxStyle(p)} />
+        ))}
+      </>
+    );
+  if (who === "nt-k" && layer === "back")
+    return (
+      <>
+        <span className="fx fx-rays" style={fxStyle({ x: 50, y: 34, d: 0 })} />
+        <span className="fx fx-halo" style={fxStyle({ x: 50, y: 34, d: 0 })} />
+      </>
+    );
+  if (who === "ot-k" && layer === "front")
+    return (
+      <>
+        {NOTES.map((p, i) => (
+          <span key={i} className="fx fx-note" style={fxStyle(p)}>
+            {p.glyph}
+          </span>
+        ))}
+      </>
+    );
+  return null;
 }
 
 // Where the squares are on the board picture, in % of its width and height.
@@ -278,7 +387,7 @@ function BoardPiece({ piece, sq }: { piece: Piece; sq: number }) {
   }, [sq, piece.kind]);
   return (
     <span ref={ref} className="pointer-events-none absolute" style={figureBox(sq)}>
-      <PieceFigure side={piece.side} kind={piece.kind} />
+      <PieceFigure side={piece.side} kind={piece.kind} fx />
     </span>
   );
 }
@@ -330,6 +439,8 @@ function ChessBoard({
   const [bursts, setBursts] = useState<{ piece: Piece; sq: number; delay: number }[]>([]);
   const [note, setNote] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
+  // A capture waits for its story question; a miss loses the turn.
+  const [quiz, setQuiz] = useState<{ move: Move; story: Story } | null>(null);
   const [ended, setEnded] = useState<"checkmate" | "stalemate" | "draw" | null>(null);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => {
@@ -389,15 +500,48 @@ function ChessBoard({
       }, ms);
     else audio.playClick();
     if (inCheck(next)) later(() => audio.play("chess-check"), ms + 120);
-    if (vsComputer && next.turn === "ot") {
-      setThinking(true);
-      // let the board show the move before the computer starts thinking
-      later(() => {
-        const reply = computerMove(next, level);
-        setThinking(false);
-        if (reply) applyFrom(next, reply);
-      }, ms + 250);
+    // let the board show the move before the computer starts thinking
+    if (vsComputer && next.turn === "ot") computerReply(next, ms + 250);
+  };
+
+  // A capture needs its story named first, unless the king is in check
+  // (then the move is needed to get out of it).
+  const asksFirst = (base: Position, m: Move) =>
+    (!!base.board[m.to] || !!m.enPassant) && !inCheck(base);
+
+  const computerReply = (base: Position, wait: number) => {
+    setThinking(true);
+    later(() => {
+      const reply = computerMove(base, level);
+      setThinking(false);
+      if (!reply) return;
+      // the computer knows most stories, not all of them
+      if (asksFirst(base, reply) && Math.random() >= 0.75) skipTurn(base, ct("dom.computerMissed"));
+      else applyFrom(base, reply);
+    }, wait);
+  };
+
+  // No move this turn: the other team plays next.
+  const skipTurn = (base: Position, text: string) => {
+    const next: Position = { ...base, turn: other(base.turn), enPassant: null };
+    setPos(next);
+    setSelected(null);
+    setNote(text);
+    audio.playIncorrect();
+    const result = outcome(next);
+    if (result !== "play") {
+      later(() => setEnded(result), 400);
+      return;
     }
+    if (vsComputer && next.turn === "ot") computerReply(next, 700);
+  };
+
+  const answer = (right: boolean) => {
+    const m = quiz?.move;
+    setQuiz(null);
+    if (!m) return;
+    if (right) apply(m);
+    else skipTurn(pos, ct("chess.captureMissed"));
   };
 
   // The computer's reply is played on the position it was thinking about.
@@ -425,8 +569,12 @@ function ChessBoard({
   };
 
   const tap = (sq: number) => {
-    if (ended || thinking) return;
+    if (ended || thinking || quiz) return;
     const target = targets.find((m) => m.to === sq);
+    if (target && asksFirst(pos, target)) {
+      setQuiz({ move: target, story: randomStory() });
+      return;
+    }
     if (target) return apply(target);
     if (mine(sq)) setSelected(sq === selected ? null : sq);
     else setSelected(null);
@@ -442,6 +590,7 @@ function ChessBoard({
     setBursts([]);
     setNote(null);
     setThinking(false);
+    setQuiz(null);
     setEnded(null);
   };
 
@@ -548,7 +697,7 @@ function ChessBoard({
           )}
           {chosen && (
             <div className="mt-2 flex items-center gap-3 rounded-2xl bg-card/80 p-2">
-              <PieceFigure side={chosen.side} kind={chosen.kind} size={72} />
+              <PieceFigure side={chosen.side} kind={chosen.kind} size={72} fx />
               <div className="min-w-0 text-sm leading-snug">
                 <p className="font-semibold">
                   {ct(`chess.name.${chosen.side}-${chosen.kind}`)} ·{" "}
@@ -560,6 +709,10 @@ function ChessBoard({
           )}
         </div>
       </div>
+
+      {quiz && (
+        <StoryQuiz story={quiz.story} reward={ct("chess.captureReward")} onAnswer={answer} />
+      )}
 
       {ended && (
         <ResultCard

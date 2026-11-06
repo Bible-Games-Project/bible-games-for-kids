@@ -20,11 +20,14 @@ export const randomStory = (): Story => STORIES[Math.floor(Math.random() * STORI
 // A quick question for an extra roll: a story's painting and three titles,
 // only one of them right. After an answer the right title glows (and a wrong
 // pick fades) for a moment, so children see the answer, then `onAnswer`.
+// `reward` says what a right answer wins (by default, another roll).
 export function StoryQuiz({
   story,
+  reward,
   onAnswer,
 }: {
   story: Story;
+  reward?: string;
   onAnswer: (right: boolean) => void;
 }) {
   const { lang } = useSettings();
@@ -56,7 +59,7 @@ export function StoryQuiz({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5">
       <div className="paint-box paint-tall paint-solid w-full max-w-sm p-6 text-center animate-in fade-in zoom-in-95 duration-200">
         <h2 className="font-display text-2xl text-foreground">{qt("quiz.title")}</h2>
-        <p className="text-sm text-muted-foreground">{qt("quiz.reward")}</p>
+        <p className="text-sm text-muted-foreground">{reward ?? qt("quiz.reward")}</p>
         <img
           src={story.thumb}
           alt=""

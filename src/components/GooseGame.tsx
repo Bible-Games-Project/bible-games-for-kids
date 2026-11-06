@@ -19,7 +19,7 @@ import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
 import { PAWN_RATIO, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
-import { StoryQuiz } from "@/components/StoryQuiz";
+import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 import type { Story } from "@/lib/stories";
 
 import gooseBg from "@/assets/goose-bg.webp";
@@ -193,6 +193,8 @@ function DeathArt() {
 const CELL = 100;
 const W = COLS * CELL;
 const H = ROWS * CELL;
+// Room around each square, so the road between squares shows.
+const INSET = 7;
 
 const centerOf = (n: number) =>
   n === LAST
@@ -212,7 +214,12 @@ function Tile({ sq, title }: { sq: Square; title: string }) {
       className={`absolute overflow-hidden rounded-xl bg-[oklch(0.97_0.02_85)] shadow-md ${
         goose ? "border-[5px] border-[oklch(0.79_0.135_76)]" : "border-[3px] border-white"
       }`}
-      style={{ left: col * CELL + 4, top: row * CELL + 4, width: CELL - 8, height: CELL - 8 }}
+      style={{
+        left: col * CELL + INSET,
+        top: row * CELL + INSET,
+        width: CELL - 2 * INSET,
+        height: CELL - 2 * INSET,
+      }}
       title={title}
     >
       {sq.kind === "start" ? (
@@ -269,6 +276,76 @@ function Tile({ sq, title }: { sq: Square; title: string }) {
   );
 }
 
+// The way round the board: a sandy road joining each square only to the
+// next one (so the end of the outer ring is not joined to the start), with
+// a little arrow in every gap pointing the way.
+const LAST_CELL = CELLS[LAST - 1];
+const ROAD = [
+  ...CELLS.map((_, n) => centerOf(n)),
+  // from the last square on into the finish
+  { x: LAST_CELL.col * CELL + CELL / 2, y: LAST_CELL.row * CELL - 2 * INSET },
+];
+const STEPS = ROAD.slice(1).map((b, k) => {
+  const a = ROAD[k];
+  const last = k === ROAD.length - 2;
+  return {
+    x: last ? b.x : (a.x + b.x) / 2,
+    y: last ? b.y + 2 * INSET : (a.y + b.y) / 2,
+    angle: (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI,
+  };
+});
+const ROAD_POINTS = ROAD.map((p) => `${p.x},${p.y}`).join(" ");
+
+function BoardRoad() {
+  return (
+    <svg className="pointer-events-none absolute left-0 top-0" width={W} height={H} aria-hidden>
+      <polyline
+        points={ROAD_POINTS}
+        fill="none"
+        stroke="oklch(0.6 0.09 60)"
+        strokeWidth={CELL * 0.5 + 8}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <polyline
+        points={ROAD_POINTS}
+        fill="none"
+        stroke="oklch(0.88 0.07 80)"
+        strokeWidth={CELL * 0.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function RoadArrows() {
+  return (
+    <svg className="pointer-events-none absolute left-0 top-0" width={W} height={H} aria-hidden>
+      {STEPS.map((p, k) => (
+        <g key={k} transform={`translate(${p.x} ${p.y}) rotate(${p.angle})`}>
+          <path
+            d="M -5 -8 L 4 0 L -5 8"
+            fill="none"
+            stroke="oklch(0.45 0.09 55)"
+            strokeWidth={8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M -5 -8 L 4 0 L -5 8"
+            fill="none"
+            stroke="white"
+            strokeWidth={4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 function GooseBoard({ players, onExit }: { players: number; onExit: () => void }) {
   const { lang, t } = useSettings();
   const audio = useAudio();
@@ -283,8 +360,9 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   const [busy, setBusy] = useState(true); // the opening zoom
   const [message, setMessage] = useState<string | null>(null);
   const [winner, setWinner] = useState<number | null>(null);
-  // After a New Testament square: name its story to roll again.
-  const [quiz, setQuiz] = useState<{ player: number; story: Story } | null>(null);
+  // After a New Testament square: name its story to roll again. In the
+  // lions' den: name a story to get out (`jail`).
+  const [quiz, setQuiz] = useState<{ player: number; story: Story; jail?: boolean } | null>(null);
   const [hopMs, setHopMs] = useState(220);
   // Camera: the whole board, or close up on a square.
   const [view, setView] = useState<{ all: boolean; n: number; ms: number }>({
@@ -297,7 +375,8 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   const viewport = useRef<HTMLDivElement | null>(null);
   const posRef = useRef(pos);
   const turnRef = useRef(0);
-  const skip = useRef<boolean[]>(Array(players).fill(false));
+  // Players in the lions' den, who must name a story to get out.
+  const jailed = useRef<boolean[]>(Array(players).fill(false));
   const rolls = useRef<number[]>(Array(players).fill(0));
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => {
@@ -347,22 +426,16 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   };
 
   const nextTurn = () => {
-    let t = turnRef.current;
-    let note: string | null = null;
-    for (let guard = 0; guard < players * 2 + 1; guard++) {
-      t = (t + 1) % players;
-      if (skip.current[t]) {
-        skip.current[t] = false;
-        rolls.current[t] += 1;
-        note = gt("goose.skipped", { name: playerName(t) });
-        continue;
-      }
-      break;
-    }
+    const t = (turnRef.current + 1) % players;
     turnRef.current = t;
     setTurn(t);
     setView({ all: false, n: posRef.current[t], ms: 700 });
-    if (note) setMessage(note);
+    if (jailed.current[t]) {
+      // Still in the lions' den: a story question opens the way out.
+      setMessage(gt("goose.prisonAsk", { name: playerName(t) }));
+      later(() => setQuiz({ player: t, story: randomStory(), jail: true }), 900);
+      return;
+    }
     setBusy(false);
   };
 
@@ -408,7 +481,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
       later(() => jump(i, rule.to, again), 900);
     } else if (sq.kind === "prison") {
       audio.playIncorrect();
-      skip.current[i] = true;
+      jailed.current[i] = true;
       setMessage(gt("goose.prison"));
       later(nextTurn, 1600);
     } else if (sq.kind === "death") {
@@ -425,7 +498,20 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
 
   const answer = (right: boolean) => {
     const i = quiz?.player ?? turnRef.current;
+    const jail = quiz?.jail ?? false;
     setQuiz(null);
+    if (jail) {
+      if (right) {
+        // out of the den: this turn's roll is theirs
+        jailed.current[i] = false;
+        setMessage(gt("goose.free"));
+        setBusy(false);
+      } else {
+        setMessage(gt("goose.stillPrison"));
+        later(nextTurn, 1200);
+      }
+      return;
+    }
     if (right) {
       setBusy(false);
       setView({ all: false, n: posRef.current[i], ms: 400 });
@@ -479,7 +565,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
     setPos(posRef.current);
     turnRef.current = 0;
     setTurn(0);
-    skip.current = Array(players).fill(false);
+    jailed.current = Array(players).fill(false);
     rolls.current = Array(players).fill(0);
     setMessage(null);
     setWinner(null);
@@ -552,6 +638,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
         >
           {/* The board itself, a painted card under the squares */}
           <div className="absolute -inset-3 rounded-[28px] bg-gradient-to-br from-[oklch(0.93_0.05_150)] via-[oklch(0.95_0.04_90)] to-[oklch(0.9_0.05_230)] shadow-[0_20px_40px_oklch(0.25_0.05_50/0.45)]" />
+          <BoardRoad />
           {SQUARES.slice(0, LAST).map((sq) => (
             <Tile key={sq.n} sq={sq} title={titleOf(sq.n)} />
           ))}
@@ -559,10 +646,10 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
           <div
             className="absolute overflow-hidden rounded-2xl border-[5px] border-[oklch(0.79_0.135_76)] shadow-lg"
             style={{
-              left: FINISH_AREA.col * CELL + 4,
-              top: FINISH_AREA.row * CELL + 4,
-              width: FINISH_AREA.cols * CELL - 8,
-              height: FINISH_AREA.rows * CELL - 8,
+              left: FINISH_AREA.col * CELL + INSET,
+              top: FINISH_AREA.row * CELL + INSET,
+              width: FINISH_AREA.cols * CELL - 2 * INSET,
+              height: FINISH_AREA.rows * CELL - 2 * INSET,
             }}
           >
             {SQUARES[LAST].story && (
@@ -597,6 +684,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
               ✝️
             </Badge>
           </div>
+          <RoadArrows />
           {pos.map((_, i) => {
             const p = pawnSpot(i);
             return (
@@ -649,7 +737,13 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
         </div>
       </div>
 
-      {quiz && <StoryQuiz story={quiz.story} onAnswer={answer} />}
+      {quiz && (
+        <StoryQuiz
+          story={quiz.story}
+          reward={quiz.jail ? gt("goose.prisonReward") : undefined}
+          onAnswer={answer}
+        />
+      )}
 
       {winner !== null && (
         <ResultCard

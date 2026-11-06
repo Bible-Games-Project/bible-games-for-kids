@@ -514,7 +514,7 @@ function ColoringBoard({
               {data && (
                 <svg
                   viewBox={`0 0 ${MAP_W} ${MAP_H}`}
-                  className="pointer-events-none absolute inset-0 h-full w-full select-none"
+                  className="appear-soft pointer-events-none absolute inset-0 h-full w-full select-none"
                   aria-hidden
                 >
                   {data.labels
@@ -589,12 +589,17 @@ function ColoringBoard({
                   onClick={() => setSelected(i)}
                   aria-label={`${i + 1}`}
                   aria-pressed={selected === i}
-                  className={`relative grid aspect-square w-full place-items-center rounded-full border-2 border-white text-base font-bold shadow-sm transition active:scale-90 ${
-                    selected === i ? "scale-110 ring-4 ring-[oklch(0.31_0.08_262)]" : ""
-                  }`}
-                  style={{ backgroundColor: c, color: light ? "oklch(0.3 0.05 60)" : "white" }}
+                  className="appear"
+                  style={{ ["--appear-delay" as string]: `${i * 45}ms` }}
                 >
-                  {done ? "✓" : i + 1}
+                  <span
+                    className={`relative grid aspect-square w-full place-items-center rounded-full border-2 border-white text-base font-bold shadow-sm transition active:scale-90 ${
+                      selected === i ? "scale-110 ring-4 ring-[oklch(0.31_0.08_262)]" : ""
+                    }`}
+                    style={{ backgroundColor: c, color: light ? "oklch(0.3 0.05 60)" : "white" }}
+                  >
+                    {done ? "✓" : i + 1}
+                  </span>
                 </button>
               );
             })}

@@ -11,6 +11,7 @@ import { useSettings } from "@/lib/i18n";
 import { localizeSceneTitle, localizeVerse } from "@/lib/scenes-i18n";
 import homeArt from "@/assets/ui/home.webp";
 import hintArt from "@/assets/ui/hint.webp";
+import { loaded } from "@/lib/preload-ui";
 
 
 interface Piece {
@@ -246,6 +247,17 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
   const [drag, setDrag] = useState<DragState | null>(null);
   const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
   const [hint, setHint] = useState<number | null>(null);
+  // the faint picture on the board fades in once it has loaded
+  const [boardArt, setBoardArt] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    loaded(puzzle.image).then(() => {
+      if (alive) setBoardArt(true);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [puzzle.image]);
   const [hintsUsed, setHintsUsed] = useState(initialSession?.hintsUsed ?? 0);
   // startTime is shifted back by the saved elapsed seconds so the timer
   // continues from where the player left off. It does NOT keep counting
@@ -553,12 +565,20 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
             style={{
               width: boardSize.w,
               height: boardSize.h,
-              backgroundImage: `linear-gradient(oklch(0.97 0.015 80 / 0.75), oklch(0.97 0.015 80 / 0.75)), url(${puzzle.image})`,
-              backgroundSize: `cover, ${boardSize.w}px ${boardSize.h}px`,
-              backgroundPosition: "center, top left",
               cursor: selectedId != null ? "crosshair" : "default",
             }}
           >
+            <div
+              aria-hidden
+              data-wait-src={puzzle.image}
+              className="pointer-events-none absolute inset-0 rounded-xl transition-opacity duration-700 ease-out"
+              style={{
+                opacity: boardArt ? 1 : 0,
+                backgroundImage: `linear-gradient(oklch(0.97 0.015 80 / 0.75), oklch(0.97 0.015 80 / 0.75)), url(${puzzle.image})`,
+                backgroundSize: `cover, ${boardSize.w}px ${boardSize.h}px`,
+                backgroundPosition: "center, top left",
+              }}
+            />
             {hint !== null && boardSize.w > 0 && (() => {
               const hp = pieces.find((p) => p.id === hint);
               if (!hp) return null;

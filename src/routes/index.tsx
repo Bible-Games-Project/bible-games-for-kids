@@ -138,7 +138,6 @@ const GAMES: GameDef[] = [
   { id: "domino", labelKey: "game.domino", icon: dominoIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
   { id: "parchis", labelKey: "game.parchis", icon: parchisIcon, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
   { id: "chess", labelKey: "game.chess", icon: chessIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
-  { id: "quiz", labelKey: "game.quiz", emoji: "❓", tint: "oklch(0.8 0.07 258 / 0.6)", playable: false },
 ];
 
 // Where the family's faces are in each home painting (fractions of its
@@ -183,6 +182,7 @@ function GameTile({
       className={`paint-box paint-tall paint-thin group relative flex aspect-[4/5] w-full flex-col p-[9px] transition active:scale-[0.97] disabled:active:scale-100 ${
         highlighted ? "paint-picked scale-[1.04]" : ""
       }`}
+      style={{ containerType: "inline-size" }}
     >
       <div
         className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl"
@@ -204,18 +204,23 @@ function GameTile({
           <div className="pointer-events-none absolute inset-0 bg-[oklch(0.975_0.025_85/0.3)]" />
         )}
       </div>
-      <span className="mt-1 line-clamp-2 hyphens-auto text-center text-[10px] font-semibold leading-tight tracking-tight text-foreground sm:text-xs">
+      <span
+        className="mt-1 line-clamp-2 hyphens-auto text-center font-semibold leading-tight tracking-tight text-foreground"
+        style={{ fontSize: "clamp(9px, 7.5cqw, 16px)" }}
+      >
         {label}
       </span>
     </button>
   );
 }
 
-// One row of game tiles, exactly three at a time, the middle one larger.
+// One row of game tiles, exactly three at a time, the middle one twice as
+// wide as the side ones (phones held upright are the main screen).
 // Each arrow (or a swipe) glides one game to the left or right, and the row
 // loops endlessly in both directions. Tapping a side game first slides it to
-// the middle (it grows as it arrives), then opens it. The dice under the
-// right arrow spins the row like a roulette and opens a random playable game.
+// the middle (it grows as it arrives), then opens it. The arrows sit above
+// the side cards, by the middle one, and the dice beside the right arrow
+// spins the row like a roulette and opens a random playable game.
 //
 // The loop works by rendering the games several times in a row and quietly
 // re-centering on the middle copy after each move; copies look identical,
@@ -224,6 +229,9 @@ function GameTile({
 // Dragging a game up or down (instead of sideways) picks it up, so it can be
 // dropped into a favorites slot.
 const SHELF_COPIES = 5;
+// Widths of a side card and of the middle one, with 0.5rem between cards.
+const SIDE_W = "calc((100% - 1rem) / 4)";
+const MIDDLE_W = "calc((100% - 1rem) / 2)";
 
 // Left-most visible game, kept while a game is open so the shelf comes back
 // where the player left it.
@@ -339,7 +347,7 @@ function GameShelf({
   const tiles = Array.from({ length: n * SHELF_COPIES }, (_, k) => k);
 
   const roundButton =
-    "grid h-10 w-10 place-items-center transition active:scale-90 disabled:opacity-35 disabled:active:scale-100";
+    "pointer-events-auto absolute bottom-[calc(100%+6px)] grid h-9 w-9 place-items-center transition active:scale-90 disabled:opacity-35 disabled:active:scale-100";
 
   const paint = (src: string, extra = "") => (
     <img
@@ -351,7 +359,7 @@ function GameShelf({
   );
 
   return (
-    <div className="w-full">
+    <div className="relative w-full">
       <div
         className="w-full overflow-hidden py-2"
         style={{ touchAction: "none" }}
@@ -397,9 +405,9 @@ function GameShelf({
         }}
       >
         <div
-          className="flex gap-3"
+          className="flex items-end gap-2"
           style={{
-            transform: `translateX(calc(${rtl ? pos : -pos} * (100% + 0.75rem) / 3))`,
+            transform: `translateX(calc(${rtl ? pos : -pos} * ((100% - 1rem) / 4 + 0.5rem)))`,
             transition: slideMs ? `transform ${slideMs}ms ease-out` : "none",
           }}
           onTransitionEnd={(e) => {
@@ -415,10 +423,11 @@ function GameShelf({
             return (
               <div
                 key={k}
-                className={`relative w-[calc((100%-1.5rem)/3)] shrink-0 transition-transform duration-300 ease-out motion-reduce:transition-none ${
-                  middle ? "z-10" : ""
-                }`}
-                style={{ transform: middle ? "scale(1.06)" : "scale(0.94)" }}
+                className={`relative shrink-0 ${middle ? "z-10" : ""}`}
+                style={{
+                  width: middle ? MIDDLE_W : SIDE_W,
+                  transition: slideMs ? `width ${slideMs}ms ease-out` : "none",
+                }}
                 data-game={i}
                 inert={!visible}
                 aria-hidden={!visible}
@@ -436,24 +445,20 @@ function GameShelf({
         </div>
       </div>
 
-      {/* The arrows sit under the side cards, the dice beside the right one. */}
-      <div className="grid grid-cols-3">
-        <div className="flex justify-center">
-          <button onClick={() => move(-1)} disabled={spinning} aria-label={prevLabel} className={roundButton}>
+      {/* The arrows stand on the side cards' inner top corners, the dice
+          beside the right arrow. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-2 flex items-end gap-2">
+        <div className="relative aspect-[4/5]" style={{ width: SIDE_W }}>
+          <button onClick={() => move(-1)} disabled={spinning} aria-label={prevLabel} className={`${roundButton} end-0`}>
             {paint(arrowArt, "-scale-x-100 rtl:scale-x-100")}
           </button>
         </div>
-        <div />
-        <div className="relative flex justify-center">
-          <button onClick={() => move(1)} disabled={spinning} aria-label={nextLabel} className={roundButton}>
+        <div style={{ width: MIDDLE_W }} />
+        <div className="relative aspect-[4/5]" style={{ width: SIDE_W }}>
+          <button onClick={() => move(1)} disabled={spinning} aria-label={nextLabel} className={`${roundButton} start-0`}>
             {paint(arrowArt, "rtl:-scale-x-100")}
           </button>
-          <button
-            onClick={spin}
-            disabled={spinning}
-            aria-label={randomLabel}
-            className="absolute left-[calc(50%+1.5rem)] top-0 grid h-10 w-10 place-items-center transition active:scale-90 rtl:left-auto rtl:right-[calc(50%+1.5rem)]"
-          >
+          <button onClick={spin} disabled={spinning} aria-label={randomLabel} className={`${roundButton} start-10 disabled:opacity-100`}>
             {paint(diceArt, spinning ? "animate-spin" : "")}
           </button>
         </div>

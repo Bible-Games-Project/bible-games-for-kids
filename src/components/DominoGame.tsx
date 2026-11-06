@@ -22,6 +22,7 @@ import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
 import { PlayerPawn, TOKEN_ORDER } from "@/components/Token";
+import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 
 import dominoBg from "@/assets/domino-bg.webp";
 
@@ -58,7 +59,7 @@ export function DominoGame({ onBack }: { onBack: () => void }) {
             <span className="shrink-0 whitespace-nowrap text-3xl" aria-hidden>
               {n === 1 ? "🧒🤖" : "🧒🧒"}
             </span>
-            <span className="text-lg font-semibold">
+            <span className="font-display text-xl">
               {n === 1 ? dt("dom.vsComputer") : mt("mem.playersMany").replace("{n}", "2")}
             </span>
           </button>
@@ -180,7 +181,9 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
   // A tile that fits at both ends, waiting for the player to pick a side.
   const [choosing, setChoosing] = useState<Tile | null>(null);
   const [shake, setShake] = useState<number | null>(null);
-  // Two players share the phone: hide the hand until the next one is ready.
+  // Drawing a tile: name the story first; a miss passes the turn.
+  const [quiz, setQuiz] = useState<Story | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   const [width, setWidth] = useState(340);
   const table = useRef<HTMLDivElement | null>(null);
   const timers = useRef<number[]>([]);
@@ -235,6 +238,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
       passes: 0,
     };
     setChoosing(null);
+    setNote(null);
     audio.playClick();
     if (!hands[s.turn].length) finish(next, s.turn, false);
     else nextTurn(next);
@@ -260,14 +264,36 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
     audio.play("domino-draw");
   };
 
+  // A missed story question: no tile, and the turn goes on (the pile is not
+  // empty, so this is not a pass that could block the game).
+  const missTurn = (text: string) => {
+    setNote(text);
+    nextTurn({ ...gRef.current });
+  };
+
+  const askDraw = () => {
+    if (!gRef.current.pile.length || quiz) return;
+    setNote(null);
+    setQuiz(randomStory());
+  };
+
+  const answer = (right: boolean) => {
+    setQuiz(null);
+    if (right) draw();
+    else missTurn(dt("dom.drawMissed"));
+  };
+
   function computerTurn() {
     const s = gRef.current;
     if (s.winner !== null) return;
     const choice = computerChoice(s.hands[s.turn], s.line);
     if (choice) commit(choice.tile, choice.side);
     else if (s.pile.length) {
-      draw();
-      later(computerTurn, 450);
+      // the computer knows most stories, not all of them
+      if (Math.random() < 0.75) {
+        draw();
+        later(computerTurn, 450);
+      } else missTurn(dt("dom.computerMissed"));
     } else pass();
   }
 
@@ -289,16 +315,18 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
     timers.current = [];
     set(newGame(seats));
     setChoosing(null);
+    setQuiz(null);
+    setNote(null);
   };
 
   // ---- The line on the table: from the middle out, turning at the edges ----
-  const S = Math.round(Math.min(42, Math.max(26, width / 11)));
+  const S = Math.round(Math.min(64, Math.max(30, width / 7.2)));
   // a tile's sides: two halves, the gap between them and the painted frame
   const tileW = 2 * S + 12;
   const tileH = S + 10;
   const laid = layoutLine(g.line, g.firstId, width, tileW, tileH);
 
-  const handSize = Math.round(Math.min(40, Math.max(28, width / 11)));
+  const handSize = Math.round(Math.min(48, Math.max(30, width / 9.5)));
   const first = g.line[0];
   const last = g.line[g.line.length - 1];
 
@@ -320,7 +348,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
           <h1 className="min-w-0 flex-1 truncate font-display text-xl text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_6px_oklch(0.3_0.06_50/0.6)]">
             {t("game.domino")}
           </h1>
-          <span className="shrink-0 rounded-full bg-card/90 px-3 py-1 text-sm font-semibold text-foreground/80 shadow-sm">
+          <span className="paint-box paint-long paint-flat paint-tiny shrink-0 px-3 py-1 text-sm font-semibold text-foreground/80">
             {dt("dom.pile", { n: g.pile.length })}
           </span>
         </header>
@@ -331,8 +359,8 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
             i === g.turn && human ? null : (
               <span
                 key={i}
-                className={`flex items-center gap-2 rounded-full bg-card/90 px-3 py-1 text-sm font-semibold shadow-sm ${
-                  i === g.turn ? "ring-2 ring-[var(--color-gold)]" : ""
+                className={`paint-box paint-long paint-flat paint-tiny flex items-center gap-2 px-3 py-1 text-sm font-semibold ${
+                  i === g.turn ? "paint-picked" : ""
                 }`}
               >
                 <PlayerPawn color={TOKEN_ORDER[i]} size={16} />
@@ -394,6 +422,14 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
             {g.winner === null && <PlayerPawn color={TOKEN_ORDER[g.turn]} size={16} />}
             {status}
           </p>
+          {note && (
+            <p
+              key={note + g.turn}
+              className="appear mt-1 text-center text-xs text-muted-foreground"
+            >
+              {note}
+            </p>
+          )}
 
           {choosing && first && last && (
             <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
@@ -401,7 +437,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
                 <button
                   key={side}
                   onClick={() => commit(choosing, side)}
-                  className="flex items-center gap-2 rounded-2xl bg-card px-3 py-2 text-sm font-semibold shadow-md ring-2 ring-[var(--color-gold)] transition active:scale-95"
+                  className="paint-box paint-long paint-flat paint-thin paint-picked flex items-center gap-2 px-4 py-2 text-sm font-semibold transition active:scale-95"
                 >
                   {dt("dom.nextTo")}
                   <Half value={side === "start" ? first.a : last.b} faces={g.faces} size={36} />
@@ -414,15 +450,16 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
             <div className="mt-2 flex justify-center">
               {g.pile.length ? (
                 <button
-                  onClick={draw}
-                  className="rounded-2xl bg-[var(--color-primary)] px-5 py-2.5 text-base font-semibold text-[var(--color-primary-foreground)] shadow-md transition active:scale-95"
+                  onClick={askDraw}
+                  disabled={quiz !== null}
+                  className="paint-box paint-long paint-flat paint-thin paint-picked px-6 py-2.5 font-display text-lg transition active:scale-95"
                 >
-                  🂠 {dt("dom.draw")}
+                  {dt("dom.draw")}
                 </button>
               ) : (
                 <button
                   onClick={pass}
-                  className="rounded-2xl bg-card px-5 py-2.5 text-base font-semibold shadow-md transition active:scale-95"
+                  className="paint-box paint-long paint-flat paint-thin px-6 py-2.5 font-display text-lg transition active:scale-95"
                 >
                   {dt("dom.pass")} ➜
                 </button>
@@ -457,6 +494,8 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
           </div>
         </div>
       </div>
+
+      {quiz && <StoryQuiz story={quiz} reward={dt("dom.drawReward")} onAnswer={answer} />}
 
       {g.winner !== null && (
         <ResultCard

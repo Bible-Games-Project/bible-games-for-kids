@@ -26,13 +26,13 @@ const en: Dict = {
 };
 
 const es: Dict = {
-  "mem.chooseLevel": "Elige un Nivel",
+  "mem.chooseLevel": "Elige un nivel",
   "mem.pairsCount": "{n} parejas",
   "mem.instruction": "Da la vuelta a dos cartas para encontrar las pinturas iguales",
   "mem.moves": "Movimientos",
   "mem.time": "Tiempo",
   "mem.complete": "¡Encontraste todas las parejas!",
-  "mem.replay": "Jugar de Nuevo",
+  "mem.replay": "Jugar de nuevo",
   "mem.levels": "Niveles",
   "mem.hidden": "Carta oculta",
   "mem.scrollDown": "Ver más cartas",
@@ -70,7 +70,7 @@ const de: Dict = {
 };
 
 const fr: Dict = {
-  "mem.chooseLevel": "Choisis un Niveau",
+  "mem.chooseLevel": "Choisis un niveau",
   "mem.pairsCount": "{n} paires",
   "mem.instruction": "Retourne deux cartes pour trouver les images identiques",
   "mem.moves": "Coups",
@@ -92,13 +92,13 @@ const fr: Dict = {
 };
 
 const it: Dict = {
-  "mem.chooseLevel": "Scegli un Livello",
+  "mem.chooseLevel": "Scegli un livello",
   "mem.pairsCount": "{n} coppie",
   "mem.instruction": "Gira due carte per trovare i dipinti uguali",
   "mem.moves": "Mosse",
   "mem.time": "Tempo",
   "mem.complete": "Hai trovato tutte le coppie!",
-  "mem.replay": "Gioca Ancora",
+  "mem.replay": "Gioca ancora",
   "mem.levels": "Livelli",
   "mem.hidden": "Carta coperta",
   "mem.scrollDown": "Mostra altre carte",
@@ -114,13 +114,13 @@ const it: Dict = {
 };
 
 const pt: Dict = {
-  "mem.chooseLevel": "Escolha um Nível",
+  "mem.chooseLevel": "Escolha um nível",
   "mem.pairsCount": "{n} pares",
   "mem.instruction": "Vire duas cartas para encontrar as pinturas iguais",
   "mem.moves": "Jogadas",
   "mem.time": "Tempo",
   "mem.complete": "Você encontrou todos os pares!",
-  "mem.replay": "Jogar de Novo",
+  "mem.replay": "Jogar de novo",
   "mem.levels": "Níveis",
   "mem.hidden": "Carta virada",
   "mem.scrollDown": "Ver mais cartas",
@@ -136,13 +136,13 @@ const pt: Dict = {
 };
 
 const pl: Dict = {
-  "mem.chooseLevel": "Wybierz Poziom",
+  "mem.chooseLevel": "Wybierz poziom",
   "mem.pairsCount": "Pary: {n}",
   "mem.instruction": "Odwróć dwie karty i znajdź takie same obrazki",
   "mem.moves": "Ruchy",
   "mem.time": "Czas",
   "mem.complete": "Wszystkie pary znalezione!",
-  "mem.replay": "Zagraj Ponownie",
+  "mem.replay": "Zagraj ponownie",
   "mem.levels": "Poziomy",
   "mem.hidden": "Zakryta karta",
   "mem.scrollDown": "Pokaż więcej kart",
@@ -158,7 +158,7 @@ const pl: Dict = {
 };
 
 const ru: Dict = {
-  "mem.chooseLevel": "Выбери Уровень",
+  "mem.chooseLevel": "Выбери уровень",
   "mem.pairsCount": "Пары: {n}",
   "mem.instruction": "Переверни две карточки и найди одинаковые картинки",
   "mem.moves": "Ходы",
@@ -246,13 +246,13 @@ const ar: Dict = {
 };
 
 const tr: Dict = {
-  "mem.chooseLevel": "Bir Seviye Seç",
+  "mem.chooseLevel": "Bir seviye seç",
   "mem.pairsCount": "{n} çift",
   "mem.instruction": "Aynı resimleri bulmak için iki kart çevir",
   "mem.moves": "Hamle",
   "mem.time": "Süre",
   "mem.complete": "Tüm çiftleri buldun!",
-  "mem.replay": "Tekrar Oyna",
+  "mem.replay": "Tekrar oyna",
   "mem.levels": "Seviyeler",
   "mem.hidden": "Kapalı kart",
   "mem.scrollDown": "Daha fazla kart göster",

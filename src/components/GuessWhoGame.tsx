@@ -28,14 +28,12 @@ import {
   Stars,
 } from "@/components/GameShell";
 
-import { PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
+import { PlayerPawn, TOKEN_ORDER } from "@/components/Token";
 
 import guessBg from "@/assets/guesswho-bg.webp";
 import hintArt from "@/assets/ui/hint.webp";
 
 const BEST_KEY = "guesswho-best-v1";
-// Each player's rack takes the colour of their token.
-const PLAYER_COLORS = TOKEN_ORDER.map((c) => TOKEN_HEX[c]);
 
 export function GuessWhoGame({ onBack }: { onBack: () => void }) {
   useSoundTheme("guesswho");
@@ -77,7 +75,7 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
       <h2 className="mt-5 text-center font-display text-2xl text-[oklch(0.99_0.01_85)] [text-shadow:0_2px_8px_oklch(0.25_0.05_50/0.85)]">
         {mt("mem.howManyPlayers")}
       </h2>
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="mx-auto mt-3 grid w-fit grid-cols-2 gap-3">
         {[1, 2, 3, 4].map((n) => (
           <button
             key={n}
@@ -85,14 +83,16 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
               window.scrollTo(0, 0);
               setGame({ level, players: n });
             }}
-            className="paint-box paint-square flex flex-col items-center justify-center gap-2 p-4 text-base font-semibold transition active:scale-[0.97]"
+            aria-label={
+              n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))
+            }
+            className="paint-box paint-square paint-thin grid h-24 w-24 place-items-center p-3 transition active:scale-[0.95]"
           >
-            <span className="flex gap-1">
+            <span className="flex max-w-[3.5rem] flex-wrap justify-center gap-1">
               {Array.from({ length: n }, (_, i) => (
-                <PlayerDot key={i} index={i} size={22} />
+                <PlayerDot key={i} index={i} size={18} />
               ))}
             </span>
-            {n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))}
           </button>
         ))}
       </div>
@@ -103,9 +103,9 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
   );
 }
 
-// A player's standing pawn (the Parchís pawns), numbered.
+// A player's standing pawn (the Parchís pawns).
 function PlayerDot({ index, size = 20 }: { index: number; size?: number }) {
-  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
+  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} />;
 }
 
 // What one player has found out so far about their hidden character.
@@ -286,10 +286,9 @@ function GuessBoard({
             {boards.map((b, i) => (
               <div
                 key={i}
-                className={`flex items-center gap-2 rounded-2xl bg-card/90 px-3 py-1.5 text-sm font-semibold shadow-sm transition ${
-                  i === turn && winner === null ? "scale-[1.03] ring-4" : "opacity-70"
+                className={`paint-box paint-long paint-flat paint-thin flex items-center gap-2 px-3 py-1.5 text-sm font-semibold transition ${
+                  i === turn && winner === null ? "paint-picked scale-[1.03]" : "opacity-70"
                 }`}
-                style={{ ["--tw-ring-color" as string]: PLAYER_COLORS[i] }}
               >
                 <PlayerDot index={i} />
                 <span className="min-w-0 flex-1 leading-tight">
