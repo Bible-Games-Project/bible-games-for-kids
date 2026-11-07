@@ -37,7 +37,7 @@ import { preloadGameArt } from "@/lib/preload-ui";
 import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
 import { isFreePuzzle } from "@/lib/freemium";
-import homeBg from "@/assets/home-bedtime.webp";
+import homeBg from "@/assets/home-family.webp";
 import titleImg from "@/assets/title-gospikids.webp";
 import puzzlesBg from "@/assets/puzzles-bedtime.webp";
 import memoryBg from "@/assets/memory-bedtime.webp";
@@ -151,10 +151,19 @@ const TITLE_W = 280;
 // the middle card (half the row less the gaps) and its 4:5 shape.
 const SHELF_H = Math.ceil(((UI_W - 16) / 2) * 1.25);
 const CARD_TOP = 8; // the shelf's top padding, above the middle card
-// The painting: cover on phones; on wider screens it keeps its height (a
-// little over the screen's, standing on the bottom edge) and the sides are
-// filled with a blurred copy, so it is never stretched sideways.
-const HOME_BG_SIZE = "auto max(100%, min(112%, 177.6vw))";
+// The painting (858 x 1834) always fills the screen's width, and the line of
+// the girl's mouth (59.5% down it) stays at the middle of the screen's
+// height: wider screens show it closer, cropped above and below that line.
+const HOME_BG = { ratio: 858 / 1834, mouth: 0.595 };
+
+function homeBackground() {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const { ratio, mouth } = HOME_BG;
+  // tall enough to cover the screen above and below the mouth line
+  const h = Math.max(W / ratio, H / (2 * Math.min(mouth, 1 - mouth)));
+  return { size: `auto ${h}px`, position: `center ${H / 2 - mouth * h}px` };
+}
 
 function GameTile({
   game,
@@ -612,6 +621,15 @@ function Home() {
   useEffect(() => {
     if (screen === "home") preloadGameArt();
   }, [screen]);
+  const [bg, setBg] = useState<ReturnType<typeof homeBackground> | null>(null);
+  useEffect(() => {
+    const place = () => setBg(homeBackground());
+    place();
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("resize", place);
+    };
+  }, []);
   // The games' pack and the title grow with the screen's width, until the
   // big middle card reaches the middle of the screen's height.
   const pack = useRef<HTMLDivElement>(null);
@@ -789,7 +807,12 @@ function Home() {
         <ScreenFade />
         {/* The family scene in the middle of the painting stays at full color
             behind the frosted tiles. */}
-        <BedtimeBackdrop image={homeBg} position="center bottom" size={HOME_BG_SIZE} fadeEnd={0} />
+        <BedtimeBackdrop
+          image={homeBg}
+          position={bg?.position ?? "center"}
+          size={bg?.size}
+          fadeEnd={0}
+        />
         <div className="relative z-10 min-h-[100dvh] w-full">
           {settingsButton}
           <div className="mx-auto flex min-h-[100dvh] w-full flex-col items-center overflow-x-clip px-6 pt-16 pb-6 text-center">
