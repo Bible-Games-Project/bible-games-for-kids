@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SettingsProvider } from "../lib/i18n";
 import { AudioProvider } from "../lib/audio";
+import { RotateHint } from "../components/RotateHint";
 
 function NotFoundComponent() {
   return (
@@ -130,6 +131,7 @@ function RootComponent() {
         <AudioProvider>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
+          <RotateHint />
         </AudioProvider>
       </SettingsProvider>
     </QueryClientProvider>

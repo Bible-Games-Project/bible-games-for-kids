@@ -6,11 +6,15 @@ import { useImageReady } from "@/lib/use-image-ready";
 export function BedtimeBackdrop({
   image,
   position = "center",
+  size,
   fadeEnd = 40,
   blur = false,
 }: {
   image: string;
   position?: string;
+  // The painting's size, when not "cover"; any room it leaves at the sides
+  // is filled with a blurred copy of it.
+  size?: string;
   // Percentage of the screen height where the top fade disappears; 0 turns
   // the fade off.
   fadeEnd?: number;
@@ -30,13 +34,25 @@ export function BedtimeBackdrop({
       data-wait-src={image}
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[oklch(0.95_0.03_70)]"
     >
+      {size && (
+        <div
+          className="absolute inset-0 scale-110 blur-2xl transition-opacity duration-200"
+          style={{
+            backgroundImage: `url(${image})`,
+            backgroundSize: "cover",
+            backgroundPosition: position,
+            opacity: ready ? 0.9 : 0,
+          }}
+        />
+      )}
       {/* Fades in once loaded rather than drawing in strips. */}
       <div
         className={`absolute inset-0 transition-opacity duration-200 ${blur ? "scale-110 blur-md" : ""}`}
         style={{
           backgroundImage: `${fade}url(${image})`,
-          backgroundSize: "cover",
+          backgroundSize: size ? (fade ? `100% 100%, ${size}` : size) : "cover",
           backgroundPosition: position,
+          backgroundRepeat: "no-repeat",
           opacity: ready ? 1 : 0,
         }}
       />

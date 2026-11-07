@@ -57,7 +57,6 @@ import parchisIcon from "@/assets/icon-parchis.webp";
 import chessIcon from "@/assets/icon-chess.webp";
 import dominoBg from "@/assets/domino-bg.webp";
 import parchisBg from "@/assets/parchis-bg.webp";
-import homeWideBg from "@/assets/home-bedtime-wide.webp";
 import favoritesBar from "@/assets/ui/favorites-bar.webp";
 import diceArt from "@/assets/ui/dice.webp";
 import arrowArt from "@/assets/ui/arrow.webp";
@@ -140,41 +139,21 @@ const GAMES: GameDef[] = [
   { id: "chess", labelKey: "game.chess", icon: chessIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
 ];
 
-// Where the family's faces are in each home painting (fractions of its
-// height). The title stays above them and the games below them.
-const FACES = {
-  tall: { w: 941, h: 1671, top: 0.29, bottom: 0.565 },
-  wide: { w: 1672, h: 941, top: 0.26, bottom: 0.63 },
-};
-const HOME_TOP = 64; // the title's top padding
 const HOME_BOTTOM = 24; // the bottom padding under the favourites
 const HOME_SIDE = 24; // the side padding
-const TITLE_RATIO = 1000 / 346;
 // The home controls are laid out at a phone's width and then scaled as one
-// piece (cards, arrows, dice, slots and labels together) to fit the screen.
+// pack (cards, arrows, dice, slots and labels together), and so is the
+// title, at the same scale.
 const UI_W = 342;
-const UI_GAP = 28; // between the games and the favourites when side by side
-
-// How the painting is placed (cover) and where the faces land. When the
-// painting is taller than the screen it is moved up as far as the title
-// allows, which leaves the most room for the games under the faces.
-function facesOnScreen(wide: boolean) {
-  const f = wide ? FACES.wide : FACES.tall;
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-  const scale = Math.max(W / f.w, H / f.h);
-  const shown = f.h * scale;
-  const spare = H - shown; // ≤ 0: the part of the painting cut off
-  const titleH = Math.min(0.82 * (W - 2 * HOME_SIDE), 420) / TITLE_RATIO;
-  const wanted = HOME_TOP + titleH + 8 - f.top * shown;
-  const offset = Math.min(0, Math.max(spare, wanted));
-  return {
-    top: offset + f.top * shown,
-    bottom: offset + f.bottom * shown,
-    screen: H,
-    bgY: spare < 0 ? (offset / spare) * 100 : 50,
-  };
-}
+const TITLE_W = 280;
+// The shelf's height, fixed so nothing under it moves while the cards slide:
+// the middle card (half the row less the gaps) and its 4:5 shape.
+const SHELF_H = Math.ceil(((UI_W - 16) / 2) * 1.25);
+const CARD_TOP = 8; // the shelf's top padding, above the middle card
+// The painting: cover on phones; on wider screens it keeps its height (a
+// little over the screen's, standing on the bottom edge) and the sides are
+// filled with a blurred copy, so it is never stretched sideways.
+const HOME_BG_SIZE = "auto max(100%, min(112%, 177.6vw))";
 
 function GameTile({
   game,
@@ -423,6 +402,7 @@ function GameShelf({
         <div
           className="flex items-end gap-2"
           style={{
+            height: SHELF_H,
             transform: `translateX(calc(${rtl ? pos : -pos} * ((100% - 1rem) / 4 + 0.5rem)))`,
             transition: slideMs ? `transform ${slideMs}ms ease-out` : "none",
           }}
@@ -627,60 +607,28 @@ function Home() {
   const [pendingTutorial, setPendingTutorial] = useState<Difficulty["id"] | null>(null);
   const [showPremiumLock, setShowPremiumLock] = useState(false);
   const [titleIntro, setTitleIntro] = useState(() => !titleIntroPlayed);
-  // Wide screens (tablets on their side, computers) get the landscape
-  // version of the bedtime painting.
-  const [wide, setWide] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(min-aspect-ratio: 5/4)");
-    const update = () => setWide(mq.matches);
-    update();
-    mq.addEventListener?.("change", update);
-    return () => {
-      mq.removeEventListener?.("change", update);
-    };
-  }, []);
-  // The title and the games stay clear of the family's faces in the
-  // painting: the title is kept above them, and the shelf and favourites
-  // shrink, if they have to, to fit below them.
-  const [faces, setFaces] = useState<ReturnType<typeof facesOnScreen> | null>(null);
-  useEffect(() => {
-    const update = () => setFaces(facesOnScreen(wide));
-    update();
-    window.addEventListener("resize", update);
-    return () => {
-      window.removeEventListener("resize", update);
-    };
-  }, [wide]);
   // While the home screen is open, fetch the games' pictures in the background.
   useEffect(() => {
     if (screen === "home") preloadGameArt();
   }, [screen]);
-  // The games and the favourites, one above the other or side by side,
-  // whichever lets them be bigger, scaled to the room under the faces.
-  const shelfBox = useRef<HTMLDivElement>(null);
-  const favBox = useRef<HTMLDivElement>(null);
-  const [ui, setUi] = useState({ scale: 1, row: false });
+  // The games' pack and the title grow with the screen's width, until the
+  // big middle card reaches the middle of the screen's height.
+  const pack = useRef<HTMLDivElement>(null);
+  const [uiScale, setUiScale] = useState(1);
   useEffect(() => {
-    const shelf = shelfBox.current;
-    const fav = favBox.current;
-    if (!shelf || !fav || !faces) return;
+    const el = pack.current;
+    if (!el) return;
     const fit = () => {
-      const room = faces.screen - HOME_BOTTOM - (faces.bottom + 8);
-      const across = window.innerWidth - 2 * HOME_SIDE;
-      const [a, b] = [shelf.offsetHeight, fav.offsetHeight];
-      const stacked = Math.min(across / UI_W, room / (a + b));
-      const side = Math.min(across / (2 * UI_W + UI_GAP), room / Math.max(a, b));
-      const row = side > stacked;
-      setUi({ scale: Math.max(0.5, Math.min(4, row ? side : stacked)), row });
+      const across = (window.innerWidth - 2 * HOME_SIDE) / UI_W;
+      const upTo = (window.innerHeight / 2 - HOME_BOTTOM) / (el.offsetHeight - CARD_TOP);
+      setUiScale(Math.max(0.5, Math.min(across, upTo)));
     };
     fit();
-    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
-    ro?.observe(shelf);
-    ro?.observe(fav);
+    window.addEventListener("resize", fit);
     return () => {
-      ro?.disconnect();
+      window.removeEventListener("resize", fit);
     };
-  }, [faces, screen]);
+  }, [screen]);
   const audio = useAudio();
   const [favorites, setFavorites] = useState<Favorites>(() => Array(FAV_SLOTS).fill(null));
   // A game being dragged to (or between) the favorites slots.
@@ -823,7 +771,7 @@ function Home() {
       aria-label={t("settings.title")}
       className="absolute right-4 top-4 z-10 grid h-12 w-12 place-items-center transition active:scale-90"
       // grows with the games on big screens
-      style={ui.scale > 1 ? { width: 48 * Math.min(ui.scale, 2), height: 48 * Math.min(ui.scale, 2) } : undefined}
+      style={uiScale > 1 ? { width: 48 * Math.min(uiScale, 2), height: 48 * Math.min(uiScale, 2) } : undefined}
     >
       <img
         src={gearArt}
@@ -840,23 +788,15 @@ function Home() {
         <ScreenFade />
         {/* The family scene in the middle of the painting stays at full color
             behind the frosted tiles. */}
-        <BedtimeBackdrop
-          image={wide ? homeWideBg : homeBg}
-          position={`center ${faces?.bgY ?? 40}%`}
-          fadeEnd={0}
-        />
+        <BedtimeBackdrop image={homeBg} position="center bottom" size={HOME_BG_SIZE} fadeEnd={0} />
         <div className="relative z-10 min-h-[100dvh] w-full">
           {settingsButton}
           <div className="mx-auto flex min-h-[100dvh] w-full flex-col items-center overflow-x-clip px-6 pt-16 pb-6 text-center">
             <h1
-              className={`w-[82%] ${
+              className={`shrink-0 ${
                 titleIntro ? "animate-in fade-in slide-in-from-top-10 duration-[1400ms] ease-out motion-reduce:animate-none" : ""
               }`}
-              style={
-                faces
-                  ? { maxWidth: `min(28rem, ${Math.max(150, (faces.top - HOME_TOP - 8) * TITLE_RATIO)}px)` }
-                  : undefined
-              }
+              style={{ width: TITLE_W * uiScale }}
             >
               <img
                 src={titleImg}
@@ -869,14 +809,14 @@ function Home() {
             <div className="min-h-8 flex-1" />
 
             <div
-              className={`flex shrink-0 origin-bottom ${ui.row ? "flex-row items-end" : "flex-col"}`}
+              ref={pack}
+              className="flex shrink-0 origin-bottom flex-col"
               style={{
-                width: ui.row ? 2 * UI_W + UI_GAP : UI_W,
-                gap: ui.row ? UI_GAP : 0,
-                transform: ui.scale !== 1 ? `scale(${ui.scale})` : undefined,
+                width: UI_W,
+                transform: uiScale !== 1 ? `scale(${uiScale})` : undefined,
               }}
             >
-              <div ref={shelfBox} style={{ width: UI_W }}>
+              <div>
                 <GameShelf
                   games={GAMES}
                   labelFor={(g) => t(g.labelKey)}
@@ -889,7 +829,7 @@ function Home() {
                 />
               </div>
 
-              <div ref={favBox} style={{ width: UI_W }}>
+              <div>
                 <FavoriteSlots
                   favorites={favorites}
                   dragging={drag?.from ?? null}

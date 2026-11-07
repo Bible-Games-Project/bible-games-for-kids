@@ -224,6 +224,26 @@
   .appear, .appear-soft { animation: none; }
 }
 
+/* Phones and tablets held sideways: ask to turn them upright. */
+.rotate-hint {
+  display: none;
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (hover: none) {
+  .rotate-hint {
+    display: grid;
+  }
+}
+
+@keyframes rotate-hint {
+  0%, 20% { transform: rotate(-90deg); }
+  55%, 100% { transform: rotate(0deg); }
+}
+
+.rotate-hint-phone {
+  animation: rotate-hint 2.2s ease-in-out infinite;
+}
+
 /* Chess: some characters come alive. Each effect is placed in its figure's
    box (--x, --y in % of the box) and sized in % of the figure's width (cqw):
    Elijah's chariot horse burns, the smoke of the sacrifice rises from the

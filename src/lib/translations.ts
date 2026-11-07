@@ -136,6 +136,7 @@ const en: Dict = {
   "more.game.bible-unlocked.desc": "Explore the Bible's greatest stories and choose your own path.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "Live the life of Jesus in a unique 3D experience unlike any other.",
+  "rotate.title": "Turn your device upright to play",
 };
 
 const es: Dict = {
@@ -240,6 +241,7 @@ const es: Dict = {
   "more.game.bible-unlocked.desc": "Explora las grandes historias de la Biblia y elige tu propio camino.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "Vive la vida de Jesús en una experiencia 3D única.",
+  "rotate.title": "Gira el dispositivo en vertical para jugar",
 };
 
 const de: Dict = {
@@ -344,6 +346,7 @@ const de: Dict = {
   "more.game.bible-unlocked.desc": "Erkunde die größten Bibelgeschichten und wähle deinen eigenen Weg.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "Erlebe das Leben Jesu in einer einzigartigen 3D-Erfahrung.",
+  "rotate.title": "Dreh dein Gerät hochkant, um zu spielen",
 };
 
 const fr: Dict = {
@@ -448,6 +451,7 @@ const fr: Dict = {
   "more.game.bible-unlocked.desc": "Explore les plus grandes histoires de la Bible et choisis ton chemin.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "Vis la vie de Jésus dans une expérience 3D unique.",
+  "rotate.title": "Tourne ton appareil à la verticale pour jouer",
 };
 
 const it: Dict = {
@@ -552,6 +556,7 @@ const it: Dict = {
   "more.game.bible-unlocked.desc": "Esplora le più grandi storie della Bibbia e scegli il tuo cammino.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "Vivi la vita di Gesù in un'esperienza 3D unica.",
+  "rotate.title": "Gira il dispositivo in verticale per giocare",
 };
 
 const pt: Dict = {
@@ -656,6 +661,7 @@ const pt: Dict = {
   "more.game.bible-unlocked.desc": "Explore as maiores histórias da Bíblia e escolha seu caminho.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "Viva a vida de Jesus em uma experiência 3D única.",
+  "rotate.title": "Gire o aparelho na vertical para jogar",
 };
 
 const pl: Dict = {
@@ -760,6 +766,7 @@ const pl: Dict = {
   "more.game.bible-unlocked.desc": "Poznawaj największe biblijne historie i wybieraj własną ścieżkę.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "Przeżyj życie Jezusa w wyjątkowym doświadczeniu 3D.",
+  "rotate.title": "Obróć urządzenie pionowo, żeby grać",
 };
 
 const ru: Dict = {
@@ -864,6 +871,7 @@ const ru: Dict = {
   "more.game.bible-unlocked.desc": "Исследуйте величайшие библейские истории и выбирайте свой путь.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "Проживите жизнь Иисуса в уникальном 3D-опыте.",
+  "rotate.title": "Поверни устройство вертикально, чтобы играть",
 };
 
 const ja: Dict = {
@@ -968,6 +976,7 @@ const ja: Dict = {
   "more.game.bible-unlocked.desc": "聖書の偉大な物語を探検し、自分だけの道を選ぼう。",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "イエスの生涯を唯一無二の3D体験で生きる。",
+  "rotate.title": "あそぶには たてむきに してね",
 };
 
 const ko: Dict = {
@@ -1072,6 +1081,7 @@ const ko: Dict = {
   "more.game.bible-unlocked.desc": "성경의 위대한 이야기를 탐험하고 자신만의 길을 선택하세요.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "독특한 3D 경험 속에서 예수님의 삶을 살아보세요.",
+  "rotate.title": "기기를 세로로 돌려서 놀아요",
 };
 
 const ar: Dict = {
@@ -1176,6 +1186,7 @@ const ar: Dict = {
   "more.game.bible-unlocked.desc": "استكشف أعظم قصص الكتاب المقدس واختر طريقك.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "عش حياة يسوع في تجربة ثلاثية الأبعاد فريدة من نوعها.",
+  "rotate.title": "أدر جهازك عموديًا لتلعب",
 };
 
 const tr: Dict = {
@@ -1280,6 +1291,7 @@ const tr: Dict = {
   "more.game.bible-unlocked.desc": "Kutsal Kitap'ın en büyük hikâyelerini keşfet ve kendi yolunu seç.",
   "more.game.true-christ.name": "True Christ",
   "more.game.true-christ.desc": "İsa'nın hayatını benzersiz bir 3D deneyimde yaşa.",
+  "rotate.title": "Oynamak için cihazını dik çevir",
 };
 
 export const STRINGS: Record<Lang, Dict> = {
