@@ -38,6 +38,7 @@ import { STORIES } from "@/lib/stories";
 import { useImageReady } from "@/lib/use-image-ready";
 
 import orderMap from "@/assets/order-map.webp";
+import { CheckIcon, RestartIcon } from "@/components/Icons";
 
 const BEST_KEY = "order-best-v1";
 
@@ -108,7 +109,7 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
             onClick={() => setAsking("reset")}
             className="mx-auto mt-3 flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-semibold text-foreground/80 shadow-sm transition active:scale-95"
           >
-            <span aria-hidden>↺</span>
+            <RestartIcon />
             {ot("order.resetMap")}
           </button>
         )}
@@ -435,7 +436,7 @@ function OrderBoard({
             {t("game.order")} · {t(`diff.${level}`)}
           </h1>
           <span className="shrink-0 rounded-full bg-card/90 px-3 py-1 text-sm font-semibold tabular-nums text-foreground/80 shadow-sm">
-            ✓ {right}
+            <CheckIcon /> {right}
           </span>
         </header>
 

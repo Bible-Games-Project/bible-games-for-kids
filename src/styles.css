@@ -329,12 +329,16 @@
 .fx-note {
   font-size: 40cqw;
   line-height: 1;
-  font-weight: 700;
   color: #ffd75a;
-  -webkit-text-stroke: 1.2cqw #6b3d0a;
-  paint-order: stroke fill;
-  text-shadow: 0 0 3cqw rgb(255 220 120 / 0.8);
+  filter: drop-shadow(0 0 1.5cqw rgb(255 220 120 / 0.8));
   animation: fx-note 3s ease-out var(--d, 0s) infinite both;
+}
+
+.fx-note svg {
+  display: block;
+  stroke: #6b3d0a;
+  stroke-width: 1.4px;
+  paint-order: stroke fill;
 }
 
 @keyframes fx-note {

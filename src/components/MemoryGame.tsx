@@ -21,6 +21,7 @@ import { PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
 import { useBackButton } from "@/lib/back-button";
 import cardBack from "@/assets/ui/card-back.webp";
 import arrowArt from "@/assets/ui/arrow.webp";
+import { CheckIcon, StarRow } from "@/components/Icons";
 
 // Up to four players share the board, each with the colour of their round
 // token for the turn marker, the scoreboard and the pairs they find.
@@ -167,10 +168,7 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                   <p className="text-sm font-semibold text-muted-foreground">
                     {t(`diff.${lv.id}.age`)} ({mt("mem.pairsCount").replace("{n}", String(lv.pairs))})
                   </p>
-                  <span className="mt-1.5 block text-base tracking-wider" aria-label={`${best} of 3 stars`}>
-                    <span className="text-[var(--color-gold)]">{"★".repeat(best)}</span>
-                    <span className="text-foreground/20">{"★".repeat(3 - best)}</span>
-                  </span>
+                  <StarRow value={best} className="mt-1.5 text-base" />
                 </div>
               </button>
             );
@@ -477,7 +475,7 @@ function MemoryBoard({
           <p className="flex min-h-[1.5rem] flex-wrap items-center justify-center gap-x-3 pb-3 text-center text-sm text-muted-foreground">
             {lastFound && (
               <span key={lastFound} className="inline-block animate-in fade-in font-semibold text-[oklch(0.45_0.12_70)]">
-                ✓ {localizeSceneTitle(lastFound, lang)}
+                <CheckIcon /> {localizeSceneTitle(lastFound, lang)}
               </span>
             )}
             {multi && !done ? (
@@ -575,10 +573,7 @@ function MemoryBoard({
               </>
             ) : (
               <>
-                <div className="text-5xl">
-                  {"⭐".repeat(stars)}
-                  {"☆".repeat(3 - stars)}
-                </div>
+                <StarRow value={stars} className="text-5xl" empty="text-[var(--color-gold)]/30" />
                 <h2 className="mt-3 font-display text-2xl text-foreground">{mt("mem.complete")}</h2>
                 <p className="mt-2 text-base text-muted-foreground tabular-nums">
                   {mt("mem.moves")}: {moves} · {mt("mem.time")}: {formatTime(elapsed)}

@@ -1,4 +1,5 @@
 import { useSettings } from "@/lib/i18n";
+import { ArrowIcon, CheckIcon, StarIcon } from "@/components/Icons";
 
 export function PremiumScreen({ onBack }: { onBack: () => void }) {
   const { t, premium, setPremium } = useSettings();
@@ -10,7 +11,7 @@ export function PremiumScreen({ onBack }: { onBack: () => void }) {
           className="grid h-10 w-10 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
           aria-label={t("premium.back")}
         >
-          ←
+          <ArrowIcon back />
         </button>
         <h1 className="font-display text-2xl sm:text-3xl">{t("premium.title")}</h1>
       </header>
@@ -25,7 +26,7 @@ export function PremiumScreen({ onBack }: { onBack: () => void }) {
           <ul className="mt-5 space-y-2 text-left text-sm">
             {["premium.feature1", "premium.feature2", "premium.feature3"].map((k) => (
               <li key={k} className="flex items-start gap-2 rounded-xl bg-secondary/50 px-3 py-2">
-                <span className="mt-0.5 text-[var(--color-gold)]">★</span>
+                <StarIcon className="mt-0.5 text-[var(--color-gold)]" />
                 <span className="text-foreground/85">{t(k)}</span>
               </li>
             ))}
@@ -33,7 +34,7 @@ export function PremiumScreen({ onBack }: { onBack: () => void }) {
 
           {premium ? (
             <div className="mt-6 rounded-2xl bg-[var(--color-sage-soft)] px-4 py-3 text-sm font-semibold text-[oklch(0.35_0.05_150)]">
-              ✓ {t("premium.unlocked")}
+              <CheckIcon /> {t("premium.unlocked")}
             </div>
           ) : (
             <button

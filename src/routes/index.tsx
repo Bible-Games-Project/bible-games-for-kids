@@ -61,6 +61,7 @@ import favoritesBar from "@/assets/ui/favorites-bar.webp";
 import diceArt from "@/assets/ui/dice.webp";
 import arrowArt from "@/assets/ui/arrow.webp";
 import gearArt from "@/assets/ui/gear.webp";
+import { StarRow } from "@/components/Icons";
 
 
 export const Route = createFileRoute("/")({
@@ -1099,10 +1100,7 @@ function DifficultyList({
                     </span>
                   )}
                   {!premiumLocked && (
-                    <span className="text-base tracking-wider" aria-label={`${stars} of 3 stars`}>
-                      <span className="text-[var(--color-gold)]">{"★".repeat(stars)}</span>
-                      <span className="text-foreground/20">{"★".repeat(3 - stars)}</span>
-                    </span>
+                    <StarRow value={stars} className="text-base" />
                   )}
                 </span>
               </div>

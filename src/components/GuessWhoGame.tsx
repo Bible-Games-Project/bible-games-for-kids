@@ -33,6 +33,7 @@ import { PlayerPawn, TOKEN_ORDER } from "@/components/Token";
 
 import guessBg from "@/assets/guesswho-bg.webp";
 import hintArt from "@/assets/ui/hint.webp";
+import { CheckIcon, CrossIcon } from "@/components/Icons";
 
 const BEST_KEY = "guesswho-best-v1";
 
@@ -204,7 +205,7 @@ function GuessBoard({
     const cost = board.cost + 1;
     update(turn, (b) => ({ ...b, asked: new Map(b.asked).set(trait, answer), cost }));
     setMessage({
-      text: `${gt(`gw.q.${trait}`)} → ${answer ? gt("gw.yes") : gt("gw.no")}`,
+      text: `${gt(`gw.q.${trait}`)} ${answer ? gt("gw.yes") : gt("gw.no")}`,
       tone: answer ? "yes" : "no",
     });
     if (answer) audio.playCorrect();
@@ -375,7 +376,7 @@ function GuessBoard({
                       : "bg-[oklch(0.92_0.04_25)] text-[oklch(0.45_0.12_25)]"
                   }`}
                 >
-                  {emoji} {board.asked.get(trait) ? "✓" : "✗"}
+                  {emoji} {board.asked.get(trait) ? <CheckIcon /> : <CrossIcon />}
                 </span>
               ))}
             </div>
@@ -421,7 +422,7 @@ function GuessBoard({
                   aria-label={gt("gw.close")}
                   className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground/70 shadow-sm"
                 >
-                  ✕
+                  <CrossIcon />
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -444,7 +445,7 @@ function GuessBoard({
                         {emoji}
                       </span>
                       <span className="min-w-0 flex-1 leading-tight">{gt(`gw.q.${trait}`)}</span>
-                      {answer !== undefined && <span aria-hidden>{answer ? "✓" : "✗"}</span>}
+                      {answer !== undefined && (answer ? <CheckIcon /> : <CrossIcon />)}
                     </button>
                   );
                 })}

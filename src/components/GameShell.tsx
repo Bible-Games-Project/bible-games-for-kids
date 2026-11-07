@@ -9,6 +9,7 @@ import { storiesForLevel, type Story } from "@/lib/stories";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import { loaded, preloadUi } from "@/lib/preload-ui";
 import backArt from "@/assets/ui/back.webp";
+import { StarRow } from "@/components/Icons";
 
 export const LEVEL_IDS: DifficultyId[] = ["easy", "easy-medium", "medium", "medium-hard", "hard"];
 
@@ -123,12 +124,7 @@ export function MenuScreen({
 }
 
 export function Stars({ value, className = "text-base" }: { value: number; className?: string }) {
-  return (
-    <span className={`tracking-wider ${className}`} aria-label={`${value} of 3 stars`}>
-      <span className="text-[var(--color-gold)]">{"★".repeat(value)}</span>
-      <span className="text-foreground/20">{"★".repeat(3 - value)}</span>
-    </span>
-  );
+  return <StarRow value={value} className={className} />;
 }
 
 // The five difficulty levels as frosted cards, each with a picture, a short
@@ -347,7 +343,10 @@ export function ConfirmCard({
   );
 }
 
-export const starText = (stars: number) => "⭐".repeat(stars) + "☆".repeat(3 - stars);
+// The stars a game ended with, for the top of its result card.
+export const starText = (stars: number) => (
+  <StarRow value={stars} empty="text-[var(--color-gold)]/30" />
+);
 
 // Best stars per level, stored under one key per game.
 export function loadBest(key: string): Record<string, number> {

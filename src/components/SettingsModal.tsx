@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSettings, LANGS } from "@/lib/i18n";
+import { CheckIcon, CrossIcon } from "@/components/Icons";
 
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { lang, setLang, sound, setSound, devMode, setDevMode, resetAll, t } = useSettings();
@@ -32,7 +33,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             aria-label={t("settings.close")}
             className="grid h-9 w-9 place-items-center rounded-full bg-secondary text-foreground/70 transition active:scale-95"
           >
-            ✕
+            <CrossIcon />
           </button>
         </div>
 
@@ -110,9 +111,9 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => setConfirmReset(false)}
-                      className="rounded-xl border border-[var(--color-border)] bg-card px-3 py-2 text-sm font-semibold active:scale-95"
+                      className="grid place-items-center rounded-xl border border-[var(--color-border)] bg-card px-3 py-2 text-sm font-semibold active:scale-95"
                     >
-                      ✕
+                      <CrossIcon />
                     </button>
                     <button
                       onClick={() => {
@@ -120,9 +121,9 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
                         setConfirmReset(false);
                         onClose();
                       }}
-                      className="rounded-xl bg-[oklch(0.55_0.18_25)] px-3 py-2 text-sm font-semibold text-white active:scale-95"
+                      className="grid place-items-center rounded-xl bg-[oklch(0.55_0.18_25)] px-3 py-2 text-sm font-semibold text-white active:scale-95"
                     >
-                      ✓
+                      <CheckIcon />
                     </button>
                   </div>
                 </div>

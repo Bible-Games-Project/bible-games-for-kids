@@ -25,6 +25,7 @@ import {
 } from "@/components/GameShell";
 
 import homeBg from "@/assets/home-bedtime.webp";
+import { StarIcon } from "@/components/Icons";
 
 export function DragDropGame({ onBack }: { onBack: () => void }) {
   useSoundTheme("dragdrop");
@@ -63,7 +64,7 @@ export function DragDropGame({ onBack }: { onBack: () => void }) {
         badge={(s) =>
           done[level]?.includes(s.slug) ? (
             <span className="grid h-7 w-7 place-items-center rounded-full bg-card text-base text-[var(--color-gold)] shadow">
-              ★
+              <StarIcon />
             </span>
           ) : null
         }

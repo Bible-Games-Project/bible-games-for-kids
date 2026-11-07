@@ -46,6 +46,7 @@ import otRook from "@/assets/chess/ot-rook.webp";
 import otPawn from "@/assets/chess/ot-pawn.webp";
 import chessBg from "@/assets/parchis-bg.webp";
 import boardArt from "@/assets/chess-board.webp";
+import { ChessIcon, NoteIcon } from "@/components/Icons";
 
 const ART: Record<string, string> = {
   "nt-k": ntKing,
@@ -62,11 +63,6 @@ const ART: Record<string, string> = {
   "ot-p": otPawn,
 };
 
-// The usual chess symbols, so children can tell what each character moves like.
-const GLYPH: Record<Side, Record<Kind, string>> = {
-  nt: { k: "♔", q: "♕", r: "♖", b: "♗", n: "♘", p: "♙" },
-  ot: { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" },
-};
 const KINDS: Kind[] = ["k", "q", "r", "b", "n", "p"];
 const BEST_KEY = "chess-wins-v1";
 
@@ -226,7 +222,8 @@ function PieceFigure({
           size ? { width: size * 0.3, fontSize: size * 0.22 } : { width: "34%", fontSize: "24cqw" }
         }
       >
-        {GLYPH[side][kind]}
+        {/* the usual chess piece, so children can tell how it moves */}
+        <ChessIcon kind={kind} />
       </span>
       {fx && <PieceFx side={side} kind={kind} layer="front" />}
     </span>
@@ -254,11 +251,11 @@ const SMOKE: Spot[] = [
   { x: 54, y: 36, d: 1.8, dx: 9 },
   { x: 50, y: 36, d: 2.7, dx: -2 },
 ];
-const NOTES: (Spot & { glyph: string })[] = [
-  { x: 80, y: 52, d: 0, dx: 14, glyph: "♪" },
-  { x: 78, y: 56, d: 1, dx: 22, glyph: "♫" },
-  { x: 82, y: 50, d: 2, dx: 8, glyph: "♩" },
-  { x: 76, y: 54, d: 1.5, dx: 18, glyph: "♬" },
+const NOTES: (Spot & { beamed: boolean })[] = [
+  { x: 80, y: 52, d: 0, dx: 14, beamed: false },
+  { x: 78, y: 56, d: 1, dx: 22, beamed: true },
+  { x: 82, y: 50, d: 2, dx: 8, beamed: false },
+  { x: 76, y: 54, d: 1.5, dx: 18, beamed: true },
 ];
 
 const fxStyle = (p: Spot) =>
@@ -308,7 +305,7 @@ function PieceFx({ side, kind, layer }: { side: Side; kind: Kind; layer: "back" 
       <>
         {NOTES.map((p, i) => (
           <span key={i} className="fx fx-note" style={fxStyle(p)}>
-            {p.glyph}
+            <NoteIcon beamed={p.beamed} />
           </span>
         ))}
       </>

@@ -25,6 +25,7 @@ import {
 } from "@/components/GameShell";
 
 import homeBg from "@/assets/home-bedtime.webp";
+import { CheckIcon, UndoIcon } from "@/components/Icons";
 
 export function ColoringGame({ onBack }: { onBack: () => void }) {
   useSoundTheme("coloring");
@@ -462,7 +463,7 @@ function ColoringBoard({
             aria-label={ct("color.undo")}
             className={tool}
           >
-            ↶
+            <UndoIcon />
           </button>
           <button
             onClick={() => setZoom((z) => !z)}
@@ -598,7 +599,7 @@ function ColoringBoard({
                     }`}
                     style={{ backgroundColor: c, color: light ? "oklch(0.3 0.05 60)" : "white" }}
                   >
-                    {done ? "✓" : i + 1}
+                    {done ? <CheckIcon /> : i + 1}
                   </span>
                 </button>
               );

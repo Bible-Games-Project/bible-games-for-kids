@@ -132,17 +132,18 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     el.preload = "auto";
     el.volume = 0;
     audioRef.current = el;
+    // Each time the game is opened the songs are put in a random order,
+    // which then repeats without end: after the last one, the first again.
     playlistRef.current = shuffle(TRACKS);
     indexRef.current = 0;
 
     const onEnded = () => {
-      indexRef.current += 1;
-      if (indexRef.current >= playlistRef.current.length) {
-        playlistRef.current = shuffle(TRACKS);
-        indexRef.current = 0;
-      }
+      indexRef.current = (indexRef.current + 1) % playlistRef.current.length;
       el.src = playlistRef.current[indexRef.current];
+      // the last song faded itself out; the next one fades back in
+      el.volume = 0;
       el.play().catch(() => {});
+      if (targetVolRef.current > 0) fadeTo(targetVolRef.current);
     };
     const FADE_SEC = 2;
     const onTimeUpdate = () => {

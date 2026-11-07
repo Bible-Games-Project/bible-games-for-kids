@@ -4,6 +4,7 @@ import { useAudio } from "@/lib/audio";
 import { gameText } from "@/lib/games-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import { STORIES, type Story } from "@/lib/stories";
+import { CheckIcon, CrossIcon } from "@/components/Icons";
 
 const shuffle = <T,>(arr: T[]): T[] => {
   const a = arr.slice();
@@ -83,7 +84,11 @@ export function StoryQuiz({
                 disabled={picked !== null}
                 className={`paint-box paint-long paint-flat paint-thin px-4 py-3 text-base font-semibold transition active:scale-[0.98] ${state}`}
               >
-                {picked && right ? "✓ " : picked === s && !right ? "✗ " : ""}
+                {picked && right ? (
+                  <CheckIcon className="me-1.5" />
+                ) : picked === s && !right ? (
+                  <CrossIcon className="me-1.5" />
+                ) : null}
                 {localizeSceneTitle(s.slug, lang)}
               </button>
             );

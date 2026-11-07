@@ -25,6 +25,7 @@ import { PlayerPawn, TOKEN_ORDER } from "@/components/Token";
 import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 
 import dominoBg from "@/assets/domino-bg.webp";
+import { ArrowIcon } from "@/components/Icons";
 
 export function DominoGame({ onBack }: { onBack: () => void }) {
   useSoundTheme("domino");
@@ -461,7 +462,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
                   onClick={pass}
                   className="paint-box paint-long paint-flat paint-thin px-6 py-2.5 font-display text-lg transition active:scale-95"
                 >
-                  {dt("dom.pass")} ➜
+                  {dt("dom.pass")} <ArrowIcon />
                 </button>
               )}
             </div>

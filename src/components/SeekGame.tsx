@@ -21,6 +21,7 @@ import {
 } from "@/components/GameShell";
 
 import homeBg from "@/assets/home-bedtime.webp";
+import { CheckIcon, CrossIcon, StarRow } from "@/components/Icons";
 
 // Best stars per "level:story".
 const BEST_KEY = "seek-best-v2";
@@ -63,8 +64,8 @@ export function SeekGame({ onBack }: { onBack: () => void }) {
         badge={(s) => {
           const stars = best[`${level}:${s.slug}`] ?? 0;
           return stars ? (
-            <span className="rounded-full bg-card px-1.5 py-0.5 text-xs text-[var(--color-gold)] shadow">
-              {"★".repeat(stars)}
+            <span className="rounded-full bg-card px-1.5 py-0.5 text-xs shadow">
+              <StarRow value={stars} empty="hidden" />
             </span>
           ) : null;
         }}
@@ -205,7 +206,7 @@ function SeekBoard({
                 <span className={isFound ? "line-through decoration-2" : ""}>
                   {wordName(it.word, lang)}
                 </span>
-                {isFound && <span aria-hidden>✓</span>}
+                {isFound && <CheckIcon />}
               </li>
             );
           })}
@@ -243,7 +244,7 @@ function SeekBoard({
               >
                 {isFound && (
                   <span className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-[oklch(0.55_0.13_150)] text-xs font-bold text-white shadow">
-                    ✓
+                    <CheckIcon />
                   </span>
                 )}
               </span>
@@ -256,7 +257,7 @@ function SeekBoard({
               className="pointer-events-none absolute grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-white/90 bg-[oklch(0.6_0.18_25/0.55)] text-base font-bold text-white animate-out fade-out zoom-out-75 duration-700"
               style={{ left: `${m.x}%`, top: `${m.y}%` }}
             >
-              ✗
+              <CrossIcon />
             </span>
           ))}
         </div>

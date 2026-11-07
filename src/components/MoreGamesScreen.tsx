@@ -5,6 +5,7 @@ import didacticIcon from "@/assets/game-didactic-jesus.png";
 import lostSheepIcon from "@/assets/game-lost-sheep.png";
 import bibleUnlockedIcon from "@/assets/game-bible-unlocked.png";
 import trueChristIcon from "@/assets/game-true-christ.png";
+import { ArrowIcon } from "@/components/Icons";
 
 interface Game {
   id: string;
@@ -64,7 +65,7 @@ export function MoreGamesScreen({ onBack }: { onBack: () => void }) {
           className="grid h-10 w-10 place-items-center rounded-full bg-card text-foreground/80 shadow-sm transition active:scale-95"
           aria-label={t("more.back")}
         >
-          ←
+          <ArrowIcon back />
         </button>
         <div className="min-w-0">
           <h1 className="truncate font-display text-2xl sm:text-3xl">{t("more.title")}</h1>

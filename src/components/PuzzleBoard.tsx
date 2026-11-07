@@ -12,6 +12,7 @@ import { localizeSceneTitle, localizeVerse } from "@/lib/scenes-i18n";
 import homeArt from "@/assets/ui/home.webp";
 import hintArt from "@/assets/ui/hint.webp";
 import { loaded } from "@/lib/preload-ui";
+import { StarRow } from "@/components/Icons";
 
 
 interface Piece {
@@ -620,10 +621,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
 
             {done && (
               <div className="absolute inset-0 flex animate-fade-in flex-col items-center justify-center bg-[oklch(0.97_0.015_80/0.9)] p-6 text-center">
-                <div className="mb-2 text-5xl">
-                  {"⭐".repeat(stars)}
-                  {"☆".repeat(3 - stars)}
-                </div>
+                <StarRow value={stars} className="mb-2 text-5xl" empty="text-[var(--color-gold)]/30" />
                 <h3 className="font-display text-2xl">{t("puzzle.done")}</h3>
                 <p className="mt-1 text-sm italic text-muted-foreground">"{localizedVerse}"</p>
                 <div className="mt-5 flex gap-2">
