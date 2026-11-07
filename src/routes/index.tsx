@@ -151,19 +151,28 @@ const TITLE_W = 280;
 // the middle card (half the row less the gaps) and its 4:5 shape.
 const SHELF_H = Math.ceil(((UI_W - 16) / 2) * 1.25);
 const CARD_TOP = 8; // the shelf's top padding, above the middle card
-// The painting (858 x 1834) always fills the screen's width, and the line of
-// the girl's mouth (59.5% down it) stays at the middle of the screen's
-// height: wider screens show it closer, cropped above and below that line.
-const HOME_BG = { ratio: 858 / 1834, mouth: 0.595 };
+// The painting (858 x 1834) is anchored at the heart in the middle of the
+// girl's shirt (51.2% across, 63.4% down): that heart stays at the centre
+// of the screen, and the painting grows around it as much as it needs to
+// cover the whole screen.
+const HOME_BG = { ratio: 858 / 1834, x: 0.512, y: 0.634 };
 
 function homeBackground() {
   const W = window.innerWidth;
   const H = window.innerHeight;
-  const { ratio, mouth } = HOME_BG;
-  // tall enough to cover the screen above and below the mouth line
-  const h = Math.max(W / ratio, H / (2 * Math.min(mouth, 1 - mouth)));
-  return { size: `auto ${h}px`, position: `center ${H / 2 - mouth * h}px` };
+  const { ratio, x, y } = HOME_BG;
+  const h = Math.max(W / (2 * Math.min(x, 1 - x)) / ratio, H / (2 * Math.min(y, 1 - y)));
+  return {
+    size: `auto ${h}px`,
+    position: `${W / 2 - x * h * ratio}px ${H / 2 - y * h}px`,
+  };
 }
+
+// The title at the top centre and the settings gear in the top right
+// corner, level with it, both at the games' scale; the title gives way
+// rather than touch the gear.
+const HOME_EDGE = 12; // the gear's and the title's distance from the top
+const GEAR = 40;
 
 function GameTile({
   game,
@@ -634,13 +643,17 @@ function Home() {
   // big middle card reaches the middle of the screen's height.
   const pack = useRef<HTMLDivElement>(null);
   const [uiScale, setUiScale] = useState(1);
+  const [titleW, setTitleW] = useState(TITLE_W);
   useEffect(() => {
     const el = pack.current;
     if (!el) return;
     const fit = () => {
-      const across = (window.innerWidth - 2 * HOME_SIDE) / UI_W;
+      const W = window.innerWidth;
+      const across = (W - 2 * HOME_SIDE) / UI_W;
       const upTo = (window.innerHeight / 2 - HOME_BOTTOM) / (el.offsetHeight - CARD_TOP);
-      setUiScale(Math.max(0.5, Math.min(across, upTo)));
+      const s = Math.max(0.5, Math.min(across, upTo));
+      setUiScale(s);
+      setTitleW(Math.min(TITLE_W * s, W - 2 * (GEAR * s + HOME_EDGE + 6)));
     };
     fit();
     window.addEventListener("resize", fit);
@@ -784,13 +797,17 @@ function Home() {
   const difficulty = DIFFICULTIES.find((d) => d.id === selectedDifficulty) ?? DIFFICULTIES[0];
   const openGame = (g: GameDef) => setScreen(GAME_SCREENS.includes(g.id) ? (g.id as GameScreen) : "select");
 
-  const settingsButton = (
+  const gearButton = (size: number, edge: number) => (
     <button
       onClick={() => setSettingsOpen(true)}
       aria-label={t("settings.title")}
-      className="absolute right-4 top-4 z-10 grid h-12 w-12 place-items-center transition active:scale-90"
-      // grows with the games on big screens
-      style={uiScale > 1 ? { width: 48 * Math.min(uiScale, 2), height: 48 * Math.min(uiScale, 2) } : undefined}
+      className="absolute z-10 grid place-items-center transition active:scale-90"
+      style={{
+        width: size,
+        height: size,
+        top: `calc(env(safe-area-inset-top, 0px) + ${edge}px)`,
+        right: `calc(env(safe-area-inset-right, 0px) + ${edge}px)`,
+      }}
     >
       <img
         src={gearArt}
@@ -814,13 +831,16 @@ function Home() {
           fadeEnd={0}
         />
         <div className="relative z-10 min-h-[100dvh] w-full">
-          {settingsButton}
-          <div className="mx-auto flex min-h-[100dvh] w-full flex-col items-center overflow-x-clip px-6 pt-16 pb-6 text-center">
+          {gearButton(GEAR * uiScale, HOME_EDGE)}
+          <div
+            className="mx-auto flex min-h-[100dvh] w-full flex-col items-center overflow-x-clip px-6 pb-6 text-center"
+            style={{ paddingTop: `calc(env(safe-area-inset-top, 0px) + ${HOME_EDGE}px)` }}
+          >
             <h1
               className={`shrink-0 ${
                 titleIntro ? "animate-in fade-in slide-in-from-top-10 duration-[1400ms] ease-out motion-reduce:animate-none" : ""
               }`}
-              style={{ width: TITLE_W * uiScale }}
+              style={{ width: titleW }}
             >
               <img
                 src={titleImg}
@@ -889,7 +909,7 @@ function Home() {
       <ScreenFade />
       <BedtimeBackdrop image={puzzlesBg} position="center 40%" fadeEnd={30} />
       <div className="relative z-10 w-full">
-        {settingsButton}
+        {gearButton(48, 16)}
 
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
           <BackButton onClick={() => setScreen("home")} label={t("select.back")} />
