@@ -452,8 +452,6 @@
     z-index: -1;
     -webkit-backdrop-filter: blur(10px) saturate(1.1);
     backdrop-filter: blur(10px) saturate(1.1);
-    -webkit-mask-image: var(--paint);
-    mask-image: var(--paint);
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
@@ -467,19 +465,61 @@
     z-index: -1;
     pointer-events: none;
     border: var(--paint-w) solid transparent;
-    border-image-source: var(--paint);
     border-image-slice: 75 fill;
     border-image-width: var(--paint-w);
     border-image-repeat: stretch;
     /* the whole picture stretched underneath fills the hairline seams
        between the nine slices; it is kept inside the painted edge so its own
        outline never shows as a second box */
-    background-image: var(--paint);
     background-origin: border-box;
     background-position: center;
     background-size: calc(100% - var(--paint-w)) calc(100% - var(--paint-w));
     background-repeat: no-repeat;
     opacity: 0.9;
+  }
+
+  /* Each panel's picture is set on the two layers directly, not through a
+     custom property: Vite 8 (lightningcss) refuses a relative url() inside a
+     custom property and the whole build fails. These come before
+     .paint-whole so its border-image: none still wins. */
+  .paint-tall::before {
+    -webkit-mask-image: url("./assets/ui/panel-tall.webp");
+    mask-image: url("./assets/ui/panel-tall.webp");
+  }
+
+  .paint-tall::after {
+    border-image-source: url("./assets/ui/panel-tall.webp");
+    background-image: url("./assets/ui/panel-tall.webp");
+  }
+
+  .paint-wide::before {
+    -webkit-mask-image: url("./assets/ui/panel-wide.webp");
+    mask-image: url("./assets/ui/panel-wide.webp");
+  }
+
+  .paint-wide::after {
+    border-image-source: url("./assets/ui/panel-wide.webp");
+    background-image: url("./assets/ui/panel-wide.webp");
+  }
+
+  .paint-long::before {
+    -webkit-mask-image: url("./assets/ui/panel-long.webp");
+    mask-image: url("./assets/ui/panel-long.webp");
+  }
+
+  .paint-long::after {
+    border-image-source: url("./assets/ui/panel-long.webp");
+    background-image: url("./assets/ui/panel-long.webp");
+  }
+
+  .paint-square::before {
+    -webkit-mask-image: url("./assets/ui/panel-square.webp");
+    mask-image: url("./assets/ui/panel-square.webp");
+  }
+
+  .paint-square::after {
+    border-image-source: url("./assets/ui/panel-square.webp");
+    background-image: url("./assets/ui/panel-square.webp");
   }
 
   .paint-thin {
@@ -522,22 +562,6 @@
 
   .paint-solid::after {
     opacity: 1;
-  }
-
-  .paint-tall {
-    --paint: url("./assets/ui/panel-tall.webp");
-  }
-
-  .paint-wide {
-    --paint: url("./assets/ui/panel-wide.webp");
-  }
-
-  .paint-long {
-    --paint: url("./assets/ui/panel-long.webp");
-  }
-
-  .paint-square {
-    --paint: url("./assets/ui/panel-square.webp");
   }
 
   /* The chosen painted panel glows gold around its edge. */
