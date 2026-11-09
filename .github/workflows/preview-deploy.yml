@@ -41,6 +41,16 @@ jobs:
           done
           echo "found=false" >> "$GITHUB_OUTPUT"
 
+      - name: Add index.html for TanStack Start builds
+        if: steps.outdir.outputs.found == 'true'
+        env:
+          OUT_DIR: ${{ steps.outdir.outputs.dir }}
+        run: |
+          if [ -f "$OUT_DIR/index.html" ]; then exit 0; fi
+          if [ ! -d .output/server ] && [ ! -d dist/server ]; then exit 0; fi
+          curl -fsSL https://raw.githubusercontent.com/Bible-Games-Project/bgp-admin/main/scripts/generate-capacitor-html.js -o "$RUNNER_TEMP/generate-index-html.mjs"
+          CAPACITOR_BUILD=1 node "$RUNNER_TEMP/generate-index-html.mjs"
+
       - name: Deploy to Cloudflare Pages
         if: steps.outdir.outputs.found == 'true'
         env:
