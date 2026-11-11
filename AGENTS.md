@@ -108,10 +108,7 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
 - All 49 story paintings are in the new gouache storybook style (red-sea is
   the maintainer's own Moses painting, not generated). The maintainer wants a
   flat, grainy, hand-made look like the reference — not Disney/Pixar, not
-  glossy AI art; small dot eyes, few gradients. Coloring pages still pending
-  (OpenAI credits ran out, Nov 2026): the 24 stories of the last batch
-  (abraham-stars ... red-sea, see git log) still use their old coloring
-  drawing, so they need a new scripts/coloring-art/<slug>.png. To save money,
+  glossy AI art; small dot eyes, few gradients. To save money,
   paintings use gpt-image-2 quality "medium" with scripts/style-reference.jpg
   (the maintainer's own reference image — the style every painting must match)
   as the style reference plus the old painting for content only (the
