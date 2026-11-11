@@ -36,7 +36,6 @@ export function loaded(src: string): Promise<void> {
 const GAME_ART = import.meta.glob<string>(
   [
     "../assets/*-bg.webp",
-    "../assets/*-bedtime.webp",
     "../assets/order-map.webp",
     "../assets/chess-board.webp",
     "../assets/parchis-board.webp",

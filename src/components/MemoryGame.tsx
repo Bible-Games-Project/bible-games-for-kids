@@ -14,7 +14,7 @@ import {
   type MemoryLevel,
 } from "@/lib/memory";
 
-import memoryBg from "@/assets/memory-bedtime.webp";
+import memoryBg from "@/assets/memory-bg.webp";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, ScreenFade } from "@/components/GameShell";
 import { PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";

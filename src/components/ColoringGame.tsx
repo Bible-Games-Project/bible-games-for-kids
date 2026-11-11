@@ -24,7 +24,7 @@ import {
   ScreenFade,
 } from "@/components/GameShell";
 
-import homeBg from "@/assets/home-bedtime.webp";
+import coloringBg from "@/assets/coloring-bg.webp";
 import { CheckIcon, UndoIcon } from "@/components/Icons";
 
 export function ColoringGame({ onBack }: { onBack: () => void }) {
@@ -51,7 +51,7 @@ export function ColoringGame({ onBack }: { onBack: () => void }) {
     <MenuScreen
       title={ct("color.choose")}
       subtitle={ct("color.instruction")}
-      background={homeBg}
+      background={coloringBg}
       onBack={onBack}
       backLabel={t("select.back")}
     >

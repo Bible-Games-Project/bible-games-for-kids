@@ -20,7 +20,7 @@ import {
   ScreenFade,
 } from "@/components/GameShell";
 
-import homeBg from "@/assets/home-bedtime.webp";
+import seekBg from "@/assets/seek-bg.webp";
 import { CheckIcon, CrossIcon, StarRow } from "@/components/Icons";
 
 // Best stars per "level:story".
@@ -52,7 +52,7 @@ export function SeekGame({ onBack }: { onBack: () => void }) {
     <MenuScreen
       title={t("game.seek")}
       subtitle={st("seek.instruction")}
-      background={homeBg}
+      background={seekBg}
       onBack={onBack}
       backLabel={t("select.back")}
     >

@@ -37,10 +37,10 @@ import { preloadGameArt } from "@/lib/preload-ui";
 import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
 import { isFreePuzzle } from "@/lib/freemium";
-import homeBg from "@/assets/home-family.webp";
+import homeBg from "@/assets/home-bg.webp";
 import titleImg from "@/assets/title-bibledoo.webp";
-import puzzlesBg from "@/assets/puzzles-bedtime.webp";
-import memoryBg from "@/assets/memory-bedtime.webp";
+import puzzlesBg from "@/assets/puzzles-bg.webp";
+import memoryBg from "@/assets/memory-bg.webp";
 import puzzlesIcon from "@/assets/icon-puzzles.webp";
 import memoryIcon from "@/assets/icon-memory.webp";
 import dragdropIcon from "@/assets/icon-dragdrop.webp";
@@ -153,11 +153,11 @@ const TITLE_W = 280;
 // the middle card (half the row less the gaps) and its 4:5 shape.
 const SHELF_H = Math.ceil(((UI_W - 16) / 2) * 1.25);
 const CARD_TOP = 8; // the shelf's top padding, above the middle card
-// The painting (858 x 1834) is anchored at the heart in the middle of the
-// girl's shirt (51.2% across, 63.4% down): that heart stays at the centre
-// of the screen, and the painting grows around it as much as it needs to
-// cover the whole screen.
-const HOME_BG = { ratio: 858 / 1834, x: 0.512, y: 0.634 };
+// The painting (1080 x 1920, the family at the table) is anchored at its
+// centre: on a phone it shows whole from top to bottom, the parents' faces
+// under the title and the children's just above the side cards; on wider
+// screens it grows around the centre as much as it needs to cover them.
+const HOME_BG = { ratio: 1080 / 1920, x: 0.5, y: 0.5 };
 
 function homeBackground() {
   const W = window.innerWidth;
