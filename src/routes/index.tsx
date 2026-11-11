@@ -832,6 +832,16 @@ function Home() {
           size={bg?.size}
           fadeEnd={0}
         />
+        {/* A warm shadow rising from the bottom so the game cards and
+            buttons stand out from the painting. */}
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 z-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 38%, oklch(0.3 0.06 45 / 0.28) 58%, oklch(0.24 0.055 42 / 0.62) 82%, oklch(0.2 0.05 40 / 0.75) 100%)",
+          }}
+        />
         <div className="relative z-10 min-h-[100dvh] w-full">
           {gearButton(GEAR * uiScale, HOME_EDGE)}
           <div

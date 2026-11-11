@@ -9,8 +9,9 @@ import {
   COLORING_PAGES,
   MAP_H,
   MAP_W,
-  hasFills,
+  hasPainting,
   loadFills,
+  markerLines,
   saveFills,
   type ColoringPage,
   type Fills,
@@ -26,6 +27,7 @@ import {
 
 import coloringBg from "@/assets/coloring-bg.webp";
 import { CheckIcon, UndoIcon } from "@/components/Icons";
+import { MarkerBoard } from "@/components/MarkerBoard";
 
 export function ColoringGame({ onBack }: { onBack: () => void }) {
   useSoundTheme("coloring");
@@ -37,6 +39,20 @@ export function ColoringGame({ onBack }: { onBack: () => void }) {
   useBackButton(page !== null, () => setPage(null));
 
   if (page) {
+    // Pages with a coloring-book drawing are painted freely with a marker
+    // (on trial on Easy); the rest stay paint by numbers.
+    const marker = markerLines(page.story.slug, level);
+    if (marker) {
+      return (
+        <MarkerBoard
+          key={`${level}:${page.story.slug}`}
+          page={page}
+          lines={marker}
+          level={level}
+          onExit={() => setPage(null)}
+        />
+      );
+    }
     return (
       <ColoringBoard
         key={`${level}:${page.story.slug}`}
@@ -62,6 +78,14 @@ export function ColoringGame({ onBack }: { onBack: () => void }) {
         stories={COLORING_PAGES.map((p) => p.story)}
         picture={(story) => {
           const p = COLORING_PAGES.find((x) => x.story === story)!;
+          const marker = markerLines(story.slug, level);
+          if (marker) {
+            return (
+              <span className="absolute inset-0 bg-white">
+                <img src={marker} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+              </span>
+            );
+          }
           return (
             <span className="absolute inset-0 bg-white">
               <img
@@ -75,7 +99,7 @@ export function ColoringGame({ onBack }: { onBack: () => void }) {
           );
         }}
         badge={(story) =>
-          hasFills(story.slug, level) ? (
+          hasPainting(story.slug, level) ? (
             <span
               className="grid h-7 w-7 place-items-center rounded-full bg-card text-sm shadow"
               aria-hidden

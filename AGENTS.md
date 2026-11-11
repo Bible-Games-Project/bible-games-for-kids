@@ -98,3 +98,10 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
 - The container has no Python, ImageMagick or curl. For image work, install
   `sharp` in a scratch folder outside the repo (`npm i sharp` in /tmp) and use
   `bun` for HTTP calls (it honours the egress proxy; plain `node` fetch doesn't).
+- Coloring has a marker mode on trial (`MarkerBoard.tsx`): free finger
+  painting where each stroke is clipped to the closed shape it started in.
+  It is used on Easy for any page with `src/assets/coloring-marker/<slug>-lines.webp`
+  (768x1152, dark brown lines on transparent); other pages and levels stay
+  paint by numbers. The drawing was made with gpt-image-2 (images/edits from
+  the story painting, "children's coloring book page, bold closed outlines"),
+  then resized and thickened (blur 1.6 + steep alpha levels) with sharp.
