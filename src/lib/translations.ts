@@ -1,4 +1,4 @@
-// Preloaded, offline localization dictionary for Gospi Kids.
+// Preloaded, offline localization dictionary for Bibledoo.
 // All 12 supported languages are bundled at build time — no runtime translation.
 
 export type Lang =
@@ -85,7 +85,7 @@ const en: Dict = {
   "more.play": "Play",
   "premium.title": "Full Game",
   "premium.subtitle": "Full access to every Bible story",
-  "premium.body": "You're enjoying the free version of Gospi Kids. Get Premium for unlimited access to every puzzle across all difficulty levels — plus all future stories we add.",
+  "premium.body": "You're enjoying the free version of Bibledoo. Get Premium for unlimited access to every puzzle across all difficulty levels — plus all future stories we add.",
   "premium.feature1": "All puzzles in every difficulty",
   "premium.feature2": "All current and future stories",
   "premium.feature3": "No limits on progression",
@@ -190,7 +190,7 @@ const es: Dict = {
   "more.play": "Jugar",
   "premium.title": "Juego completo",
   "premium.subtitle": "Acceso completo a todas las historias",
-  "premium.body": "Estás jugando la versión gratuita de Gospi Kids. Obtén Premium para acceso ilimitado a todos los puzles en todas las dificultades, además de las nuevas historias que añadamos.",
+  "premium.body": "Estás jugando la versión gratuita de Bibledoo. Obtén Premium para acceso ilimitado a todos los puzles en todas las dificultades, además de las nuevas historias que añadamos.",
   "premium.feature1": "Todos los puzles en cada dificultad",
   "premium.feature2": "Todas las historias actuales y futuras",
   "premium.feature3": "Sin límites de progresión",
@@ -295,7 +295,7 @@ const de: Dict = {
   "more.play": "Spielen",
   "premium.title": "Vollversion",
   "premium.subtitle": "Voller Zugang zu jeder biblischen Geschichte",
-  "premium.body": "Du spielst die kostenlose Version von Gospi Kids. Hol dir Premium für unbegrenzten Zugang zu jedem Puzzle in allen Schwierigkeitsstufen – inklusive aller zukünftigen Geschichten.",
+  "premium.body": "Du spielst die kostenlose Version von Bibledoo. Hol dir Premium für unbegrenzten Zugang zu jedem Puzzle in allen Schwierigkeitsstufen – inklusive aller zukünftigen Geschichten.",
   "premium.feature1": "Alle Puzzles in jeder Schwierigkeit",
   "premium.feature2": "Alle aktuellen und zukünftigen Geschichten",
   "premium.feature3": "Kein Fortschrittslimit",
@@ -400,7 +400,7 @@ const fr: Dict = {
   "more.play": "Jouer",
   "premium.title": "Jeu complet",
   "premium.subtitle": "Accès complet à chaque histoire de la Bible",
-  "premium.body": "Tu profites de la version gratuite de Gospi Kids. Passe à Premium pour un accès illimité à tous les puzzles dans toutes les difficultés — ainsi qu'à toutes les futures histoires.",
+  "premium.body": "Tu profites de la version gratuite de Bibledoo. Passe à Premium pour un accès illimité à tous les puzzles dans toutes les difficultés — ainsi qu'à toutes les futures histoires.",
   "premium.feature1": "Tous les puzzles dans chaque difficulté",
   "premium.feature2": "Toutes les histoires actuelles et futures",
   "premium.feature3": "Aucune limite de progression",
@@ -505,7 +505,7 @@ const it: Dict = {
   "more.play": "Gioca",
   "premium.title": "Gioco completo",
   "premium.subtitle": "Accesso completo a ogni storia della Bibbia",
-  "premium.body": "Stai usando la versione gratuita di Gospi Kids. Passa a Premium per accesso illimitato a ogni puzzle in tutte le difficoltà — più tutte le storie future.",
+  "premium.body": "Stai usando la versione gratuita di Bibledoo. Passa a Premium per accesso illimitato a ogni puzzle in tutte le difficoltà — più tutte le storie future.",
   "premium.feature1": "Tutti i puzzle in ogni difficoltà",
   "premium.feature2": "Tutte le storie attuali e future",
   "premium.feature3": "Nessun limite di progressione",
@@ -715,7 +715,7 @@ const pl: Dict = {
   "more.play": "Graj",
   "premium.title": "Pełna gra",
   "premium.subtitle": "Pełny dostęp do każdej biblijnej historii",
-  "premium.body": "Korzystasz z darmowej wersji Gospi Kids. Wybierz Premium, aby uzyskać nieograniczony dostęp do wszystkich puzzli na każdym poziomie trudności — oraz do wszystkich przyszłych historii.",
+  "premium.body": "Korzystasz z darmowej wersji Bibledoo. Wybierz Premium, aby uzyskać nieograniczony dostęp do wszystkich puzzli na każdym poziomie trudności — oraz do wszystkich przyszłych historii.",
   "premium.feature1": "Wszystkie puzzle na każdym poziomie",
   "premium.feature2": "Wszystkie obecne i przyszłe historie",
   "premium.feature3": "Bez ograniczeń postępu",
@@ -1240,7 +1240,7 @@ const tr: Dict = {
   "more.play": "Oyna",
   "premium.title": "Tam Oyun",
   "premium.subtitle": "Tüm İncil hikâyelerine tam erişim",
-  "premium.body": "Gospi Kids'in ücretsiz sürümünü kullanıyorsun. Premium ile tüm zorluklardaki tüm yapbozlara ve eklenecek tüm yeni hikâyelere sınırsız erişim kazan.",
+  "premium.body": "Bibledoo'in ücretsiz sürümünü kullanıyorsun. Premium ile tüm zorluklardaki tüm yapbozlara ve eklenecek tüm yeni hikâyelere sınırsız erişim kazan.",
   "premium.feature1": "Her zorlukta tüm yapbozlar",
   "premium.feature2": "Mevcut ve gelecekteki tüm hikâyeler",
   "premium.feature3": "İlerlemede hiçbir sınır yok",
