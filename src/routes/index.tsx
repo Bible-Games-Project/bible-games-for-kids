@@ -1,3 +1,4 @@
+import { homeGameName } from "@/lib/translations";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -617,7 +618,7 @@ function FavoriteSlots({
 let titleIntroPlayed = false;
 
 function Home() {
-  const { onboarded, devMode, premium, t } = useSettings();
+  const { onboarded, devMode, premium, t, lang } = useSettings();
   const [progress, setProgress] = useState<Progress>({});
   const [active, setActive] = useState<ActiveState | null>(null);
   const [screen, setScreen] = useState<Screen>("home");
@@ -875,7 +876,7 @@ function Home() {
               <div>
                 <GameShelf
                   games={GAMES}
-                  labelFor={(g) => t(g.labelKey)}
+                  labelFor={(g) => homeGameName(lang, g.id, t(g.labelKey))}
                   comingLabel={t("game.comingSoon")}
                   prevLabel={t("home.prevGames")}
                   nextLabel={t("home.nextGames")}
@@ -892,7 +893,7 @@ function Home() {
                   over={drag?.over ?? -1}
                   title={t("home.favorites")}
                   hint={t("home.favoritesHint")}
-                  labelFor={(g) => t(g.labelKey)}
+                  labelFor={(g) => homeGameName(lang, g.id, t(g.labelKey))}
                   slotRefs={slotRefs}
                   onPlay={openGame}
                   onDragStart={(g, slot, x, y) => beginDrag(g, slot, x, y)}

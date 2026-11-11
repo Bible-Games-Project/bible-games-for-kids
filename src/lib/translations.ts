@@ -1297,3 +1297,29 @@ const tr: Dict = {
 export const STRINGS: Record<Lang, Dict> = {
   en, es, de, fr, it, pt, pl, ru, ja, ko, ar, tr,
 };
+
+// Shorter game names for the home cards, where a name fits in at most 11
+// characters (spaces included). Games whose full name already fits are not
+// listed and keep it.
+const SHORT_GAME_NAMES: Partial<Record<Lang, Record<string, string>>> = {
+  en: { goose: "Goose Game", order: "What First?" },
+  es: { puzzles: "Puzles", goose: "La Oca", seek: "Encuentra", order: "¿Qué antes?" },
+  de: { guesswho: "Wer ist es?", seek: "Suchspiel", order: "Was zuerst?" },
+  fr: {
+    dragdrop: "Glisse-pose",
+    guesswho: "Devine qui",
+    goose: "L'oie",
+    parchis: "Chevaux",
+    seek: "Trouve-tout",
+    order: "Avant-après",
+  },
+  it: { goose: "L'oca", seek: "Cerca-trova", order: "Cosa prima?" },
+  pt: { puzzles: "Puzzles", guesswho: "Quem é?", goose: "O Ganso", seek: "Procura", order: "Qual antes?" },
+  pl: { seek: "Szukaj", order: "Kolejność" },
+  ru: { dragdrop: "Перетащи", order: "Что раньше?" },
+  ar: { order: "ماذا أولاً؟" },
+  tr: { dragdrop: "Sürükle", order: "Ne önce?" },
+};
+
+export const homeGameName = (lang: Lang, id: string, full: string) =>
+  SHORT_GAME_NAMES[lang]?.[id] ?? full;
