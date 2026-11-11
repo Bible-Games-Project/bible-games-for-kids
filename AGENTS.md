@@ -105,9 +105,16 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   paint by numbers. The drawing was made with gpt-image-2 (images/edits from
   the story painting, "children's coloring book page, bold closed outlines"),
   then thickened (blur 1.6 + steep alpha levels); scripts/story-assets.cjs rebuilds it from scripts/coloring-art/<slug>.png.
-- Story paintings are moving to a new gouache storybook style (trial on
-  noahs-ark, david-goliath, nativity, good-shepherd, jonah-fish; originals
-  of the new ones in src/assets/style-test/, compared at /style-test). Each new
+- Story paintings are moving to a new gouache storybook style, in batches of
+  10 (done: noahs-ark, david-goliath, nativity, good-shepherd, jonah-fish,
+  blessing-children, walking-water, calming-storm, good-samaritan, creation,
+  moses-basket, david-shepherd, burning-bush, rainbow-promise, tower-babel;
+  red-sea waits for the maintainer's own Moses painting). To save money,
+  paintings use gpt-image-2 quality "medium" with style-test/good-shepherd.jpg
+  and style-test/nativity.jpg as style references plus the old painting for
+  content, and the coloring-book drawings use quality "low" (about 1 cent, and
+  they line up with the painting better than "high" did; check by overlaying,
+  since coloring takes its colors from the painting under each area). Each new
   painting hides about nine small story objects, marked in story-items.ts for
   Seek & Find and Drag & Drop. After replacing a puzzle-<slug>.jpg, update
   its story-items.ts line and Guess Who traits by hand, put a gpt-image-2

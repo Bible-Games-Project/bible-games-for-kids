@@ -58,7 +58,6 @@ CHARACTERS = {
 # and zoom (smaller = closer).
 ADJUST = {
     "zacchaeus": (0, -0.5, 1),
-    "samaritan": (0, -0.45, 1),
     "peter": (-0.1, -0.3, 1),
     "goliath": (0, 0, 0.8),
 }
