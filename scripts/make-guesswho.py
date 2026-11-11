@@ -23,7 +23,7 @@ CHARACTERS = {
     "goliath": ("david-goliath", 1),
     "noah": ("noahs-ark", 0),
     "abraham": ("abraham-stars", 0),
-    "adam": ("adam-animals", 11),
+    "adam": ("adam-animals", 0),
     "elijah": ("elijah-ravens", 0),
     "daniel": ("daniel-lions", 0),
     "jonah": ("jonah-fish", 0),
@@ -57,7 +57,7 @@ CHARACTERS = {
 # Framing tweaks for faces not centred in their circle: shift (in radii)
 # and zoom (smaller = closer).
 ADJUST = {
-    "zacchaeus": (0, -0.5, 1),
+    "john": (0, 0, 0.7),
     "peter": (-0.1, -0.3, 1),
     "goliath": (0, 0, 0.8),
 }

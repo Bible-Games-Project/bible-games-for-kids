@@ -19,6 +19,16 @@ const REPAINTED = [
   "burning-bush",
   "rainbow-promise",
   "tower-babel",
+  "passover-supper",
+  "wedding-cana",
+  "prodigal-son",
+  "zacchaeus",
+  "daniel-lions",
+  "joseph-coat",
+  "sermon-mount",
+  "baptism-jesus",
+  "palm-sunday",
+  "adam-animals",
 ];
 
 export const Route = createFileRoute("/style-test")({

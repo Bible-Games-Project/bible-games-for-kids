@@ -108,11 +108,15 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
 - Story paintings are moving to a new gouache storybook style, in batches of
   10 (done: noahs-ark, david-goliath, nativity, good-shepherd, jonah-fish,
   blessing-children, walking-water, calming-storm, good-samaritan, creation,
-  moses-basket, david-shepherd, burning-bush, rainbow-promise, tower-babel;
+  moses-basket, david-shepherd, burning-bush, rainbow-promise, tower-babel,
+  passover-supper, wedding-cana, prodigal-son, zacchaeus, daniel-lions,
+  joseph-coat, sermon-mount, baptism-jesus, palm-sunday, adam-animals;
   red-sea waits for the maintainer's own Moses painting). To save money,
   paintings use gpt-image-2 quality "medium" with scripts/style-reference.jpg
   (the maintainer's own reference image — the style every painting must match)
-  as the style reference plus the old painting for content only, and the
+  as the style reference plus the old painting for content only (the
+  maintainer rejects objects floating in the air, cut-off limbs and blood, so
+  say so in every prompt), and the
   coloring-book drawings use quality "low" (about 1 cent, and
   they line up with the painting better than "high" did; check by overlaying,
   since coloring takes its colors from the painting under each area). Each new

@@ -74,7 +74,7 @@ const LIST: [id: string, story: string, traits: string][] = [
   ["gabriel", "annunciation", "angel"],
   ["john", "baptism-jesus", "beard fur"],
   ["peter", "washes-feet", "beard down"],
-  ["zacchaeus", "zacchaeus", "beard covered headband red"],
+  ["zacchaeus", "zacchaeus", "beard covered headband red down"],
   ["martha", "mary-martha", "woman covered veil red"],
   ["mary-bethany", "mary-martha", "woman covered veil blue up hand"],
   ["samaritan", "good-samaritan", "beard covered headband red smile down"],
