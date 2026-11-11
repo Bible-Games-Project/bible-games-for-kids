@@ -24,7 +24,7 @@ import {
   ScreenFade,
 } from "@/components/GameShell";
 
-import homeBg from "@/assets/home-bedtime.webp";
+import dragdropBg from "@/assets/dragdrop-bg.webp";
 import { StarIcon } from "@/components/Icons";
 
 export function DragDropGame({ onBack }: { onBack: () => void }) {
@@ -52,7 +52,7 @@ export function DragDropGame({ onBack }: { onBack: () => void }) {
     <MenuScreen
       title={t("game.dragdrop")}
       subtitle={dt("dd.instruction")}
-      background={homeBg}
+      background={dragdropBg}
       onBack={onBack}
       backLabel={t("select.back")}
     >

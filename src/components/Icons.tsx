@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Kind } from "@/lib/chess";
 
-// Small drawn signs for the symbols the game's two fonts (Fredoka for titles,
+// Small drawn signs for the symbols the game's two fonts (Baloo 2 for titles,
 // Nunito for text) don't have, so no other typeface ever shows: stars,
 // ticks, crosses, arrows, chess pieces and music notes. Each is 1em, sits on
 // the text line and takes the colour of the text around it.

@@ -177,7 +177,7 @@ function SeekBoard({
           </h1>
           <button
             onClick={hint}
-            className="shrink-0 rounded-full bg-[var(--color-gold)] px-3 py-2 text-sm font-semibold text-[oklch(0.31_0.08_262)] shadow-sm transition active:scale-95"
+            className="shrink-0 rounded-full bg-[var(--color-gold)] px-3 py-2 text-sm font-semibold text-[oklch(0.3_0.07_45)] shadow-sm transition active:scale-95"
           >
             ✨ {st("seek.hint")}
           </button>

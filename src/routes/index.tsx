@@ -38,7 +38,7 @@ import { useAudio } from "@/lib/audio";
 import { useBackButton } from "@/lib/back-button";
 import { isFreePuzzle } from "@/lib/freemium";
 import homeBg from "@/assets/home-family.webp";
-import titleImg from "@/assets/title-gospikids.webp";
+import titleImg from "@/assets/title-bibledoo.webp";
 import puzzlesBg from "@/assets/puzzles-bedtime.webp";
 import memoryBg from "@/assets/memory-bedtime.webp";
 import puzzlesIcon from "@/assets/icon-puzzles.webp";
@@ -47,7 +47,9 @@ import dragdropIcon from "@/assets/icon-dragdrop.webp";
 import coloringIcon from "@/assets/icon-coloring.webp";
 import seekIcon from "@/assets/icon-seek.webp";
 import orderIcon from "@/assets/icon-order.webp";
-import orderMap from "@/assets/order-map.webp";
+import orderBg from "@/assets/order-bg.webp";
+import chessBg from "@/assets/chess-bg.webp";
+import dragdropBg from "@/assets/dragdrop-bg.webp";
 import guessWhoIcon from "@/assets/icon-guesswho.webp";
 import gooseIcon from "@/assets/icon-goose.webp";
 import guessWhoBg from "@/assets/guesswho-bg.webp";
@@ -67,13 +69,13 @@ import { StarRow } from "@/components/Icons";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Gospi Kids: Bible Games" },
+      { title: "Bibledoo: Bible Games" },
       {
         name: "description",
         content:
           "A peaceful watercolor jigsaw puzzle app for children, illustrating gentle stories from the life of Jesus and the New Testament.",
       },
-      { property: "og:title", content: "Gospi Kids: Bible Games" },
+      { property: "og:title", content: "Bibledoo: Bible Games" },
       {
         property: "og:description",
         content:
@@ -127,17 +129,17 @@ interface GameDef {
 
 // Playable games first so they sit in the first view of the shelf.
 const GAMES: GameDef[] = [
-  { id: "puzzles", labelKey: "game.puzzles", icon: puzzlesIcon, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
-  { id: "memory", labelKey: "game.memory", icon: memoryIcon, tint: "oklch(0.84 0.06 262 / 0.6)", playable: true },
-  { id: "dragdrop", labelKey: "game.dragdrop", icon: dragdropIcon, tint: "oklch(0.9 0.08 79 / 0.6)", playable: true },
-  { id: "coloring", labelKey: "game.coloring", icon: coloringIcon, tint: "oklch(0.86 0.06 13 / 0.6)", playable: true },
-  { id: "seek", labelKey: "game.seek", icon: seekIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
-  { id: "order", labelKey: "game.order", icon: orderIcon, tint: "oklch(0.8 0.07 258 / 0.6)", playable: true },
-  { id: "guesswho", labelKey: "game.guesswho", icon: guessWhoIcon, tint: "oklch(0.8 0.07 258 / 0.6)", playable: true },
-  { id: "goose", labelKey: "game.goose", icon: gooseIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
-  { id: "domino", labelKey: "game.domino", icon: dominoIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
-  { id: "parchis", labelKey: "game.parchis", icon: parchisIcon, tint: "oklch(0.88 0.06 262 / 0.6)", playable: true },
-  { id: "chess", labelKey: "game.chess", icon: chessIcon, tint: "oklch(0.87 0.07 62 / 0.6)", playable: true },
+  { id: "puzzles", labelKey: "game.puzzles", icon: puzzlesIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "memory", labelKey: "game.memory", icon: memoryIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "dragdrop", labelKey: "game.dragdrop", icon: dragdropIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "coloring", labelKey: "game.coloring", icon: coloringIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "seek", labelKey: "game.seek", icon: seekIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "order", labelKey: "game.order", icon: orderIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "guesswho", labelKey: "game.guesswho", icon: guessWhoIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "goose", labelKey: "game.goose", icon: gooseIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "domino", labelKey: "game.domino", icon: dominoIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "parchis", labelKey: "game.parchis", icon: parchisIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
+  { id: "chess", labelKey: "game.chess", icon: chessIcon, tint: "oklch(0.86 0.08 70 / 0.6)", playable: true },
 ];
 
 const HOME_BOTTOM = 24; // the bottom padding under the favourites
@@ -210,7 +212,7 @@ function GameTile({
           </span>
         )}
         {!game.playable && (
-          <span className="absolute inset-x-1 top-1.5 z-10 mx-auto w-fit max-w-full truncate rounded-full bg-[oklch(0.31_0.08_262/0.8)] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[var(--color-primary-foreground)] shadow">
+          <span className="absolute inset-x-1 top-1.5 z-10 mx-auto w-fit max-w-full truncate rounded-full bg-[oklch(0.3_0.07_45/0.8)] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[var(--color-primary-foreground)] shadow">
             {comingLabel}
           </span>
         )}
@@ -739,7 +741,7 @@ function Home() {
     setProgress(loadProgress());
     // Warm the cache so the game screens open with their painting already
     // loaded instead of fading it in.
-    for (const src of [puzzlesBg, memoryBg, orderMap, guessWhoBg, gooseBg, dominoBg, parchisBg]) {
+    for (const src of [puzzlesBg, memoryBg, orderBg, chessBg, dragdropBg, guessWhoBg, gooseBg, dominoBg, parchisBg]) {
       const img = new Image();
       img.src = src;
     }
@@ -844,7 +846,7 @@ function Home() {
             >
               <img
                 src={titleImg}
-                alt="Gospi Kids: Bible Games"
+                alt="Bibledoo"
                 draggable={false}
                 className="h-auto w-full select-none drop-shadow-[0_4px_10px_oklch(0.4_0.08_50/0.35)]"
               />

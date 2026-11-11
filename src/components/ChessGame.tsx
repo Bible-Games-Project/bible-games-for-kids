@@ -44,7 +44,7 @@ import otBishop from "@/assets/chess/ot-bishop.webp";
 import otKnight from "@/assets/chess/ot-knight.webp";
 import otRook from "@/assets/chess/ot-rook.webp";
 import otPawn from "@/assets/chess/ot-pawn.webp";
-import chessBg from "@/assets/parchis-bg.webp";
+import chessBg from "@/assets/chess-bg.webp";
 import boardArt from "@/assets/chess-board.webp";
 import { ChessIcon, NoteIcon } from "@/components/Icons";
 

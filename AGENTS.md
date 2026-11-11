@@ -85,3 +85,16 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Project notes
+
+- Visual style (since Nov 2026, "Bibledoo"): warm textured gouache paintings,
+  seen from above. The palette lives in `.theme-bedtime` / `:root` in
+  `src/styles.css` (deep brown text, parchment boxes, teal main buttons, gold
+  highlights); avoid hard-coding other colours in components. Fonts: Baloo 2
+  for headings, Nunito for body (Google Fonts link in `__root.tsx`).
+- Home game cards use 4:5 crops (512x640) of each game's painting, so the
+  card and the game's background match.
+- The container has no Python, ImageMagick or curl. For image work, install
+  `sharp` in a scratch folder outside the repo (`npm i sharp` in /tmp) and use
+  `bun` for HTTP calls (it honours the egress proxy; plain `node` fetch doesn't).

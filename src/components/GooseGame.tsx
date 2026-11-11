@@ -223,7 +223,7 @@ function Tile({ sq, title }: { sq: Square; title: string }) {
       title={title}
     >
       {sq.kind === "start" ? (
-        <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[oklch(0.6_0.12_262)] to-[oklch(0.45_0.12_262)] text-white">
+        <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[oklch(0.55_0.09_215)] to-[oklch(0.4_0.08_215)] text-white">
           <span className="text-3xl">🚩</span>
           <span className="text-[13px] font-bold uppercase tracking-wide">{gt("goose.start")}</span>
         </div>
@@ -250,7 +250,7 @@ function Tile({ sq, title }: { sq: Square; title: string }) {
         />
       )}
       {sq.kind !== "start" && (
-        <span className="absolute left-1 top-1 grid h-6 min-w-6 place-items-center rounded-full bg-white/90 px-1 text-[13px] font-bold text-[oklch(0.31_0.08_262)] shadow">
+        <span className="absolute left-1 top-1 grid h-6 min-w-6 place-items-center rounded-full bg-white/90 px-1 text-[13px] font-bold text-[oklch(0.3_0.07_45)] shadow">
           {sq.n}
         </span>
       )}
@@ -661,7 +661,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
           }}
         >
           {/* The board itself, a painted card under the squares */}
-          <div className="absolute -inset-3 rounded-[28px] bg-gradient-to-br from-[oklch(0.93_0.05_150)] via-[oklch(0.95_0.04_90)] to-[oklch(0.9_0.05_230)] shadow-[0_20px_40px_oklch(0.25_0.05_50/0.45)]" />
+          <div className="absolute -inset-3 rounded-[28px] bg-gradient-to-br from-[oklch(0.93_0.05_150)] via-[oklch(0.95_0.04_90)] to-[oklch(0.88_0.05_210)] shadow-[0_20px_40px_oklch(0.25_0.05_50/0.45)]" />
           <BoardRoad />
           {SQUARES.slice(0, LAST).map((sq) => (
             <Tile key={sq.n} sq={sq} title={titleOf(sq.n)} />
@@ -684,7 +684,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
                 className="h-full w-full object-cover"
               />
             )}
-            <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[oklch(0.3_0.06_262/0.85)] to-transparent px-4 pb-3 pt-10 text-center font-display text-3xl text-white">
+            <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[oklch(0.3_0.07_45/0.85)] to-transparent px-4 pb-3 pt-10 text-center font-display text-3xl text-white">
               🏆 {LAST} · {titleOf(LAST)}
             </span>
           </div>
@@ -852,11 +852,11 @@ function DieFace({ value, spinning }: { value: number; spinning: boolean }) {
         height="21"
         rx="5"
         fill="oklch(0.99 0.012 85)"
-        stroke="oklch(0.31 0.08 262)"
+        stroke="oklch(0.3 0.07 45)"
         strokeWidth="1.2"
       />
       {PIPS[value].map(([cx, cy]) => (
-        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="2" fill="oklch(0.31 0.08 262)" />
+        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="2" fill="oklch(0.3 0.07 45)" />
       ))}
     </svg>
   );

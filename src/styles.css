@@ -12,7 +12,7 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 14px);
 
-  --font-display: "Fredoka", "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-display: "Baloo 2", "Nunito", ui-rounded, system-ui, sans-serif;
   --font-body: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
 
@@ -44,46 +44,46 @@
   --shadow-piece: 0 2px 6px oklch(0.3 0.05 60 / 0.18), 0 8px 18px -8px oklch(0.3 0.05 60 / 0.25);
   --shadow-soft: 0 10px 30px -12px oklch(0.55 0.08 60 / 0.3);
 
-  --gradient-warm: linear-gradient(180deg, oklch(0.98 0.02 80) 0%, oklch(0.95 0.04 60) 100%);
+  --gradient-warm: linear-gradient(180deg, oklch(0.93 0.06 80) 0%, oklch(0.84 0.1 68) 100%);
   --gradient-sky: linear-gradient(180deg, oklch(0.97 0.025 230) 0%, oklch(0.93 0.045 30) 100%);
 }
 
 :root {
   --radius: 1.25rem;
-  /* Warm cream parchment base */
-  --background: oklch(0.975 0.018 80);
-  --foreground: oklch(0.32 0.05 50);
+  /* Parchment and wood, from the painted backgrounds */
+  --background: oklch(0.93 0.05 80);
+  --foreground: oklch(0.3 0.07 45);
 
-  --card: oklch(0.99 0.012 85);
-  --card-foreground: oklch(0.32 0.05 50);
+  --card: oklch(0.95 0.04 82);
+  --card-foreground: oklch(0.3 0.07 45);
 
-  --popover: oklch(0.99 0.012 85);
-  --popover-foreground: oklch(0.32 0.05 50);
+  --popover: oklch(0.95 0.04 82);
+  --popover-foreground: oklch(0.3 0.07 45);
 
-  /* Soft terracotta primary */
-  --primary: oklch(0.7 0.12 40);
-  --primary-foreground: oklch(0.99 0.01 85);
+  /* The teal of the paintings' rugs and Bible covers */
+  --primary: oklch(0.47 0.085 215);
+  --primary-foreground: oklch(0.97 0.03 85);
 
-  --secondary: oklch(0.93 0.035 75);
-  --secondary-foreground: oklch(0.4 0.06 50);
+  --secondary: oklch(0.9 0.06 75);
+  --secondary-foreground: oklch(0.3 0.07 45);
 
-  --muted: oklch(0.94 0.025 80);
-  --muted-foreground: oklch(0.5 0.04 60);
+  --muted: oklch(0.91 0.045 78);
+  --muted-foreground: oklch(0.45 0.07 50);
 
-  --accent: oklch(0.85 0.08 200);
-  --accent-foreground: oklch(0.3 0.05 230);
+  --accent: oklch(0.85 0.05 210);
+  --accent-foreground: oklch(0.3 0.06 220);
 
   --destructive: oklch(0.65 0.15 30);
   --destructive-foreground: oklch(0.99 0.01 85);
 
-  --border: oklch(0.88 0.03 75);
-  --input: oklch(0.9 0.025 75);
-  --ring: oklch(0.7 0.12 40);
+  --border: oklch(0.82 0.06 70);
+  --input: oklch(0.88 0.05 75);
+  --ring: oklch(0.47 0.085 215);
 
-  --gold: oklch(0.82 0.13 85);
-  --sky-soft: oklch(0.88 0.06 230);
-  --rose-soft: oklch(0.9 0.06 20);
-  --sage-soft: oklch(0.86 0.05 150);
+  --gold: oklch(0.8 0.14 75);
+  --sky-soft: oklch(0.85 0.05 210);
+  --rose-soft: oklch(0.86 0.07 35);
+  --sage-soft: oklch(0.84 0.06 145);
 }
 
 @layer base {
@@ -105,7 +105,7 @@
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-weight: 500;
+    font-weight: 700;
     letter-spacing: -0.01em;
   }
 }
@@ -117,21 +117,22 @@
   border: 1px solid oklch(0.92 0.025 75);
 }
 
-/* Home screen palette, sampled from its bedtime-story background: lamp-lit
-   cream, peach and pink surfaces, with the night-sky blue of the window as
-   the complementary color for text and the main button. */
+/* The screens' palette, sampled from the Bibledoo paintings: deep brown
+   ink (the title's outline) on parchment and wood, with the teal of the
+   rugs and Bible covers for the main buttons and the title's gold for
+   highlights. */
 .theme-bedtime {
-  --foreground: oklch(0.31 0.08 262);
-  --card: oklch(0.975 0.025 85);
-  --card-foreground: oklch(0.31 0.08 262);
-  --primary: oklch(0.45 0.115 258);
-  --primary-foreground: oklch(0.975 0.025 85);
-  --secondary: oklch(0.93 0.04 62);
-  --secondary-foreground: oklch(0.31 0.08 262);
-  --muted-foreground: oklch(0.44 0.06 262);
-  --border: oklch(0.88 0.04 62);
-  --ring: oklch(0.45 0.115 258);
-  --gold: oklch(0.79 0.135 76);
+  --foreground: oklch(0.3 0.07 45);
+  --card: oklch(0.95 0.04 82);
+  --card-foreground: oklch(0.3 0.07 45);
+  --primary: oklch(0.47 0.085 215);
+  --primary-foreground: oklch(0.97 0.03 85);
+  --secondary: oklch(0.9 0.06 75);
+  --secondary-foreground: oklch(0.3 0.07 45);
+  --muted-foreground: oklch(0.45 0.07 50);
+  --border: oklch(0.82 0.06 70);
+  --ring: oklch(0.47 0.085 215);
+  --gold: oklch(0.8 0.14 75);
 
   /* @theme inline resolves the --color-* aliases on :root, so restate the
      ones this scope changes. */
@@ -151,14 +152,14 @@
   color: var(--color-foreground);
 }
 
-/* Frosted moonlit-cream card that lets the background painting glow through. */
+/* Frosted parchment card that lets the background painting glow through. */
 @utility glass-card {
   background: color-mix(in oklch, var(--color-card) 62%, transparent);
   border-radius: var(--radius-2xl);
   border: 1px solid oklch(1 0 0 / 0.6);
   box-shadow:
     0 1px 0 oklch(1 0 0 / 0.7) inset,
-    0 10px 28px -12px oklch(0.31 0.08 262 / 0.35);
+    0 10px 28px -12px oklch(0.3 0.07 45 / 0.35);
   -webkit-backdrop-filter: blur(12px) saturate(1.1);
   backdrop-filter: blur(12px) saturate(1.1);
 }
@@ -573,5 +574,5 @@
 /* Scrollbars in the game's colours: thin, a warm wooden thumb, no track. */
 * {
   scrollbar-width: thin;
-  scrollbar-color: oklch(0.7 0.12 58 / 0.85) transparent;
+  scrollbar-color: oklch(0.5 0.1 50 / 0.85) transparent;
 }

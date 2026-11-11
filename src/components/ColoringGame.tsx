@@ -531,7 +531,7 @@ function ColoringBoard({
                           textAnchor="middle"
                           dominantBaseline="central"
                           fontWeight={mine ? 800 : 600}
-                          fill={mine ? "oklch(0.3 0.08 262)" : "oklch(0.42 0.03 60)"}
+                          fill={mine ? "oklch(0.3 0.07 45)" : "oklch(0.42 0.03 60)"}
                           style={{ fontFamily: "var(--font-body)" }}
                         >
                           {data.colorOf[l.id] + 1}
@@ -595,7 +595,7 @@ function ColoringBoard({
                 >
                   <span
                     className={`relative grid aspect-square w-full place-items-center rounded-full border-2 border-white text-base font-bold shadow-sm transition active:scale-90 ${
-                      selected === i ? "scale-110 ring-4 ring-[oklch(0.31_0.08_262)]" : ""
+                      selected === i ? "scale-110 ring-4 ring-[oklch(0.3_0.07_45)]" : ""
                     }`}
                     style={{ backgroundColor: c, color: light ? "oklch(0.3 0.05 60)" : "white" }}
                   >

@@ -38,6 +38,7 @@ import { STORIES } from "@/lib/stories";
 import { useImageReady } from "@/lib/use-image-ready";
 
 import orderMap from "@/assets/order-map.webp";
+import orderBg from "@/assets/order-bg.webp";
 import { CheckIcon, RestartIcon } from "@/components/Icons";
 
 const BEST_KEY = "order-best-v1";
@@ -86,9 +87,7 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
     <MenuScreen
       title={t("game.order")}
       subtitle={ot("order.instruction")}
-      background={orderMap}
-      blur
-      position="center top"
+      background={orderBg}
       onBack={onBack}
       backLabel={t("select.back")}
     >
@@ -428,7 +427,7 @@ function OrderBoard({
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
       <ScreenFade />
-      <BedtimeBackdrop image={orderMap} position="center top" fadeEnd={0} blur />
+      <BedtimeBackdrop image={orderBg} fadeEnd={0} blur />
       <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-3 md:py-5">
         <header className="flex items-center gap-3 pb-2">
           <BackButton onClick={onExit} label={ot("order.levels")} />
@@ -507,7 +506,7 @@ function OrderBoard({
                             className={`absolute left-1 top-1 grid h-7 w-7 place-items-center rounded-full text-sm font-bold text-white shadow animate-in zoom-in-50 ${
                               isEarliest
                                 ? "bg-[oklch(0.55_0.13_150)]"
-                                : "bg-[oklch(0.31_0.08_262/0.85)]"
+                                : "bg-[oklch(0.3_0.07_45/0.85)]"
                             }`}
                           >
                             {rank(s)}

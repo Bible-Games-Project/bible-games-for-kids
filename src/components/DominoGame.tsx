@@ -370,7 +370,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
                   {h.slice(0, 10).map((x) => (
                     <span
                       key={x.id}
-                      className="-ml-1 h-5 w-3 rounded-[3px] border border-white bg-[oklch(0.45_0.12_262)] first:ml-0"
+                      className="-ml-1 h-5 w-3 rounded-[3px] border border-white bg-[oklch(0.47_0.085_215)] first:ml-0"
                     />
                   ))}
                 </span>

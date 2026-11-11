@@ -641,11 +641,11 @@ function DieFace({ value, spinning }: { value: number; spinning: boolean }) {
         height="21"
         rx="5"
         fill="oklch(0.99 0.012 85)"
-        stroke="oklch(0.31 0.08 262)"
+        stroke="oklch(0.3 0.07 45)"
         strokeWidth="1.2"
       />
       {PIPS[value].map(([cx, cy]) => (
-        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="2" fill="oklch(0.31 0.08 262)" />
+        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="2" fill="oklch(0.3 0.07 45)" />
       ))}
     </svg>
   );
