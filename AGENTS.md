@@ -110,9 +110,10 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   blessing-children, walking-water, calming-storm, good-samaritan, creation,
   moses-basket, david-shepherd, burning-bush, rainbow-promise, tower-babel;
   red-sea waits for the maintainer's own Moses painting). To save money,
-  paintings use gpt-image-2 quality "medium" with style-test/good-shepherd.jpg
-  and style-test/nativity.jpg as style references plus the old painting for
-  content, and the coloring-book drawings use quality "low" (about 1 cent, and
+  paintings use gpt-image-2 quality "medium" with scripts/style-reference.jpg
+  (the maintainer's own reference image — the style every painting must match)
+  as the style reference plus the old painting for content only, and the
+  coloring-book drawings use quality "low" (about 1 cent, and
   they line up with the painting better than "high" did; check by overlaying,
   since coloring takes its colors from the painting under each area). Each new
   painting hides about nine small story objects, marked in story-items.ts for
