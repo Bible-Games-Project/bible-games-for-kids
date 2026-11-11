@@ -83,7 +83,7 @@ const MARKER_LINES = import.meta.glob("../assets/coloring-marker/*-lines.webp", 
   import: "default",
 }) as Record<string, string>;
 
-export const MARKER_W = 768;
+export const MARKER_W = 896;
 export const MARKER_H = 1152;
 
 export function markerLines(slug: string, level: DifficultyId): string | undefined {

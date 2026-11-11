@@ -67,10 +67,10 @@ export interface Character {
 
 // id -> story it comes from, and what the portrait shows.
 const LIST: [id: string, story: string, traits: string][] = [
-  ["jesus", "good-shepherd", "beard"],
+  ["jesus", "good-shepherd", "beard red smile"],
   ["boy-jesus", "boy-temple", "child blue up"],
-  ["mary", "nativity", "woman covered veil blue smile down"],
-  ["joseph", "nativity", "beard down hand"],
+  ["mary", "nativity", "woman covered veil red smile down"],
+  ["joseph", "nativity", "beard red down"],
   ["gabriel", "annunciation", "angel"],
   ["john", "baptism-jesus", "beard fur"],
   ["peter", "washes-feet", "beard down"],
@@ -93,9 +93,9 @@ const LIST: [id: string, story: string, traits: string][] = [
   ["orpah", "ruth-fields", "woman covered veil red hand old"],
   ["samuel", "samuel-call", "child down hand old"],
   ["david", "david-shepherd", "child old"],
-  ["goliath", "david-goliath", "beard covered crown old"],
+  ["goliath", "david-goliath", "beard covered old"],
   ["elijah", "elijah-ravens", "beard white fur up old"],
-  ["jonah", "jonah-fish", "beard red up hand old"],
+  ["jonah", "jonah-fish", "beard red up old"],
   ["daniel", "daniel-lions", "beard blue up old"],
   ["esther", "queen-esther", "woman covered crown old"],
   ["jacob", "joseph-coat", "beard white covered headband smile old"],

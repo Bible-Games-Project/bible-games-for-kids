@@ -101,7 +101,16 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
 - Coloring has a marker mode on trial (`MarkerBoard.tsx`): free finger
   painting where each stroke is clipped to the closed shape it started in.
   It is used on Easy for any page with `src/assets/coloring-marker/<slug>-lines.webp`
-  (768x1152, dark brown lines on transparent); other pages and levels stay
+  (896x1152, dark brown lines on transparent); other pages and levels stay
   paint by numbers. The drawing was made with gpt-image-2 (images/edits from
   the story painting, "children's coloring book page, bold closed outlines"),
-  then resized and thickened (blur 1.6 + steep alpha levels) with sharp.
+  then thickened (blur 1.6 + steep alpha levels); scripts/story-assets.cjs rebuilds it from scripts/coloring-art/<slug>.png.
+- Story paintings are moving to a new gouache storybook style (trial on
+  noahs-ark, david-goliath, nativity, good-shepherd, jonah-fish; originals
+  of the new ones in src/assets/style-test/, compared at /style-test). Each new
+  painting hides about nine small story objects, marked in story-items.ts for
+  Seek & Find and Drag & Drop. After replacing a puzzle-<slug>.jpg, update
+  its story-items.ts line and Guess Who traits by hand, put a gpt-image-2
+  coloring-book drawing of it in scripts/coloring-art/<slug>.png, then run
+  `NODE_PATH=~/imgtools/node_modules node scripts/story-assets.cjs <slug>...`
+  (thumbs, Drag & Drop pieces, portraits, coloring pages).
