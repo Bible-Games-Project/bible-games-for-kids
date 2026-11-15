@@ -1,14 +1,15 @@
 import { useEffect } from "react";
 import { useSettings } from "@/lib/i18n";
 
-// The game is played upright. Phones and tablets held sideways get this
-// screen asking to turn them (shown by CSS, see .rotate-hint), and where
-// the browser allows it the screen is locked upright on the first touch.
+// Phones are played upright. A phone held sideways gets this screen asking
+// to turn it (shown by CSS, see .rotate-hint), and where the browser allows
+// it the screen is locked upright on the first touch. Tablets may turn.
 export function RotateHint() {
   const { t } = useSettings();
 
   useEffect(() => {
     const lock = () => {
+      if (Math.min(screen.width, screen.height) >= 600) return;
       const orientation = screen.orientation as ScreenOrientation & {
         lock?: (o: string) => Promise<void>;
       };

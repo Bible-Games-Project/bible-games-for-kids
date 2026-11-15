@@ -19,6 +19,7 @@ import {
   type Tile,
 } from "@/lib/domino";
 import { useBackButton } from "@/lib/back-button";
+import { useWideScreen } from "@/lib/use-fit";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
 import { PlayerPawn, TOKEN_ORDER } from "@/components/Token";
@@ -186,6 +187,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
   const [quiz, setQuiz] = useState<Story | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [width, setWidth] = useState(340);
+  const wide = useWideScreen();
   const table = useRef<HTMLDivElement | null>(null);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => {
@@ -321,13 +323,13 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
   };
 
   // ---- The line on the table: from the middle out, turning at the edges ----
-  const S = Math.round(Math.min(64, Math.max(30, width / 7.2)));
+  const S = Math.round(Math.min(wide ? 72 : 64, Math.max(30, width / 7.2)));
   // a tile's sides: two halves, the gap between them and the painted frame
   const tileW = 2 * S + 12;
   const tileH = S + 10;
   const laid = layoutLine(g.line, g.firstId, width, tileW, tileH);
 
-  const handSize = Math.round(Math.min(48, Math.max(30, width / 9.5)));
+  const handSize = Math.round(Math.min(wide ? 66 : 48, Math.max(30, width / 9.5)));
   const first = g.line[0];
   const last = g.line[g.line.length - 1];
 
@@ -343,7 +345,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
       <ScreenFade />
       <BedtimeBackdrop image={dominoBg} fadeEnd={0} blur />
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-2xl flex-col px-3 py-3">
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-2xl flex-col px-3 py-3 wide:max-w-5xl">
         <header className="flex items-center gap-3 pb-2">
           <BackButton onClick={onExit} label={dt("dom.players")} />
           <h1 className="min-w-0 flex-1 truncate font-display text-xl text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_6px_oklch(0.3_0.06_50/0.6)]">
@@ -381,7 +383,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
         </div>
 
         {/* The table */}
-        <div className="rounded-3xl bg-[oklch(0.62_0.08_60/0.85)] p-3 shadow-[inset_0_2px_8px_oklch(0.3_0.05_50/0.4)]">
+        <div className="rounded-3xl bg-[oklch(0.62_0.08_60/0.85)] p-3 shadow-[inset_0_2px_8px_oklch(0.3_0.05_50/0.4)] wide:flex wide:flex-1 wide:flex-col wide:justify-center">
           <div
             ref={table}
             className="relative w-full transition-[height] duration-500"

@@ -607,7 +607,11 @@ function ChessBoard({
     .sort((a, b) => a.p.id - b.p.id);
 
   const tray = (side: Side) => (
-    <div className="flex min-h-7 flex-wrap items-center gap-1 px-1">
+    <div
+      className={`flex min-h-7 flex-wrap items-center gap-1 px-1 wide:col-start-1 ${
+        side === "ot" ? "wide:row-start-2 wide:pt-4" : "wide:row-start-4 wide:pb-5"
+      }`}
+    >
       <span className="mr-1 text-xs font-semibold text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
         {team(side)}
       </span>
@@ -623,8 +627,8 @@ function ChessBoard({
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
       <ScreenFade />
       <BedtimeBackdrop image={chessBg} fadeEnd={0} blur />
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-xl flex-col px-3 py-3">
-        <header className="flex items-center gap-3 pb-2">
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-xl flex-col px-3 py-3 wide:grid wide:h-[100dvh] wide:max-w-none wide:grid-cols-[20rem_auto] wide:grid-rows-[auto_auto_1fr_auto] wide:justify-center wide:gap-x-8 wide:px-5 xl:wide:grid-cols-[24rem_auto]">
+        <header className="flex items-center gap-3 pb-2 wide:col-start-1 wide:row-start-1">
           <BackButton onClick={onExit} label={ct("dom.players")} />
           <h1 className="min-w-0 flex-1 truncate font-display text-xl text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_6px_oklch(0.3_0.06_50/0.6)]">
             {t("game.chess")}
@@ -635,7 +639,7 @@ function ChessBoard({
         {tray("ot")}
 
         {/* The board: the Old Testament at the top, the New at the bottom */}
-        <div className="relative mx-auto mb-1 mt-7 aspect-[1095/1080] w-full max-w-[min(100%,64dvh)] drop-shadow-[0_14px_22px_oklch(0.25_0.05_50/0.45)]">
+        <div className="relative mx-auto mb-1 mt-7 aspect-[1095/1080] w-full max-w-[min(100%,64dvh)] wide:col-start-2 wide:row-span-4 wide:row-start-1 wide:mb-0 wide:mt-4 wide:w-[min(calc(100vw-27rem),calc((100dvh-3rem)*1095/1080))] wide:max-w-none wide:self-center drop-shadow-[0_14px_22px_oklch(0.25_0.05_50/0.45)]">
           <img
             src={boardArt}
             alt=""
@@ -682,7 +686,7 @@ function ChessBoard({
 
         {tray("nt")}
 
-        <div className="paint-box paint-long paint-thin mt-2 px-4 py-2.5">
+        <div className="paint-box paint-long paint-thin mt-2 px-4 py-2.5 wide:col-start-1 wide:row-start-3 wide:my-4 wide:self-center wide:py-5">
           <p
             className={`text-center text-sm font-semibold ${check ? "text-[oklch(0.55_0.2_25)]" : ""}`}
             aria-live="polite"

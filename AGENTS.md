@@ -123,3 +123,14 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   coloring-book drawing of it in scripts/coloring-art/<slug>.png, then run
   `NODE_PATH=~/imgtools/node_modules node scripts/story-assets.cjs <slug>...`
   (thumbs, Drag & Drop pieces, portraits, coloring pages).
+- Wide screens (since Nov 2026): the maintainer wants every game to use the
+  whole screen on a computer or a sideways tablet, with phones unchanged.
+  The `wide:` Tailwind variant (styles.css) and `useWideScreen()` in
+  `src/lib/use-fit.ts` share one test (min-width 900px, landscape). The pattern:
+  controls in a ~20rem side column, the board in a second grid column sized by
+  height (`w-[min(calc(100vw-27rem),calc((100dvh-Xrem)*W/H))]`); card grids
+  use `useElementSize` + `fitGrid` to pick the columns that fit without
+  scrolling. Only phones (landscape height < 600px) get the rotate hint.
+- Checking layouts without a browser: `~/browser/shot.sh out.png W H "?screen=<id>" [clicks/wait:ms/eval:js]`
+  (headless Chromium; needs its FONTCONFIG settings or text is blank). `?screen=`
+  opens a game directly in dev only. Run at most two at once or navigation times out.

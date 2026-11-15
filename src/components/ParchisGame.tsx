@@ -449,8 +449,8 @@ function ParchisBoard({
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
       <ScreenFade />
       <BedtimeBackdrop image={parchisBg} fadeEnd={0} blur />
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-xl flex-col px-3 py-3">
-        <header className="flex items-center gap-3 pb-2">
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-xl flex-col px-3 py-3 wide:grid wide:h-[100dvh] wide:max-w-none wide:grid-cols-[20rem_auto] wide:grid-rows-[auto_1fr] wide:justify-center wide:gap-x-8 wide:px-5 xl:wide:grid-cols-[24rem_auto]">
+        <header className="flex items-center gap-3 pb-2 wide:col-start-1 wide:row-start-1">
           <BackButton onClick={onExit} label={pt("dom.players")} />
           <h1 className="min-w-0 flex-1 truncate font-display text-xl text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_6px_oklch(0.3_0.06_50/0.6)]">
             {t("game.parchis")}
@@ -458,7 +458,7 @@ function ParchisBoard({
         </header>
 
         {/* The board */}
-        <div className="relative mx-auto aspect-[1132/1093] w-full max-w-[min(100%,72dvh)] drop-shadow-[0_14px_22px_oklch(0.25_0.05_50/0.45)]">
+        <div className="relative mx-auto aspect-[1132/1093] w-full max-w-[min(100%,72dvh)] wide:col-start-2 wide:row-span-2 wide:row-start-1 wide:w-[min(calc(100vw-27rem),calc((100dvh-2rem)*1132/1093))] wide:max-w-none wide:self-center drop-shadow-[0_14px_22px_oklch(0.25_0.05_50/0.45)]">
           <img
             src={boardArt}
             alt=""
@@ -534,13 +534,13 @@ function ParchisBoard({
         </div>
 
         {/* Whose turn, the die and the pawn choice */}
-        <div className="paint-box paint-long paint-thin mt-3 flex items-center gap-3 px-4 py-2.5">
+        <div className="paint-box paint-long paint-thin mt-3 flex items-center gap-3 px-4 py-2.5 wide:col-start-1 wide:row-start-2 wide:mt-0 wide:flex-col-reverse wide:items-stretch wide:gap-4 wide:self-center wide:py-5">
           <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-2 text-sm font-semibold">
+            <p className="flex items-center gap-2 text-sm font-semibold wide:text-base">
               <Pawn color={seat.color} size={18} />
               <span className="truncate">{mt("mem.turn").replace("{name}", nameOf(turn))}</span>
             </p>
-            <p className="mt-1 min-h-[1.25rem] text-xs text-foreground/80" aria-live="polite">
+            <p className="mt-1 min-h-[1.25rem] text-xs text-foreground/80 wide:text-sm" aria-live="polite">
               {message ?? ""}
             </p>
             {human && phase === "choose" && (
@@ -562,7 +562,7 @@ function ParchisBoard({
             onClick={roll}
             disabled={!human || phase !== "roll"}
             aria-label={pt("goose.roll")}
-            className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90 disabled:opacity-60"
+            className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl wide:mx-auto wide:h-28 wide:w-28 bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90 disabled:opacity-60"
           >
             <DieFace value={die} spinning={rolling} />
           </button>

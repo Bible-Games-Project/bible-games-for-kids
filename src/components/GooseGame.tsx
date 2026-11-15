@@ -16,6 +16,7 @@ import {
   type Square,
 } from "@/lib/goose";
 import { useBackButton } from "@/lib/back-button";
+import { useWideScreen } from "@/lib/use-fit";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
 import { PAWN_RATIO, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
@@ -377,6 +378,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
     ms: 0,
   });
   const [size, setSize] = useState({ w: 360, h: 480 });
+  const wide = useWideScreen();
 
   const viewport = useRef<HTMLDivElement | null>(null);
   const posRef = useRef(pos);
@@ -599,11 +601,14 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   };
 
   // Camera transform for the current view.
-  const fit = Math.min(size.w / W, size.h / H);
+  // leave room around the whole board for its painted edge
+  const margin = wide ? 32 : 0;
+  const fit = Math.min((size.w - 2 * margin) / W, (size.h - 2 * margin) / H);
   let scale = fit;
   let tx = (size.w - W * fit) / 2;
   let ty = (size.h - H * fit) / 2;
-  if (!view.all) {
+  // On a computer the whole board fits, so the camera never zooms in.
+  if (!view.all && !wide) {
     scale = Math.max(fit, Math.min(size.w, size.h) / (CELL * 3.4));
     const c = centerOf(view.n);
     const clamp = (v: number, span: number, room: number) =>
@@ -625,10 +630,10 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   const solo = players === 1;
 
   return (
-    <div className="theme-bedtime relative flex h-[100dvh] w-full flex-col overflow-hidden">
+    <div className="theme-bedtime relative flex h-[100dvh] w-full flex-col overflow-hidden wide:grid wide:grid-cols-[20rem_1fr] wide:grid-rows-[auto_1fr] xl:wide:grid-cols-[24rem_1fr]">
       <ScreenFade />
       <BedtimeBackdrop image={gooseBg} fadeEnd={0} blur />
-      <header className="relative z-10 mx-auto flex w-full max-w-3xl items-center gap-3 px-3 pt-3 pb-2">
+      <header className="relative z-10 mx-auto flex w-full max-w-3xl items-center gap-3 px-3 pt-3 pb-2 wide:col-start-1 wide:row-start-1 wide:pl-5 wide:pt-5">
         <BackButton onClick={onExit} label={gt("goose.players")} />
         <h1 className="min-w-0 flex-1 truncate font-display text-xl text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_6px_oklch(0.3_0.06_50/0.6)]">
           {t("game.goose")}
@@ -639,7 +644,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
           }
           aria-label={gt("goose.board")}
           aria-pressed={view.all}
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-card text-lg shadow-sm transition active:scale-95 ${
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-card text-lg shadow-sm transition active:scale-95 wide:hidden ${
             view.all ? "ring-2 ring-[var(--color-primary)]" : ""
           }`}
         >
@@ -649,7 +654,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
 
       <div
         ref={viewport}
-        className="relative z-10 mx-auto w-full max-w-3xl min-h-0 flex-1 overflow-hidden"
+        className="relative z-10 mx-auto w-full max-w-3xl min-h-0 flex-1 overflow-hidden wide:col-start-2 wide:row-span-2 wide:row-start-1 wide:h-full wide:max-w-none"
       >
         <div
           className="absolute left-0 top-0 origin-top-left"
@@ -732,10 +737,10 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
       </div>
 
       {/* Turn, message and the die */}
-      <div className="relative z-10 mx-auto w-full max-w-3xl px-3 pb-4 pt-2">
-        <div className="paint-box paint-long paint-thin flex items-center gap-3 px-4 py-2.5">
+      <div className="relative z-10 mx-auto w-full max-w-3xl px-3 pb-4 pt-2 wide:col-start-1 wide:row-start-2 wide:self-center wide:pl-5">
+        <div className="paint-box paint-long paint-thin flex items-center gap-3 px-4 py-2.5 wide:flex-col-reverse wide:items-stretch wide:gap-4 wide:py-5">
           <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-2 text-sm font-semibold">
+            <p className="flex items-center gap-2 text-sm font-semibold wide:text-base">
               <Pawn index={turn} size={22} />
               <span className="truncate">
                 {solo
@@ -744,7 +749,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
               </span>
             </p>
             <p
-              className="mt-1 min-h-[2.5rem] text-xs leading-snug text-foreground/80"
+              className="mt-1 min-h-[2.5rem] text-xs leading-snug text-foreground/80 wide:text-sm"
               aria-live="polite"
             >
               {message ?? ""}
@@ -754,7 +759,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
             onClick={roll}
             disabled={busy || winner !== null}
             aria-label={gt("goose.roll")}
-            className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90 disabled:opacity-60"
+            className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl wide:mx-auto wide:h-28 wide:w-28 bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90 disabled:opacity-60"
           >
             <DieFace value={die} spinning={rolling} />
           </button>

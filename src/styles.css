@@ -228,12 +228,13 @@
   .appear, .appear-soft { animation: none; }
 }
 
-/* Phones and tablets held sideways: ask to turn them upright. */
+/* Phones held sideways: ask to turn them upright. Tablets are tall enough to
+   play sideways, with the wide layouts (see the wide variant above). */
 .rotate-hint {
   display: none;
 }
 
-@media (orientation: landscape) and (pointer: coarse) and (hover: none) {
+@media (orientation: landscape) and (pointer: coarse) and (hover: none) and (max-height: 599px) {
   .rotate-hint {
     display: grid;
   }
