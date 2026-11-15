@@ -70,6 +70,7 @@ export function ColoringGame({ onBack }: { onBack: () => void }) {
       background={coloringBg}
       onBack={onBack}
       backLabel={t("select.back")}
+      wide
     >
       <StoryPicker
         level={level}

@@ -55,6 +55,7 @@ export function DragDropGame({ onBack }: { onBack: () => void }) {
       background={dragdropBg}
       onBack={onBack}
       backLabel={t("select.back")}
+      wide
     >
       <StoryPicker
         level={level}

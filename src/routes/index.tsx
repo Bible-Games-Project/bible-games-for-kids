@@ -622,6 +622,13 @@ function Home() {
   const [progress, setProgress] = useState<Progress>({});
   const [active, setActive] = useState<ActiveState | null>(null);
   const [screen, setScreen] = useState<Screen>("home");
+  // Dev server only: open a screen straight away with ?screen=<id>, so layout
+  // checks with a headless browser don't have to click through the carousel.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const s = new URLSearchParams(window.location.search).get("screen");
+    if (s) setScreen(s as Screen);
+  }, []);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty["id"]>(
     DIFFICULTIES[0].id,
@@ -924,7 +931,7 @@ function Home() {
       <div className="relative z-10 w-full">
         {gearButton(48, 16)}
 
-        <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
+        <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2 lg:max-w-6xl 2xl:max-w-7xl">
           <BackButton onClick={() => setScreen("home")} label={t("select.back")} />
           <h1 className="font-display text-2xl sm:text-3xl">{t("select.title")}</h1>
         </header>
@@ -961,7 +968,7 @@ function Home() {
           </p>
         </nav>
 
-        <main className="mx-auto max-w-3xl space-y-4 px-4 pb-12">
+        <main className="mx-auto grid max-w-3xl gap-4 px-4 pb-12 lg:max-w-6xl lg:grid-cols-2 xl:grid-cols-3 2xl:max-w-7xl">
           <DifficultyList
             key={difficulty.id}
             difficulty={difficulty}

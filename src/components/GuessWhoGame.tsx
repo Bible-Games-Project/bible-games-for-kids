@@ -16,6 +16,7 @@ import {
   type Trait,
 } from "@/lib/guesswho";
 import { useBackButton } from "@/lib/back-button";
+import { fitGrid, useElementSize, useWideScreen } from "@/lib/use-fit";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import {
   BackButton,
@@ -263,146 +264,185 @@ function GuessBoard({
   };
 
   const cols = CHARACTER_COLS[level];
+  const wide = useWideScreen();
+  const [setArea, area] = useElementSize();
   const asked = QUESTIONS.filter((q) => board.asked.has(q.trait));
   const shown = winner !== null ? boards[winner] : board;
+  const fit = fitGrid(shown.cards.length, area.width, area.height, 5 / 4, 8);
+
+  const playersBar = (
+    <>
+      {players > 1 && (
+        <div className={wide ? "grid gap-2" : "mb-2 grid grid-cols-2 gap-2"}>
+          {boards.map((b, i) => (
+            <div
+              key={i}
+              className={`paint-box paint-long paint-flat paint-thin flex items-center gap-2 px-3 py-1.5 text-sm font-semibold transition ${
+                i === turn && winner === null ? "paint-picked scale-[1.03]" : "opacity-70"
+              }`}
+            >
+              <PlayerDot index={i} />
+              <span className="min-w-0 flex-1 leading-tight">
+                <span className="block truncate">{playerName(i)}</span>
+                <span className="block truncate text-xs font-normal text-muted-foreground">
+                  {gt("gw.left", { n: standing(b).length })}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+  const cardsGrid = (
+    <>
+      {/* The cards, each standing in a painted frame. A card that is
+          ruled out tips over backwards and falls flat, like on the real
+          game's board. */}
+      <div
+        className="grid gap-2"
+        style={
+          wide
+            ? { gridTemplateColumns: `repeat(${fit.cols}, ${fit.cell}px)` }
+            : { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }
+        }
+      >
+        {shown.cards.map((c) => {
+          const isDown = shown.down.has(c.id);
+          const isSecret = winner !== null && c === shown.secret;
+          return (
+            <button
+              key={c.id}
+              onClick={() => guess(c)}
+              disabled={isDown || winner !== null}
+              aria-label={name(c)}
+              className="relative aspect-[4/5] w-full [perspective:500px]"
+            >
+              {/* where the card stood */}
+              <span className="absolute inset-x-[8%] bottom-0 h-[14%] rounded-[50%] bg-[oklch(0.3_0.05_50/0.22)] blur-[2px]" />
+              <span
+                className={`paint-box paint-tall paint-flat paint-tiny absolute inset-0 flex origin-bottom flex-col p-[9%] transition-[transform,opacity] duration-700 ${
+                  isSecret ? "paint-picked" : ""
+                }`}
+                style={{
+                  transform: isDown ? "rotateX(84deg)" : "none",
+                  opacity: isDown ? 0.55 : 1,
+                  transitionTimingFunction: isDown
+                    ? "cubic-bezier(0.55, 0, 0.85, 0.35)"
+                    : "cubic-bezier(0.2, 0.7, 0.3, 1)",
+                }}
+              >
+                <img
+                  src={c.image}
+                  alt=""
+                  draggable={false}
+                  className="min-h-0 w-full flex-1 select-none rounded-[6px] object-cover"
+                />
+                <span className="line-clamp-1 px-0.5 pt-0.5 text-center text-[8px] font-semibold leading-tight text-foreground sm:text-[11px]">
+                  {name(c)}
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </>
+  );
+  const panel = (
+    <div className={`paint-box paint-long px-5 pb-4 pt-3 ${wide ? "" : "mt-3"}`}>
+      <p
+        className={`min-h-[1.5rem] text-center text-sm font-semibold ${
+          message?.tone === "yes"
+            ? "text-[oklch(0.48_0.13_150)]"
+            : message?.tone === "no"
+              ? "text-[oklch(0.55_0.17_25)]"
+              : "text-foreground"
+        }`}
+        aria-live="polite"
+      >
+        {message?.text ?? gt("gw.instruction")}
+      </p>
+      {asked.length > 0 && (
+        <div className="mt-1 flex flex-wrap justify-center gap-1">
+          {asked.map(({ trait, emoji }) => (
+            <span
+              key={trait}
+              title={gt(`gw.q.${trait}`)}
+              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                board.asked.get(trait)
+                  ? "bg-[oklch(0.9_0.07_150)] text-[oklch(0.35_0.08_150)]"
+                  : "bg-[oklch(0.92_0.04_25)] text-[oklch(0.45_0.12_25)]"
+              }`}
+            >
+              {emoji} {board.asked.get(trait) ? <CheckIcon /> : <CrossIcon />}
+            </span>
+          ))}
+        </div>
+      )}
+      <button
+        onClick={() => {
+          audio.playClick();
+          setSheet(true);
+        }}
+        disabled={busy || winner !== null}
+        className="paint-box paint-wide paint-flat paint-thin mx-auto mt-3 flex w-full max-w-xs items-center justify-center gap-3 px-5 py-3.5 font-display text-xl text-[oklch(0.42_0.11_50)] transition active:scale-95 disabled:opacity-50"
+      >
+        <img src={hintArt} alt="" aria-hidden draggable={false} className="h-9 w-9 select-none" />
+        {gt("gw.ask")}
+      </button>
+      <p className="pt-2 text-center text-[11px] italic text-muted-foreground">
+        {gt("gw.orGuess")}
+      </p>
+    </div>
+  );
 
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
       <ScreenFade />
       <BedtimeBackdrop image={guessBg} fadeEnd={0} blur />
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col px-3 py-3">
-        <header className="flex items-center gap-3 pb-2">
-          <BackButton onClick={onExit} label={gt("gw.levels")} />
-          <h1 className="min-w-0 flex-1 truncate font-display text-xl text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_6px_oklch(0.3_0.06_50/0.6)]">
-            {t("game.guesswho")} · {t(`diff.${level}`)}
-          </h1>
-          {players === 1 && (
-            <span className="shrink-0 rounded-full bg-card/90 px-3 py-1 text-sm font-semibold tabular-nums text-foreground/80 shadow-sm">
-              ❓ {board.cost}
-            </span>
-          )}
-        </header>
-
-        {players > 1 && (
-          <div className="mb-2 grid grid-cols-2 gap-2">
-            {boards.map((b, i) => (
-              <div
-                key={i}
-                className={`paint-box paint-long paint-flat paint-thin flex items-center gap-2 px-3 py-1.5 text-sm font-semibold transition ${
-                  i === turn && winner === null ? "paint-picked scale-[1.03]" : "opacity-70"
-                }`}
-              >
-                <PlayerDot index={i} />
-                <span className="min-w-0 flex-1 leading-tight">
-                  <span className="block truncate">{playerName(i)}</span>
-                  <span className="block truncate text-xs font-normal text-muted-foreground">
-                    {gt("gw.left", { n: standing(b).length })}
-                  </span>
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* The cards, each standing in a painted frame. A card that is
-            ruled out tips over backwards and falls flat, like on the real
-            game's board. */}
-        <div
-          className="grid gap-2"
-          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-        >
-          {shown.cards.map((c) => {
-            const isDown = shown.down.has(c.id);
-            const isSecret = winner !== null && c === shown.secret;
-            return (
-              <button
-                key={c.id}
-                onClick={() => guess(c)}
-                disabled={isDown || winner !== null}
-                aria-label={name(c)}
-                className="relative aspect-[4/5] w-full [perspective:500px]"
-              >
-                {/* where the card stood */}
-                <span className="absolute inset-x-[8%] bottom-0 h-[14%] rounded-[50%] bg-[oklch(0.3_0.05_50/0.22)] blur-[2px]" />
-                <span
-                  className={`paint-box paint-tall paint-flat paint-tiny absolute inset-0 flex origin-bottom flex-col p-[9%] transition-[transform,opacity] duration-700 ${
-                    isSecret ? "paint-picked" : ""
-                  }`}
-                  style={{
-                    transform: isDown ? "rotateX(84deg)" : "none",
-                    opacity: isDown ? 0.55 : 1,
-                    transitionTimingFunction: isDown
-                      ? "cubic-bezier(0.55, 0, 0.85, 0.35)"
-                      : "cubic-bezier(0.2, 0.7, 0.3, 1)",
-                  }}
-                >
-                  <img
-                    src={c.image}
-                    alt=""
-                    draggable={false}
-                    className="min-h-0 w-full flex-1 select-none rounded-[6px] object-cover"
-                  />
-                  <span className="line-clamp-1 px-0.5 pt-0.5 text-center text-[8px] font-semibold leading-tight text-foreground sm:text-[11px]">
-                    {name(c)}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="paint-box paint-long mt-3 px-5 pb-4 pt-3">
-          <p
-            className={`min-h-[1.5rem] text-center text-sm font-semibold ${
-              message?.tone === "yes"
-                ? "text-[oklch(0.48_0.13_150)]"
-                : message?.tone === "no"
-                  ? "text-[oklch(0.55_0.17_25)]"
-                  : "text-foreground"
-            }`}
-            aria-live="polite"
-          >
-            {message?.text ?? gt("gw.instruction")}
-          </p>
-          {asked.length > 0 && (
-            <div className="mt-1 flex flex-wrap justify-center gap-1">
-              {asked.map(({ trait, emoji }) => (
-                <span
-                  key={trait}
-                  title={gt(`gw.q.${trait}`)}
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    board.asked.get(trait)
-                      ? "bg-[oklch(0.9_0.07_150)] text-[oklch(0.35_0.08_150)]"
-                      : "bg-[oklch(0.92_0.04_25)] text-[oklch(0.45_0.12_25)]"
-                  }`}
-                >
-                  {emoji} {board.asked.get(trait) ? <CheckIcon /> : <CrossIcon />}
-                </span>
-              ))}
+      {wide ? (
+        // Computer or tablet held sideways: every card fits on the screen,
+        // the questions stand beside them.
+        <div className="relative z-10 mx-auto flex h-[100dvh] w-full max-w-[110rem] flex-col px-5 py-3">
+          <header className="flex items-center gap-3 pb-2">
+            <BackButton onClick={onExit} label={gt("gw.levels")} />
+            <h1 className="min-w-0 flex-1 truncate font-display text-xl text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_6px_oklch(0.3_0.06_50/0.6)]">
+              {t("game.guesswho")} · {t(`diff.${level}`)}
+            </h1>
+            {players === 1 && (
+              <span className="shrink-0 rounded-full bg-card/90 px-3 py-1 text-sm font-semibold tabular-nums text-foreground/80 shadow-sm">
+                ❓ {board.cost}
+              </span>
+            )}
+          </header>
+          <div className="flex min-h-0 flex-1 gap-5">
+            <div ref={setArea} className="grid min-h-0 min-w-0 flex-1 place-items-center overflow-hidden p-2">
+              {fit.cell > 0 && cardsGrid}
             </div>
-          )}
-          <button
-            onClick={() => {
-              audio.playClick();
-              setSheet(true);
-            }}
-            disabled={busy || winner !== null}
-            className="paint-box paint-wide paint-flat paint-thin mx-auto mt-3 flex w-full max-w-xs items-center justify-center gap-3 px-5 py-3.5 font-display text-xl text-[oklch(0.42_0.11_50)] transition active:scale-95 disabled:opacity-50"
-          >
-            <img
-              src={hintArt}
-              alt=""
-              aria-hidden
-              draggable={false}
-              className="h-9 w-9 select-none"
-            />
-            {gt("gw.ask")}
-          </button>
-          <p className="pt-2 text-center text-[11px] italic text-muted-foreground">
-            {gt("gw.orGuess")}
-          </p>
+            <aside className="flex w-80 shrink-0 flex-col justify-center gap-3 xl:w-96">
+              {playersBar}
+              {panel}
+            </aside>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col px-3 py-3">
+          <header className="flex items-center gap-3 pb-2">
+            <BackButton onClick={onExit} label={gt("gw.levels")} />
+            <h1 className="min-w-0 flex-1 truncate font-display text-xl text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_6px_oklch(0.3_0.06_50/0.6)]">
+              {t("game.guesswho")} · {t(`diff.${level}`)}
+            </h1>
+            {players === 1 && (
+              <span className="shrink-0 rounded-full bg-card/90 px-3 py-1 text-sm font-semibold tabular-nums text-foreground/80 shadow-sm">
+                ❓ {board.cost}
+              </span>
+            )}
+          </header>
+          {playersBar}
+          {cardsGrid}
+          {panel}
+        </div>
+      )}
 
       {/* The questions, in a sheet over the bottom of the screen */}
       {sheet && (
@@ -411,7 +451,7 @@ function GuessBoard({
           onClick={() => setSheet(false)}
         >
           <div
-            className="paint-box paint-tall paint-solid w-full max-w-lg animate-in slide-in-from-bottom-10 duration-200"
+            className={`paint-box paint-tall paint-solid w-full animate-in slide-in-from-bottom-10 duration-200 ${wide ? "max-w-3xl" : "max-w-lg"}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="max-h-[75dvh] overflow-y-auto px-6 pb-7 pt-6">
@@ -425,7 +465,7 @@ function GuessBoard({
                   <CrossIcon />
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className={`grid gap-2 ${wide ? "grid-cols-3" : "grid-cols-2"}`}>
                 {QUESTIONS.map(({ trait, emoji }) => {
                   const answer = board.asked.get(trait);
                   return (

@@ -92,6 +92,7 @@ export function MenuScreen({
   backLabel,
   blur = false,
   position = "center 35%",
+  wide = false,
   children,
 }: {
   title: string;
@@ -101,23 +102,26 @@ export function MenuScreen({
   backLabel: string;
   blur?: boolean;
   position?: string;
+  // Story grids use the whole width of a computer screen.
+  wide?: boolean;
   children: ReactNode;
 }) {
+  const width = wide ? "max-w-3xl lg:max-w-6xl 2xl:max-w-7xl" : "max-w-3xl";
   return (
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
       <ScreenFade />
       <BedtimeBackdrop image={background} position={position} fadeEnd={30} blur={blur} />
       <div className="relative z-10 min-h-[100dvh] w-full">
-        <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2">
+        <header className={`mx-auto flex ${width} items-center gap-3 px-4 pt-6 pb-2`}>
           <BackButton onClick={onBack} label={backLabel} />
           <h1 className="font-display text-2xl sm:text-3xl">{title}</h1>
         </header>
         {subtitle && (
-          <p className="mx-auto max-w-3xl px-6 pt-1 text-sm italic text-muted-foreground">
+          <p className={`mx-auto ${width} px-6 pt-1 text-sm italic text-muted-foreground`}>
             {subtitle}
           </p>
         )}
-        <main className="mx-auto max-w-3xl px-4 pb-12 pt-4">{children}</main>
+        <main className={`mx-auto ${width} px-4 pb-12 pt-4`}>{children}</main>
       </div>
     </div>
   );
@@ -142,7 +146,7 @@ export function LevelList({
 }) {
   const { t } = useSettings();
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 lg:grid-cols-2">
       {LEVEL_IDS.map((id, i) => (
         <button
           key={id}
@@ -180,7 +184,7 @@ export function LevelTabs({
 }) {
   const { t } = useSettings();
   return (
-    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+    <div className="mx-auto grid max-w-3xl grid-cols-5 gap-1.5 sm:gap-2">
       {LEVEL_IDS.map((id) => {
         const active = id === level;
         return (
@@ -231,7 +235,7 @@ export function StoryPicker({
     <>
       <LevelTabs level={level} onLevel={onLevel} />
       <p className="mt-2 text-center text-xs italic text-muted-foreground">{describe(level)}</p>
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {ordered.map((s) => (
           <button
             key={s.slug}

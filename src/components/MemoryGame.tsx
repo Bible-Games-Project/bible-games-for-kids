@@ -19,6 +19,7 @@ import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, ScreenFade } from "@/components/GameShell";
 import { PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
 import { useBackButton } from "@/lib/back-button";
+import { fitGrid, useElementSize, useWideScreen } from "@/lib/use-fit";
 import cardBack from "@/assets/ui/card-back.webp";
 import arrowArt from "@/assets/ui/arrow.webp";
 import { CheckIcon, StarRow } from "@/components/Icons";
@@ -37,8 +38,7 @@ const loadPlayers = (): number => {
   }
 };
 
-const formatTime = (sec: number) =>
-  `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+const formatTime = (sec: number) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
 
 // Static class names so Tailwind generates them. The width class is shared
 // by the pinned header and the board so both line up.
@@ -66,7 +66,12 @@ function CardBack({ className = "" }: { className?: string }) {
 function CardFace({ src, className = "" }: { src: string; className?: string }) {
   return (
     <span className={`drop-shadow-[0_3px_4px_oklch(0.3_0.06_50/0.35)] ${className}`}>
-      <img src={cardBack} alt="" draggable={false} className="absolute inset-0 h-full w-full select-none" />
+      <img
+        src={cardBack}
+        alt=""
+        draggable={false}
+        className="absolute inset-0 h-full w-full select-none"
+      />
       <img
         src={src}
         alt=""
@@ -138,7 +143,7 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
         <p className="mx-auto max-w-3xl px-6 pt-1 text-sm italic text-muted-foreground">
           {mt("mem.instruction")}
         </p>
-        <main className="mx-auto grid max-w-3xl gap-4 px-4 pb-12 pt-4">
+        <main className="mx-auto grid max-w-3xl gap-4 px-4 pb-12 pt-4 lg:grid-cols-2">
           {MEMORY_LEVELS.map((lv) => {
             const best = progress[lv.id] ?? 0;
             const cover = findScene(lv.cover);
@@ -160,13 +165,18 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
                       "left-[38px] top-1 -rotate-2",
                       "left-[74px] top-4 rotate-[11deg] transition-transform group-hover:rotate-[15deg]",
                     ].map((pos) => (
-                      <CardFace key={pos} src={cover.thumb} className={`absolute aspect-[13/20] w-14 ${pos}`} />
+                      <CardFace
+                        key={pos}
+                        src={cover.thumb}
+                        className={`absolute aspect-[13/20] w-14 ${pos}`}
+                      />
                     ))}
                 </span>
                 <div className="min-w-0 flex-1">
                   <h2 className="font-display text-xl leading-snug">{t(`diff.${lv.id}`)}</h2>
                   <p className="text-sm font-semibold text-muted-foreground">
-                    {t(`diff.${lv.id}.age`)} ({mt("mem.pairsCount").replace("{n}", String(lv.pairs))})
+                    {t(`diff.${lv.id}.age`)} (
+                    {mt("mem.pairsCount").replace("{n}", String(lv.pairs))})
                   </p>
                   <StarRow value={best} className="mt-1.5 text-base" />
                 </div>
@@ -216,7 +226,9 @@ function PlayerPicker({
             <button
               key={n}
               onClick={() => onPick(n)}
-              aria-label={n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))}
+              aria-label={
+                n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))
+              }
               className={`paint-box paint-square paint-thin grid h-24 w-24 place-items-center p-3 transition active:scale-[0.95] ${
                 n === last ? "paint-picked" : ""
               }`}
@@ -270,7 +282,9 @@ function ScrollArrow({
   if (!dir) return null;
 
   const go = () => {
-    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "smooth";
     if (dir === "up") window.scrollTo({ top: 0, behavior });
     else window.scrollBy({ top: Math.round(window.innerHeight * 0.6), behavior });
   };
@@ -324,6 +338,10 @@ function MemoryBoard({
   const timeoutsRef = useRef<number[]>([]);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const wide = WIDE_LAYOUT[level.wideCols];
+  // On a computer (or a tablet held sideways) every card fits on the screen.
+  const fitScreen = useWideScreen();
+  const [setArea, area] = useElementSize();
+  const fit = fitGrid(deck.length, area.width, area.height, 20 / 13, 14);
 
   // Boost music volume while playing; restore menu volume on exit.
   useEffect(() => {
@@ -351,8 +369,9 @@ function MemoryBoard({
 
   const multi = players > 1;
   const playerName = (i: number) => mt("mem.player").replace("{n}", String(i + 1));
-  const scores = Array.from({ length: players }, (_, i) =>
-    [...matched.values()].filter((p) => p === i).length,
+  const scores = Array.from(
+    { length: players },
+    (_, i) => [...matched.values()].filter((p) => p === i).length,
   );
   const best = Math.max(...scores);
   const winners = scores.map((sc, i) => (sc === best ? i : -1)).filter((i) => i >= 0);
@@ -423,12 +442,53 @@ function MemoryBoard({
     window.scrollTo(0, 0);
   };
 
+  const cards = deck.map((card, i) => {
+    const finder = matched.get(card.scene.slug);
+    const isMatched = finder !== undefined;
+    const faceUp = isMatched || flipped.includes(i);
+    const title = localizeSceneTitle(card.scene.slug, lang);
+    return (
+      <button
+        key={card.key}
+        onClick={() => flip(i)}
+        disabled={isMatched}
+        aria-label={faceUp ? title : mt("mem.hidden")}
+        className={`relative aspect-[13/20] [perspective:800px] ${
+          fitScreen ? "w-[var(--cell)]" : "w-[calc((100%-(var(--cols)-1)*var(--gap))/var(--cols))]"
+        }`}
+      >
+        <span
+          className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d] motion-reduce:transition-none"
+          style={{ transform: faceUp ? "rotateY(180deg)" : "none" }}
+        >
+          <CardBack className="absolute inset-0 h-full w-full [backface-visibility:hidden]" />
+          <span
+            className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]"
+            style={
+              isMatched
+                ? {
+                    filter: `drop-shadow(0 0 3px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"}) drop-shadow(0 0 7px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"})`,
+                  }
+                : undefined
+            }
+          >
+            <CardFace src={card.scene.thumb} className="absolute inset-0" />
+          </span>
+        </span>
+      </button>
+    );
+  });
+
   return (
-    <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
+    <div
+      className={`w-full bg-[oklch(0.97_0.02_75)] ${fitScreen ? "flex h-[100dvh] flex-col" : "min-h-[100dvh]"}`}
+    >
       <ScreenFade />
       {/* Header stays pinned while the board scrolls underneath it. */}
       <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 px-2 pb-1 pt-2">
-        <div className={`paint-box paint-long mx-auto w-full max-w-lg px-5 pt-4 ${wide.width}`}>
+        <div
+          className={`paint-box paint-long mx-auto w-full px-5 pt-4 ${fitScreen ? "max-w-5xl" : `max-w-lg ${wide.width}`}`}
+        >
           <header className="flex items-center gap-3 pb-2">
             <BackButton onClick={onExit} label={mt("mem.levels")} />
             <h1 className="min-w-0 flex-1 font-display text-lg leading-tight">
@@ -445,7 +505,9 @@ function MemoryBoard({
                 </span>
                 <span>
                   {mt("mem.time")}
-                  <span className="block text-base font-bold text-foreground">{formatTime(elapsed)}</span>
+                  <span className="block text-base font-bold text-foreground">
+                    {formatTime(elapsed)}
+                  </span>
                 </span>
               </div>
             )}
@@ -474,7 +536,10 @@ function MemoryBoard({
 
           <p className="flex min-h-[1.5rem] flex-wrap items-center justify-center gap-x-3 pb-3 text-center text-sm text-muted-foreground">
             {lastFound && (
-              <span key={lastFound} className="inline-block animate-in fade-in font-semibold text-[oklch(0.45_0.12_70)]">
+              <span
+                key={lastFound}
+                className="inline-block animate-in fade-in font-semibold text-[oklch(0.45_0.12_70)]"
+              >
                 <CheckIcon /> {localizeSceneTitle(lastFound, lang)}
               </span>
             )}
@@ -490,49 +555,37 @@ function MemoryBoard({
       </div>
 
       {/* Large cards in 3 columns on phones; the page scrolls when they
-          don't all fit, so cards never shrink to fit the screen. */}
-      <div
-        ref={gridRef}
-        className={`mx-auto flex w-full max-w-lg flex-wrap justify-center gap-[var(--gap)] px-4 pb-28 pt-1 [--gap:0.6rem] sm:[--cols:var(--cols-wide)] sm:[--gap:0.9rem] ${wide.width}`}
-        style={{ ["--cols" as string]: level.cols, ["--cols-wide" as string]: level.wideCols }}
-      >
-        {deck.map((card, i) => {
-          const finder = matched.get(card.scene.slug);
-          const isMatched = finder !== undefined;
-          const faceUp = isMatched || flipped.includes(i);
-          const title = localizeSceneTitle(card.scene.slug, lang);
-          return (
-            <button
-              key={card.key}
-              onClick={() => flip(i)}
-              disabled={isMatched}
-              aria-label={faceUp ? title : mt("mem.hidden")}
-              className="relative aspect-[13/20] w-[calc((100%-(var(--cols)-1)*var(--gap))/var(--cols))] [perspective:800px]"
+          don't all fit, so cards never shrink to fit the screen. On a wide
+          screen the cards are sized so the whole board fits. */}
+      {fitScreen ? (
+        <div
+          ref={setArea}
+          className="grid min-h-0 flex-1 place-items-center overflow-hidden px-4 pb-4 pt-2"
+        >
+          {fit.cell > 0 && (
+            <div
+              ref={gridRef}
+              className="flex flex-wrap justify-center gap-[14px]"
+              style={{
+                width: fit.cols * fit.cell + (fit.cols - 1) * 14,
+                ["--cell" as string]: `${fit.cell}px`,
+              }}
             >
-              <span
-                className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d] motion-reduce:transition-none"
-                style={{ transform: faceUp ? "rotateY(180deg)" : "none" }}
-              >
-                <CardBack className="absolute inset-0 h-full w-full [backface-visibility:hidden]" />
-                <span
-                  className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]"
-                  style={
-                    isMatched
-                      ? {
-                          filter: `drop-shadow(0 0 3px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"}) drop-shadow(0 0 7px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"})`,
-                        }
-                      : undefined
-                  }
-                >
-                  <CardFace src={card.scene.thumb} className="absolute inset-0" />
-                </span>
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              {cards}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div
+          ref={gridRef}
+          className={`mx-auto flex w-full max-w-lg flex-wrap justify-center gap-[var(--gap)] px-4 pb-28 pt-1 [--gap:0.6rem] sm:[--cols:var(--cols-wide)] sm:[--gap:0.9rem] ${wide.width}`}
+          style={{ ["--cols" as string]: level.cols, ["--cols-wide" as string]: level.wideCols }}
+        >
+          {cards}
+        </div>
+      )}
 
-      {!done && (
+      {!done && !fitScreen && (
         <ScrollArrow
           watch={gridRef}
           downLabel={mt("mem.scrollDown")}
@@ -558,11 +611,16 @@ function MemoryBoard({
                     .map((sc, i) => ({ sc, i }))
                     .sort((a, b) => b.sc - a.sc)
                     .map(({ sc, i }) => (
-                      <li key={i} className="flex items-center gap-3 rounded-xl bg-secondary/60 px-3 py-2">
+                      <li
+                        key={i}
+                        className="flex items-center gap-3 rounded-xl bg-secondary/60 px-3 py-2"
+                      >
                         <PlayerDot index={i} />
                         <span className="flex-1 font-semibold">{playerName(i)}</span>
                         <span className="tabular-nums text-muted-foreground">
-                          {sc === 1 ? mt("mem.pairOne") : mt("mem.pairsCount").replace("{n}", String(sc))}
+                          {sc === 1
+                            ? mt("mem.pairOne")
+                            : mt("mem.pairsCount").replace("{n}", String(sc))}
                         </span>
                         <span className="w-5 text-center" aria-hidden>
                           {winners.includes(i) ? "👑" : ""}

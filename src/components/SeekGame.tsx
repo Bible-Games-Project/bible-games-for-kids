@@ -55,6 +55,7 @@ export function SeekGame({ onBack }: { onBack: () => void }) {
       background={seekBg}
       onBack={onBack}
       backLabel={t("select.back")}
+      wide
     >
       <StoryPicker
         level={level}
