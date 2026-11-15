@@ -428,7 +428,7 @@ function OrderBoard({
     <div className="theme-bedtime relative min-h-[100dvh] w-full">
       <ScreenFade />
       <BedtimeBackdrop image={orderBg} fadeEnd={0} blur />
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-3 md:py-5">
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-3 md:py-5 xl:max-w-6xl">
         <header className="flex items-center gap-3 pb-2">
           <BackButton onClick={onExit} label={ot("order.levels")} />
           <h1 className="min-w-0 flex-1 truncate font-display text-xl text-[oklch(0.98_0.02_85)] [text-shadow:0_1px_6px_oklch(0.3_0.06_50/0.6)]">
@@ -449,7 +449,7 @@ function OrderBoard({
             </div>
           </div>
 
-          <div className="shrink-0 md:flex md:w-[26rem] md:flex-col md:justify-center">
+          <div className="shrink-0 md:flex md:w-[26rem] md:flex-col md:justify-center xl:w-[30rem]">
             <div className="paint-box paint-wide px-4 pb-4 pt-3">
               <p className="text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {ot("order.round", { n: round, total: ORDER_ROUNDS })}

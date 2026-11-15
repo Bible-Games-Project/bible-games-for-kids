@@ -13,6 +13,7 @@ import homeArt from "@/assets/ui/home.webp";
 import hintArt from "@/assets/ui/hint.webp";
 import { loaded } from "@/lib/preload-ui";
 import { StarRow } from "@/components/Icons";
+import { useWideScreen } from "@/lib/use-fit";
 
 
 interface Piece {
@@ -50,6 +51,8 @@ interface Props {
 
 const ASPECT = 896 / 1152;
 const FRAME = 16;
+// Width of the tray beside the board on wide screens.
+const WIDE_TRAY_W = 360;
 const TAB_RATIO = 0.15;
 const DRAG_THRESHOLD = 6; // px of movement before a tap becomes a drag
 
@@ -270,17 +273,21 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
   const [elapsed, setElapsed] = useState(initialElapsedRef.current);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [shakeId, setShakeId] = useState<number | null>(null);
+  // Computers and tablets held sideways: the tray stands beside the board,
+  // which then uses the whole height of the screen.
+  const wide = useWideScreen();
 
   useEffect(() => {
     const measure = () => {
       const container = containerRef.current;
       if (!container) return;
       const padding = 16;
-      const trayH = window.innerWidth < 640 ? 130 : 150;
+      const trayH = wide ? 0 : window.innerWidth < 640 ? 130 : 150;
+      const trayW = wide ? WIDE_TRAY_W + padding : 0;
       const headerH = 64;
       // the painted panel around the board takes FRAME on each side
       const availH = window.innerHeight - headerH - trayH - padding * 3 - FRAME * 2;
-      const availW = container.clientWidth - padding * 2 - FRAME * 2;
+      const availW = container.clientWidth - trayW - padding * 2 - FRAME * 2;
       let w = availW;
       let h = w / ASPECT;
       if (h > availH) {
@@ -292,7 +299,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, []);
+  }, [wide]);
 
   useEffect(() => {
     if (done) return;
@@ -556,6 +563,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
       </div>
 
 
+      <div className={wide ? "flex min-h-0 flex-1" : "contents"}>
       {/* Board, on a painted panel */}
       <div className="flex flex-1 items-center justify-center px-4">
         <div className="paint-box paint-tall" style={{ padding: FRAME }}>
@@ -639,11 +647,18 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
         </div>
       </div>
 
-      {/* Tray */}
-      <div className="paint-box paint-long mx-2 mb-2">
+      {/* Tray: a strip under the board, or a column beside it on wide screens */}
+      <div
+        className={wide ? "paint-box paint-tall mb-4 mr-4 flex shrink-0 flex-col" : "paint-box paint-long mx-2 mb-2"}
+        style={wide ? { width: WIDE_TRAY_W } : undefined}
+      >
         <div
-          className="flex items-center gap-2 overflow-x-auto px-4 py-3"
-          style={{ minHeight: trayPieceSize + 24 }}
+          className={
+            wide
+              ? "flex min-h-0 flex-1 flex-wrap content-start justify-center gap-2 overflow-y-auto p-4"
+              : "flex items-center gap-2 overflow-x-auto px-4 py-3"
+          }
+          style={wide ? undefined : { minHeight: trayPieceSize + 24 }}
         >
           {trayPieces.length === 0 && !done && (
             <p className="w-full text-center text-sm text-muted-foreground">{t("puzzle.allPlaced")}</p>
@@ -678,6 +693,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
               );
             })}
         </div>
+      </div>
       </div>
 
       {drag && boardSize.w > 0 && (() => {
