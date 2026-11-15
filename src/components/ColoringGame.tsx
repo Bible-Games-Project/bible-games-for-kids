@@ -476,10 +476,12 @@ function ColoringBoard({
   return (
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
       <ScreenFade />
-      <div className="mx-auto flex w-full max-w-md flex-col px-4 py-4">
-        <header className="flex items-center gap-2 pb-3">
+      {/* On a wide screen the page fills the screen's height and the tools
+          and the palette stand beside it. */}
+      <div className="mx-auto flex w-full max-w-md flex-col px-4 py-4 wide:grid wide:h-[100dvh] wide:max-w-none wide:grid-cols-[20rem_auto] wide:grid-rows-[auto_auto_1fr] wide:justify-center wide:gap-x-8 xl:wide:grid-cols-[24rem_auto]">
+        <header className="flex items-center gap-2 pb-3 wide:flex-wrap wide:justify-center wide:gap-y-3 wide:col-start-1 wide:row-start-1">
           <BackButton onClick={onExit} label={ct("color.back")} />
-          <h1 className="min-w-0 flex-1 truncate font-display text-xl">
+          <h1 className="min-w-0 flex-1 truncate font-display text-xl wide:basis-[calc(100%-3.75rem)]">
             {localizeSceneTitle(slug, lang)}
           </h1>
           <button
@@ -516,9 +518,14 @@ function ColoringBoard({
         </header>
 
         {/* Zoomed in, the page is twice as big and scrolls with a finger. */}
-        <div className="paint-box paint-tall w-full p-4">
+        <div
+          className="paint-box paint-tall w-full p-4 wide:col-start-2 wide:row-span-3 wide:row-start-1 wide:w-[var(--fit-w)] wide:self-center"
+          style={{
+            ["--fit-w" as string]: `min(calc(100vw - 26rem), calc((100dvh - 4rem) * ${MAP_W / MAP_H} + 2rem))`,
+          }}
+        >
           <div
-            className={`w-full rounded-2xl bg-white ${zoom ? "max-h-[62dvh] overflow-auto" : "overflow-hidden"}`}
+            className={`w-full rounded-2xl bg-white ${zoom ? "max-h-[62dvh] overflow-auto wide:max-h-[calc(100dvh-4rem)]" : "overflow-hidden"}`}
           >
             <div
               onClick={paintAt}
@@ -592,12 +599,14 @@ function ColoringBoard({
           </div>
         </div>
 
-        <p className="pt-3 text-center text-sm text-muted-foreground">{ct("color.instruction")}</p>
+        <p className="pt-3 text-center text-sm text-muted-foreground wide:col-start-1 wide:row-start-2">
+          {ct("color.instruction")}
+        </p>
 
         {/* Numbered palette: the color's number, and a check once all its areas are done */}
         {data && (
           <div
-            className="mt-2 grid justify-center gap-2 pb-2"
+            className="mt-2 grid justify-center gap-2 pb-2 wide:col-start-1 wide:row-start-3 wide:content-start"
             style={{
               gridTemplateColumns: `repeat(${Math.min(data.palette.length, 6)}, minmax(0, 3.5rem))`,
             }}

@@ -169,8 +169,10 @@ function DragDropBoard({
   return (
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
       <ScreenFade />
-      <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 py-4">
-        <header className="flex items-center gap-3 pb-2">
+      {/* On a wide screen the painting fills the screen's height and the
+          title, the instruction and the tray stand beside it. */}
+      <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 py-4 wide:grid wide:h-[100dvh] wide:max-w-none wide:grid-cols-[20rem_auto] wide:grid-rows-[auto_auto_1fr] wide:justify-center wide:gap-x-8 xl:wide:grid-cols-[24rem_auto]">
+        <header className="flex items-center gap-3 pb-2 wide:col-start-1 wide:row-start-1">
           <BackButton onClick={onExit} label={dt("dd.backStories")} />
           <h1 className="min-w-0 flex-1 truncate font-display text-xl">
             {localizeSceneTitle(story.slug, lang)}
@@ -179,12 +181,17 @@ function DragDropBoard({
             {placed.size}/{pieces.length}
           </span>
         </header>
-        <p className="pb-2 text-center text-sm text-muted-foreground">{dt("dd.instruction")}</p>
+        <p className="pb-2 text-center text-sm text-muted-foreground wide:col-start-1 wide:row-start-2">
+          {dt("dd.instruction")}
+        </p>
 
         <div
           ref={boardRef}
-          className="relative w-full overflow-hidden rounded-3xl shadow-lg"
-          style={{ aspectRatio: `1 / ${PAINTING_RATIO}` }}
+          className="relative w-full overflow-hidden rounded-3xl shadow-lg wide:col-start-2 wide:row-span-3 wide:row-start-1 wide:w-[var(--fit-w)] wide:self-center"
+          style={{
+            aspectRatio: `1 / ${PAINTING_RATIO}`,
+            ["--fit-w" as string]: `min(calc(100vw - 26rem), calc((100dvh - 2rem) / ${PAINTING_RATIO}))`,
+          }}
           onPointerMove={moveTo}
           onPointerUp={drop}
           onPointerCancel={drop}
@@ -214,7 +221,7 @@ function DragDropBoard({
         </div>
 
         {/* Tray: the pieces waiting to go back */}
-        <div className="mt-auto flex flex-wrap items-center justify-center gap-3 px-2 pt-5 pb-2">
+        <div className="mt-auto flex flex-wrap items-center justify-center gap-3 px-2 pt-5 pb-2 wide:col-start-1 wide:row-start-3 wide:mt-0 wide:content-center">
           {tray
             .filter((i) => !placed.has(i))
             .map((i, k) => (
@@ -226,7 +233,7 @@ function DragDropBoard({
                 onPointerUp={drop}
                 onPointerCancel={drop}
                 onDragStart={(e) => e.preventDefault()}
-                className={`${trayPiece} shrink-0 touch-none select-none rounded-full border-4 border-white shadow-[0_8px_16px_oklch(0.35_0.04_60/0.3)] transition ${
+                className={`${trayPiece} shrink-0 touch-none wide:h-24 wide:w-24 select-none rounded-full border-4 border-white shadow-[0_8px_16px_oklch(0.35_0.04_60/0.3)] transition ${
                   drag?.i === i ? "opacity-25" : ""
                 } ${wrong === i ? "piece-shake" : ""}`}
                 style={{

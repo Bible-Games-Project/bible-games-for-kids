@@ -3,6 +3,9 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* Computers and tablets held sideways: games put their controls beside the
+   board and size it to the screen (same test as useWideScreen in use-fit.ts). */
+@custom-variant wide (@media (min-width: 900px) and (min-aspect-ratio: 1/1));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);

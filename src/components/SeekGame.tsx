@@ -170,7 +170,10 @@ function SeekBoard({
   return (
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
       <ScreenFade />
-      <div className="mx-auto flex w-full max-w-lg flex-col px-4 py-4">
+      {/* On a wide screen the list stands beside the painting, which fills
+          the screen's height. */}
+      <div className="mx-auto flex w-full max-w-lg flex-col px-4 py-4 wide:h-[100dvh] wide:max-w-none wide:flex-row wide:items-center wide:justify-center wide:gap-6">
+        <div className="wide:flex wide:w-80 wide:shrink-0 wide:flex-col wide:self-stretch xl:wide:w-96">
         <header className="flex items-center gap-3 pb-2">
           <BackButton onClick={onExit} label={st("seek.levels")} />
           <h1 className="min-w-0 flex-1 truncate font-display text-xl">
@@ -184,12 +187,12 @@ function SeekBoard({
           </button>
         </header>
 
-        <p className="pb-2 text-center text-sm text-muted-foreground">
+        <p className="pb-2 text-center text-sm text-muted-foreground wide:mt-auto wide:text-base">
           {st("seek.instruction")} · {st("seek.found", { n: found.size, total: items.length })}
         </p>
 
         {/* What to find */}
-        <ul className="flex flex-wrap justify-center gap-2 pb-3">
+        <ul className="flex flex-wrap justify-center gap-2 pb-3 wide:mb-auto">
           {items.map((it) => {
             const isFound = found.has(it.word);
             return (
@@ -212,12 +215,16 @@ function SeekBoard({
             );
           })}
         </ul>
+        </div>
 
         <div
           ref={boardRef}
           onPointerDown={tap}
-          className="relative w-full cursor-pointer touch-manipulation overflow-hidden rounded-3xl shadow-lg"
-          style={{ aspectRatio: `1 / ${PAINTING_RATIO}` }}
+          className="relative w-full cursor-pointer touch-manipulation overflow-hidden rounded-3xl shadow-lg wide:w-[var(--fit-w)] wide:shrink-0"
+          style={{
+            aspectRatio: `1 / ${PAINTING_RATIO}`,
+            ["--fit-w" as string]: `min(calc(100vw - 26rem), calc((100dvh - 2rem) / ${PAINTING_RATIO}))`,
+          }}
         >
           <img
             src={story.image}

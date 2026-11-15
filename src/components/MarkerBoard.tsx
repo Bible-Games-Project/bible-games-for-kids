@@ -445,10 +445,12 @@ export function MarkerBoard({
   return (
     <div className="min-h-[100dvh] w-full bg-[oklch(0.97_0.02_75)]">
       <ScreenFade />
-      <div className="mx-auto flex w-full max-w-md flex-col px-3 py-3">
-        <header className="flex items-center gap-2 pb-2">
+      {/* On a wide screen the page fills the screen's height and the tools
+          and colors stand beside it. */}
+      <div className="mx-auto flex w-full max-w-md flex-col px-3 py-3 wide:grid wide:h-[100dvh] wide:max-w-none wide:grid-cols-[20rem_auto] wide:grid-rows-[auto_auto_auto_1fr] wide:content-center wide:justify-center wide:gap-x-8 xl:wide:grid-cols-[24rem_auto]">
+        <header className="flex items-center gap-2 pb-2 wide:flex-wrap wide:justify-center wide:gap-y-3 wide:col-start-1 wide:row-start-1">
           <BackButton onClick={onExit} label={ct("color.back")} />
-          <h1 className="min-w-0 flex-1 truncate font-display text-xl">
+          <h1 className="min-w-0 flex-1 truncate font-display text-xl wide:basis-[calc(100%-3.75rem)]">
             {localizeSceneTitle(slug, lang)}
           </h1>
           <button onClick={undo} disabled={!count} aria-label={ct("color.undo")} className={tool}>
@@ -482,8 +484,11 @@ export function MarkerBoard({
         {/* The page keeps its shape and shrinks on short screens so the
             colors below always fit. */}
         <div
-          className="paint-box paint-tall mx-auto w-full p-3"
-          style={{ maxWidth: `calc((100dvh - 17rem) * ${W / H} + 1.5rem)` }}
+          className="paint-box paint-tall mx-auto w-full max-w-[var(--phone-w)] p-3 wide:col-start-2 wide:row-span-4 wide:row-start-1 wide:w-[var(--fit-w)] wide:max-w-none wide:self-center"
+          style={{
+            ["--phone-w" as string]: `calc((100dvh - 17rem) * ${W / H} + 1.5rem)`,
+            ["--fit-w" as string]: `min(calc(100vw - 26rem), calc((100dvh - 3.5rem) * ${W / H} + 1.5rem))`,
+          }}
         >
           <div
             ref={frameRef}
@@ -521,7 +526,7 @@ export function MarkerBoard({
         </div>
 
         {/* Brush sizes, the fill bucket and "I'm done". */}
-        <div className="mt-2 flex items-center justify-center gap-2">
+        <div className="mt-2 flex items-center justify-center gap-2 wide:col-start-1 wide:row-start-2 wide:mt-6">
           {SIZES.map((s, i) => (
             <button
               key={s}
@@ -560,7 +565,7 @@ export function MarkerBoard({
           </button>
         </div>
 
-        <div className="mx-auto mt-2 grid w-full max-w-sm grid-cols-9 gap-1.5">
+        <div className="mx-auto mt-2 grid w-full max-w-sm grid-cols-9 gap-1.5 wide:col-start-1 wide:row-start-3 wide:mt-5 wide:grid-cols-6 wide:gap-2.5">
           {COLORS.map((c) => (
             <button
               key={c}
@@ -575,7 +580,9 @@ export function MarkerBoard({
           ))}
         </div>
 
-        <p className="pt-2 text-center text-xs text-muted-foreground">{ct("color.markerHint")}</p>
+        <p className="pt-2 text-center text-xs text-muted-foreground wide:col-start-1 wide:row-start-4 wide:pt-4">
+          {ct("color.markerHint")}
+        </p>
       </div>
 
       {done && (
