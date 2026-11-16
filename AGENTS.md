@@ -158,3 +158,10 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
 - Checking layouts without a browser: `~/browser/shot.sh out.png W H "?screen=<id>" [clicks/wait:ms/eval:js]`
   (headless Chromium; needs its FONTCONFIG settings or text is blank). `?screen=`
   opens a game directly in dev only. Run at most two at once or navigation times out.
+- Player-count menus use `PlayerChoice` (Token.tsx): small painted boxes of
+  coloured pawns. Choice 0 means one child against the computer (seat 1,
+  `PlayerPawn color="robot"`, the maintainer's robot pawn); texts are
+  `dom.vsComputer`, `vs.yourTurn`/`vs.computerTurn`, `dom.youWin`/`dom.computerWins`.
+  Domino, Goose, Parchís, Memory and Guess Who all have it; the computer
+  plays from a `useEffect` on the turn state, and human moves are refused
+  while it plays.

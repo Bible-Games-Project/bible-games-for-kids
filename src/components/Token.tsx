@@ -12,6 +12,7 @@ import yellowPawn from "@/assets/tokens/pawn-yellow.webp";
 import redPawn from "@/assets/tokens/pawn-red.webp";
 import purplePawn from "@/assets/tokens/pawn-purple.webp";
 import orangePawn from "@/assets/tokens/pawn-orange.webp";
+import robotPawn from "@/assets/tokens/pawn-robot.webp";
 
 export type TokenColor = "blue" | "red" | "yellow" | "green" | "purple" | "orange";
 
@@ -108,8 +109,11 @@ export function Token({
   );
 }
 
-// The standing pawns of the Goose and Parchís (supplied pictures).
-const PAWNS: Record<TokenColor, string> = {
+// The standing pawns of the Goose and Parchís (supplied pictures); the robot
+// stands for the computer when playing against it.
+export type PawnKind = TokenColor | "robot";
+const PAWNS: Record<PawnKind, string> = {
+  robot: robotPawn,
   blue: bluePawn,
   red: redPawn,
   yellow: yellowPawn,
@@ -129,7 +133,7 @@ export function PlayerPawn({
   label,
   className = "",
 }: {
-  color: TokenColor;
+  color: PawnKind;
   // Width in px; without it the pawn fills its box's width.
   size?: number;
   label?: string | number;
@@ -158,5 +162,57 @@ export function PlayerPawn({
         </span>
       )}
     </span>
+  );
+}
+
+// "How many players?" for the games with turns: small painted boxes showing
+// just the pawns. Choice 0 is one player against the computer (a pawn and
+// the robot); n > 0 is n players on the same device.
+export function PlayerChoice({
+  choices,
+  picked,
+  onPick,
+  label,
+  columns = 3,
+  pawns = (n) => TOKEN_ORDER.slice(0, n),
+}: {
+  choices: number[];
+  picked?: number | null;
+  onPick: (choice: number) => void;
+  label: (choice: number) => string;
+  columns?: number;
+  // The pawns for n players, when a game's seats have other colours.
+  pawns?: (players: number) => PawnKind[];
+}) {
+  return (
+    <div
+      className={`mx-auto mt-4 grid w-fit ${columns > 3 ? "gap-2" : "gap-3"}`}
+      style={{ gridTemplateColumns: `repeat(${Math.min(columns, choices.length)}, auto)` }}
+    >
+      {choices.map((n) => (
+        <button
+          key={n}
+          onClick={() => onPick(n)}
+          aria-label={label(n)}
+          title={label(n)}
+          className={`paint-box paint-square paint-thin grid place-items-center p-3 transition ${
+            columns > 3 ? "h-20 w-20" : "h-24 w-24"
+          } active:scale-[0.95] ${
+            n === picked ? "paint-picked" : ""
+          }`}
+        >
+          <span className="flex max-w-[4.2rem] flex-wrap items-end justify-center gap-1">
+            {n === 0 ? (
+              <>
+                <PlayerPawn color={pawns(1)[0]} size={20} />
+                <PlayerPawn color="robot" size={20} />
+              </>
+            ) : (
+              pawns(n).map((c, i) => <PlayerPawn key={i} color={c} size={n > 4 ? 16 : 18} />)
+            )}
+          </span>
+        </button>
+      ))}
+    </div>
   );
 }

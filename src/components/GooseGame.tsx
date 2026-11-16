@@ -19,7 +19,14 @@ import { useBackButton } from "@/lib/back-button";
 import { useWideScreen } from "@/lib/use-fit";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
-import { PAWN_RATIO, PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
+import {
+  PAWN_RATIO,
+  PlayerChoice,
+  PlayerPawn,
+  TOKEN_HEX,
+  TOKEN_ORDER,
+  type PawnKind,
+} from "@/components/Token";
 import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 import type { Story } from "@/lib/stories";
 
@@ -29,8 +36,9 @@ const PLAYERS_KEY = "goose-players-v1";
 
 function loadPlayers(): number {
   try {
-    const n = Number(localStorage.getItem(PLAYERS_KEY));
-    return n >= 1 && n <= 6 ? n : 2;
+    const v = localStorage.getItem(PLAYERS_KEY);
+    const n = Number(v);
+    return v !== null && n >= 0 && n <= 6 ? n : 2;
   } catch {
     return 2;
   }
@@ -46,7 +54,8 @@ export function GooseGame({ onBack }: { onBack: () => void }) {
 
   useBackButton(players !== null, () => setPlayers(null));
 
-  if (players)
+  // 0 = one player against the computer
+  if (players !== null)
     return <GooseBoard key={players} players={players} onExit={() => setPlayers(null)} />;
 
   const pick = (n: number) => {
@@ -68,27 +77,19 @@ export function GooseGame({ onBack }: { onBack: () => void }) {
       backLabel={t("select.back")}
     >
       <h2 className="text-center font-display text-2xl">{mt("mem.howManyPlayers")}</h2>
-      {/* Small boxes with just the pawns, like Memory's */}
-      <div className="mx-auto mt-4 grid w-fit grid-cols-3 gap-3">
-        {[1, 2, 3, 4, 5, 6].map((n) => (
-          <button
-            key={n}
-            onClick={() => pick(n)}
-            aria-label={
-              n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))
-            }
-            className={`paint-box paint-square paint-thin grid h-24 w-24 place-items-center p-3 transition active:scale-[0.95] ${
-              n === last ? "paint-picked" : ""
-            }`}
-          >
-            <span className="flex max-w-[4.2rem] flex-wrap justify-center gap-1">
-              {Array.from({ length: n }, (_, i) => (
-                <Pawn key={i} index={i} size={16} />
-              ))}
-            </span>
-          </button>
-        ))}
-      </div>
+      <PlayerChoice
+        choices={[0, 1, 2, 3, 4, 5, 6]}
+        picked={last}
+        onPick={pick}
+        columns={4}
+        label={(n) =>
+          n === 0
+            ? gt("dom.vsComputer")
+            : n === 1
+              ? mt("mem.playersOne")
+              : mt("mem.playersMany").replace("{n}", String(n))
+        }
+      />
 
       <div className="paint-box paint-wide mt-5 p-5">
         <h3 className="font-display text-lg">{gt("goose.rules")}</h3>
@@ -151,9 +152,10 @@ const GooseBadge = ({ size = 28 }: { size?: number }) => (
   </Badge>
 );
 
-// Each player plays with one of the standing pawns.
-function Pawn({ index, size }: { index: number; size: number }) {
-  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} />;
+// Each player plays with one of the standing pawns (the computer: the robot).
+function Pawn({ index, size, robot }: { index: number; size: number; robot?: boolean }) {
+  const kind: PawnKind = robot ? "robot" : TOKEN_ORDER[index];
+  return <PlayerPawn color={kind} size={size} />;
 }
 
 // Three crosses on a hill at dusk, for the square without a painting.
@@ -347,12 +349,19 @@ function RoadArrows() {
   );
 }
 
-function GooseBoard({ players, onExit }: { players: number; onExit: () => void }) {
+function GooseBoard({ players: choice, onExit }: { players: number; onExit: () => void }) {
   const { lang, t } = useSettings();
   const audio = useAudio();
   const gt = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
   const mt = (k: string) => memText(lang, k);
-  const playerName = (i: number) => mt("mem.player").replace("{n}", String(i + 1));
+  // choice 0: you against the computer, which plays the second pawn
+  const vsComputer = choice === 0;
+  const players = vsComputer ? 2 : choice;
+  const isComputer = (i: number) => vsComputer && i === 1;
+  const playerName = (i: number) =>
+    vsComputer
+      ? gt(i === 0 ? "dom.you" : "dom.computer")
+      : mt("mem.player").replace("{n}", String(i + 1));
 
   const [pos, setPos] = useState<number[]>(() => Array(players).fill(0));
   const [turn, setTurn] = useState(0);
@@ -433,6 +442,19 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
     return sq.story ? localizeSceneTitle(sq.story.slug, lang) : "";
   };
 
+  // A story question: the players answer it; the computer gets it right
+  // most of the time, without a question on screen.
+  type Quiz = NonNullable<typeof quiz>;
+  const ask = (q: Quiz) => {
+    if (!isComputer(q.player)) {
+      setQuiz(q);
+      return;
+    }
+    const right = Math.random() < 0.75;
+    setMessage(gt(right ? "vs.computerRight" : "vs.computerWrong"));
+    later(() => resolve(q, right), 1100);
+  };
+
   const nextTurn = () => {
     const t = (turnRef.current + 1) % players;
     turnRef.current = t;
@@ -441,7 +463,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
     if (jailed.current[t]) {
       // Still in the lions' den: a story question opens the way out.
       setMessage(gt("goose.prisonAsk", { name: playerName(t) }));
-      later(() => setQuiz({ player: t, story: randomStory(), jail: true }), 900);
+      later(() => ask({ player: t, story: randomStory(), jail: true }), 900);
       return;
     }
     setBusy(false);
@@ -471,22 +493,22 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
     };
     if (sq.kind === "goose") {
       audio.playCorrect();
-      const ask = (m: number) => {
+      const askAbout = (m: number) => {
         const story = SQUARES[m].story;
-        if (story) later(() => setQuiz({ player: i, story }), 500);
+        if (story) later(() => ask({ player: i, story }), 500);
         else again();
       };
       if (rule.to === n) {
         setMessage(gt("goose.lastGoose"));
-        ask(n);
+        askAbout(n);
       } else {
         setMessage(gt("goose.gooseJump"));
-        later(() => jump(i, rule.to, () => ask(rule.to)), 900);
+        later(() => jump(i, rule.to, () => askAbout(rule.to)), 900);
       }
     } else if (sq.kind === "ladder" && rule.to > n) {
       // the foot of the ladder: only a right story lets you climb it
       setMessage(gt("goose.ladderAsk"));
-      later(() => setQuiz({ player: i, story: randomStory(), ladder: true }), 700);
+      later(() => ask({ player: i, story: randomStory(), ladder: true }), 700);
     } else if (sq.kind === "ladder") {
       audio.playCorrect();
       setMessage(gt("goose.ladderJump"));
@@ -509,10 +531,15 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   };
 
   const answer = (right: boolean) => {
-    const i = quiz?.player ?? turnRef.current;
-    const jail = quiz?.jail ?? false;
-    const ladder = quiz?.ladder ?? false;
+    if (!quiz) return;
     setQuiz(null);
+    resolve(quiz, right);
+  };
+
+  function resolve(q: Quiz, right: boolean) {
+    const i = q.player;
+    const jail = q.jail ?? false;
+    const ladder = q.ladder ?? false;
     if (ladder) {
       if (right) {
         setMessage(gt("goose.ladderUp"));
@@ -545,7 +572,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
       setMessage(gt("quiz.missed"));
       later(nextTurn, 700);
     }
-  };
+  }
 
   const roll = () => {
     if (busy || winner !== null) return;
@@ -583,6 +610,13 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
       later(() => land(i, p, dir < 0), 350 + path.length * 260 + 200);
     }, 700);
   };
+
+  // The computer's turn: it rolls by itself once the board is ready.
+  useEffect(() => {
+    if (busy || winner !== null || quiz || !isComputer(turn)) return;
+    const id = window.setTimeout(roll, 1000);
+    return () => window.clearTimeout(id);
+  });
 
   const replay = () => {
     timers.current.forEach((id) => window.clearTimeout(id));
@@ -628,6 +662,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
   };
 
   const solo = players === 1;
+  const computerTurn = isComputer(turn);
 
   return (
     <div className="theme-bedtime relative flex h-[100dvh] w-full flex-col overflow-hidden wide:grid wide:grid-cols-[20rem_1fr] wide:grid-rows-[auto_1fr] xl:wide:grid-cols-[24rem_1fr]">
@@ -729,7 +764,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
                   transition: `transform ${hopMs}ms ease-out`,
                 }}
               >
-                <Pawn index={i} size={40} />
+                <Pawn index={i} size={40} robot={isComputer(i)} />
               </span>
             );
           })}
@@ -741,11 +776,13 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
         <div className="paint-box paint-long paint-thin flex items-center gap-3 px-4 py-2.5 wide:flex-col-reverse wide:items-stretch wide:gap-4 wide:py-5">
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-2 text-sm font-semibold wide:text-base">
-              <Pawn index={turn} size={22} />
+              <Pawn index={turn} size={22} robot={computerTurn} />
               <span className="truncate">
                 {solo
                   ? gt("goose.rolls", { n: rolls.current[0] })
-                  : mt("mem.turn").replace("{name}", playerName(turn))}
+                  : vsComputer
+                    ? gt(computerTurn ? "vs.computerTurn" : "vs.yourTurn")
+                    : mt("mem.turn").replace("{name}", playerName(turn))}
               </span>
             </p>
             <p
@@ -757,7 +794,7 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
           </div>
           <button
             onClick={roll}
-            disabled={busy || winner !== null}
+            disabled={busy || winner !== null || computerTurn}
             aria-label={gt("goose.roll")}
             className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl wide:mx-auto wide:h-28 wide:w-28 shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90 disabled:opacity-60"
             style={{
@@ -785,11 +822,13 @@ function GooseBoard({ players, onExit }: { players: number; onExit: () => void }
 
       {winner !== null && (
         <ResultCard
-          top="🏆"
+          top={isComputer(winner) ? "🤖" : "🏆"}
           title={
             solo
               ? gt("goose.soloWin", { n: rolls.current[0] })
-              : mt("mem.wins").replace("{name}", playerName(winner))
+              : vsComputer
+                ? gt(winner === 0 ? "dom.youWin" : "dom.computerWins")
+                : mt("mem.wins").replace("{name}", playerName(winner))
           }
           detail={
             SQUARES[LAST].story && (

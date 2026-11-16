@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import { useSettings } from "@/lib/i18n";
 import { useAudio, useSoundTheme } from "@/lib/audio";
 import { memText } from "@/lib/memory-i18n";
+import { gameText } from "@/lib/games-i18n";
 import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import {
   MEMORY_LEVELS,
@@ -17,13 +18,14 @@ import {
 import memoryBg from "@/assets/memory-bg.webp";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, ScreenFade } from "@/components/GameShell";
-import { PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
+import { PlayerChoice, PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
 import { useBackButton } from "@/lib/back-button";
 import { fitGrid, useElementSize, useWideScreen } from "@/lib/use-fit";
 import cardBack from "@/assets/ui/card-back.webp";
 import arrowArt from "@/assets/ui/arrow.webp";
 import { CheckIcon, StarRow } from "@/components/Icons";
 
+// 0 means one child against the computer (seat 1, the robot pawn).
 // Up to four players share the board, each with the colour of their round
 // token for the turn marker, the scoreboard and the pairs they find.
 const PLAYER_COLORS = TOKEN_ORDER.map((c) => TOKEN_HEX[c]);
@@ -32,7 +34,7 @@ const PLAYERS_KEY = "memory-players";
 const loadPlayers = (): number => {
   try {
     const n = Number(localStorage.getItem(PLAYERS_KEY));
-    return n >= 1 && n <= 4 ? n : 1;
+    return localStorage.getItem(PLAYERS_KEY) !== null && n >= 0 && n <= 4 ? n : 1;
   } catch {
     return 1;
   }
@@ -191,8 +193,20 @@ export function MemoryGame({ onBack }: { onBack: () => void }) {
 
 // Players are shown by the round tokens shared with the board games.
 // A player's standing pawn (the Parchís pawns), numbered.
-function PlayerDot({ index, size = 20 }: { index: number; size?: number }) {
-  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} label={index + 1} />;
+function PlayerDot({
+  index,
+  size = 20,
+  robot = false,
+}: {
+  index: number;
+  size?: number;
+  robot?: boolean;
+}) {
+  return robot ? (
+    <PlayerPawn color="robot" size={size} />
+  ) : (
+    <PlayerPawn color={TOKEN_ORDER[index]} size={size} label={index + 1} />
+  );
 }
 
 // ---------- How many players? ----------
@@ -221,26 +235,18 @@ function PlayerPicker({
           </h1>
         </header>
         <h2 className="mt-6 text-center font-display text-3xl">{mt("mem.howManyPlayers")}</h2>
-        <div className="mx-auto mt-6 grid grid-cols-2 gap-3">
-          {[1, 2, 3, 4].map((n) => (
-            <button
-              key={n}
-              onClick={() => onPick(n)}
-              aria-label={
-                n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))
-              }
-              className={`paint-box paint-square paint-thin grid h-24 w-24 place-items-center p-3 transition active:scale-[0.95] ${
-                n === last ? "paint-picked" : ""
-              }`}
-            >
-              <span className="flex max-w-[3.5rem] flex-wrap justify-center gap-1">
-                {Array.from({ length: n }, (_, i) => (
-                  <PlayerPawn key={i} color={TOKEN_ORDER[i]} size={18} />
-                ))}
-              </span>
-            </button>
-          ))}
-        </div>
+        <PlayerChoice
+          choices={[0, 1, 2, 3, 4]}
+          picked={last}
+          onPick={onPick}
+          label={(n) =>
+            n === 0
+              ? gameText(lang, "dom.vsComputer")
+              : n === 1
+                ? mt("mem.playersOne")
+                : mt("mem.playersMany").replace("{n}", String(n))
+          }
+        />
       </div>
     </div>
   );
@@ -310,7 +316,7 @@ function ScrollArrow({
 // ---------- The matching-pairs board ----------
 function MemoryBoard({
   level,
-  players,
+  players: choice,
   onExit,
   onComplete,
 }: {
@@ -322,6 +328,10 @@ function MemoryBoard({
   const { lang, t } = useSettings();
   const audio = useAudio();
   const mt = (k: string) => memText(lang, k);
+  const gt = (k: string) => gameText(lang, k);
+  const vsComputer = choice === 0;
+  const players = vsComputer ? 2 : choice;
+  const isComputer = (i: number) => vsComputer && i === 1;
 
   const [deck, setDeck] = useState<MemoryCard[]>(() => buildDeck(level.pairs));
   const [flipped, setFlipped] = useState<number[]>([]);
@@ -337,6 +347,9 @@ function MemoryBoard({
   const busyRef = useRef(false);
   const timeoutsRef = useRef<number[]>([]);
   const gridRef = useRef<HTMLDivElement | null>(null);
+  // What the computer remembers: card index -> story. Like a child, it
+  // forgets some of the cards it has seen.
+  const seenRef = useRef<Map<number, string>>(new Map());
   const wide = WIDE_LAYOUT[level.wideCols];
   // On a computer (or a tablet held sideways) every card fits on the screen.
   const fitScreen = useWideScreen();
@@ -368,7 +381,10 @@ function MemoryBoard({
   };
 
   const multi = players > 1;
-  const playerName = (i: number) => mt("mem.player").replace("{n}", String(i + 1));
+  const playerName = (i: number) =>
+    vsComputer
+      ? gt(i === 0 ? "dom.you" : "dom.computer")
+      : mt("mem.player").replace("{n}", String(i + 1));
   const scores = Array.from(
     { length: players },
     (_, i) => [...matched.values()].filter((p) => p === i).length,
@@ -376,9 +392,11 @@ function MemoryBoard({
   const best = Math.max(...scores);
   const winners = scores.map((sc, i) => (sc === best ? i : -1)).filter((i) => i >= 0);
 
-  const flip = (index: number) => {
+  const flip = (index: number, byComputer = false) => {
     const card = deck[index];
     if (busyRef.current || done || matched.has(card.scene.slug) || flipped.includes(index)) return;
+    if (isComputer(turn) !== byComputer) return;
+    if (vsComputer && Math.random() < 0.7) seenRef.current.set(index, card.scene.slug);
     audio.playClick();
     if (startedAt === null) setStartedAt(Date.now());
 
@@ -425,10 +443,38 @@ function MemoryBoard({
     }, 1100);
   };
 
+  // The computer's turn: it turns one card at a time, using a pair it
+  // remembers when it can, otherwise a card it has not seen yet.
+  useEffect(() => {
+    if (!isComputer(turn) || done || flipped.length > 1) return;
+    const open = deck
+      .map((c, i) => i)
+      .filter((i) => !matched.has(deck[i].scene.slug) && !flipped.includes(i));
+    const known = open.filter((i) => seenRef.current.get(i) === deck[i].scene.slug);
+    const unseen = open.filter((i) => !known.includes(i));
+    const pick = (list: number[]) => list[Math.floor(Math.random() * list.length)];
+    let next: number | undefined;
+    if (flipped.length === 1) {
+      const slug = deck[flipped[0]].scene.slug;
+      next = known.find((i) => deck[i].scene.slug === slug);
+    } else {
+      next = known.find((i) =>
+        known.some((j) => j !== i && deck[j].scene.slug === deck[i].scene.slug),
+      );
+    }
+    next ??= unseen.length ? pick(unseen) : pick(open);
+    if (next === undefined) return;
+    const target = next;
+    const id = window.setTimeout(() => flip(target, true), flipped.length ? 800 : 1000);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turn, flipped, matched, done, deck]);
+
   const restart = () => {
     timeoutsRef.current.forEach((id) => window.clearTimeout(id));
     timeoutsRef.current = [];
     busyRef.current = false;
+    seenRef.current = new Map();
     setDeck(buildDeck(level.pairs));
     setFlipped([]);
     setMatched(new Map());
@@ -526,7 +572,7 @@ function MemoryBoard({
                     style={active ? { backgroundColor: PLAYER_COLORS[i] } : undefined}
                     aria-current={active ? "true" : undefined}
                   >
-                    <PlayerDot index={i} />
+                    <PlayerDot index={i} robot={isComputer(i)} />
                     <span className="tabular-nums">{sc}</span>
                   </span>
                 );
@@ -545,7 +591,9 @@ function MemoryBoard({
             )}
             {multi && !done ? (
               <span className="font-semibold" style={{ color: PLAYER_COLORS[turn] }}>
-                {mt("mem.turn").replace("{name}", playerName(turn))}
+                {vsComputer
+                  ? gt(isComputer(turn) ? "vs.computerTurn" : "vs.yourTurn")
+                  : mt("mem.turn").replace("{name}", playerName(turn))}
               </span>
             ) : (
               !lastFound && mt("mem.instruction")
@@ -599,12 +647,14 @@ function MemoryBoard({
             {multi ? (
               <>
                 <div className="text-5xl" aria-hidden>
-                  🏆
+                  {winners.length === 1 && isComputer(winners[0]) ? "🤖" : "🏆"}
                 </div>
                 <h2 className="mt-3 font-display text-2xl text-foreground">
-                  {winners.length === 1
-                    ? mt("mem.wins").replace("{name}", playerName(winners[0]))
-                    : mt("mem.tie")}
+                  {winners.length !== 1
+                    ? mt("mem.tie")
+                    : vsComputer
+                      ? gt(isComputer(winners[0]) ? "dom.computerWins" : "dom.youWin")
+                      : mt("mem.wins").replace("{name}", playerName(winners[0]))}
                 </h2>
                 <ol className="mt-4 space-y-2 text-left">
                   {scores
@@ -615,7 +665,7 @@ function MemoryBoard({
                         key={i}
                         className="flex items-center gap-3 rounded-xl bg-secondary/60 px-3 py-2"
                       >
-                        <PlayerDot index={i} />
+                        <PlayerDot index={i} robot={isComputer(i)} />
                         <span className="flex-1 font-semibold">{playerName(i)}</span>
                         <span className="tabular-nums text-muted-foreground">
                           {sc === 1

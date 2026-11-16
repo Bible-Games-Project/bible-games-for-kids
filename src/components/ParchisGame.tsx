@@ -19,7 +19,7 @@ import {
 import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
-import { PlayerPawn, TOKEN_HEX } from "@/components/Token";
+import { PlayerChoice, PlayerPawn, TOKEN_HEX } from "@/components/Token";
 import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 import type { Story } from "@/lib/stories";
 
@@ -131,30 +131,19 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
       backLabel={t("select.back")}
     >
       <h2 className="text-center font-display text-2xl">{mt("mem.howManyPlayers")}</h2>
-      {/* Small boxes with just the pawns, like Memory's; one pawn plays the computer */}
-      <div className="mx-auto mt-4 grid w-fit grid-cols-2 gap-3">
-        {[1, 2, 3, 4].map((n) => (
-          <button
-            key={n}
-            onClick={() => {
-              window.scrollTo(0, 0);
-              setSetup({ players: n, pawns: quick ? 2 : 4 });
-            }}
-            aria-label={
-              n === 1 ? pt("dom.vsComputer") : mt("mem.playersMany").replace("{n}", String(n))
-            }
-            className="paint-box paint-square paint-thin grid h-24 w-24 place-items-center p-3 transition active:scale-[0.95]"
-          >
-            <span className="flex max-w-[3.5rem] flex-wrap justify-center gap-1">
-              {seatColors(n)
-                .slice(0, n)
-                .map((c) => (
-                  <Pawn key={c} color={c} size={18} />
-                ))}
-            </span>
-          </button>
-        ))}
-      </div>
+      <PlayerChoice
+        choices={[0, 2, 3, 4]}
+        columns={2}
+        pawns={(n) => seatColors(n).slice(0, n)}
+        onPick={(n) => {
+          window.scrollTo(0, 0);
+          // 1 seat with a person = against the computer
+          setSetup({ players: n || 1, pawns: quick ? 2 : 4 });
+        }}
+        label={(n) =>
+          n === 0 ? pt("dom.vsComputer") : mt("mem.playersMany").replace("{n}", String(n))
+        }
+      />
       <label className="paint-box paint-long paint-thin mt-3 flex items-center gap-3 px-5 py-3.5 text-sm font-semibold">
         <input
           type="checkbox"
@@ -179,7 +168,15 @@ export function ParchisGame({ onBack }: { onBack: () => void }) {
 }
 
 // The pieces are the round tokens shared by all the board games.
-function Pawn({ color, size, dim = false }: { color: Color; size?: number; dim?: boolean }) {
+function Pawn({
+  color,
+  size,
+  dim = false,
+}: {
+  color: Color | "robot";
+  size?: number;
+  dim?: boolean;
+}) {
   return <PlayerPawn color={color} size={size} className={dim ? "opacity-50" : ""} />;
 }
 
@@ -537,8 +534,12 @@ function ParchisBoard({
         <div className="paint-box paint-long paint-thin mt-3 flex items-center gap-3 px-4 py-2.5 wide:col-start-1 wide:row-start-2 wide:mt-0 wide:flex-col-reverse wide:items-stretch wide:gap-4 wide:self-center wide:py-5">
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-2 text-sm font-semibold wide:text-base">
-              <Pawn color={seat.color} size={18} />
-              <span className="truncate">{mt("mem.turn").replace("{name}", nameOf(turn))}</span>
+              <Pawn color={vsComputer && turn === 1 ? "robot" : seat.color} size={18} />
+              <span className="truncate">
+                {vsComputer
+                  ? pt(turn === 0 ? "vs.yourTurn" : "vs.computerTurn")
+                  : mt("mem.turn").replace("{name}", nameOf(turn))}
+              </span>
             </p>
             <p className="mt-1 min-h-[1.25rem] text-xs text-foreground/80 wide:text-sm" aria-live="polite">
               {message ?? ""}

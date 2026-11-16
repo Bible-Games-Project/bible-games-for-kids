@@ -30,7 +30,7 @@ import {
   Stars,
 } from "@/components/GameShell";
 
-import { PLAYER_TINT, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
+import { PLAYER_TINT, PlayerChoice, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
 
 import guessBg from "@/assets/guesswho-bg.webp";
 import hintArt from "@/assets/ui/hint.webp";
@@ -78,27 +78,21 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
       <h2 className="mt-5 text-center font-display text-2xl text-[oklch(0.99_0.01_85)] [text-shadow:0_2px_8px_oklch(0.25_0.05_50/0.85)]">
         {mt("mem.howManyPlayers")}
       </h2>
-      <div className="mx-auto mt-3 grid w-fit grid-cols-2 gap-3">
-        {[1, 2, 3, 4].map((n) => (
-          <button
-            key={n}
-            onClick={() => {
-              window.scrollTo(0, 0);
-              setGame({ level, players: n });
-            }}
-            aria-label={
-              n === 1 ? mt("mem.playersOne") : mt("mem.playersMany").replace("{n}", String(n))
-            }
-            className="paint-box paint-square paint-thin grid h-24 w-24 place-items-center p-3 transition active:scale-[0.95]"
-          >
-            <span className="flex max-w-[3.5rem] flex-wrap justify-center gap-1">
-              {Array.from({ length: n }, (_, i) => (
-                <PlayerDot key={i} index={i} size={18} />
-              ))}
-            </span>
-          </button>
-        ))}
-      </div>
+      {/* 0 is one child against the computer. */}
+      <PlayerChoice
+        choices={[0, 1, 2, 3, 4]}
+        onPick={(n) => {
+          window.scrollTo(0, 0);
+          setGame({ level, players: n });
+        }}
+        label={(n) =>
+          n === 0
+            ? gt("dom.vsComputer")
+            : n === 1
+              ? mt("mem.playersOne")
+              : mt("mem.playersMany").replace("{n}", String(n))
+        }
+      />
       <p className="paint-box paint-long mt-4 px-5 py-3.5 text-center text-sm text-foreground/80">
         {gt("gw.twoPlayers")}
       </p>
@@ -107,8 +101,16 @@ export function GuessWhoGame({ onBack }: { onBack: () => void }) {
 }
 
 // A player's standing pawn (the Parchís pawns).
-function PlayerDot({ index, size = 20 }: { index: number; size?: number }) {
-  return <PlayerPawn color={TOKEN_ORDER[index]} size={size} />;
+function PlayerDot({
+  index,
+  size = 20,
+  robot = false,
+}: {
+  index: number;
+  size?: number;
+  robot?: boolean;
+}) {
+  return <PlayerPawn color={robot ? "robot" : TOKEN_ORDER[index]} size={size} />;
 }
 
 // What one player has found out so far about their hidden character.
@@ -123,7 +125,7 @@ interface PlayerBoard {
 // ---------- One game ----------
 function GuessBoard({
   level,
-  players,
+  players: choice,
   onExit,
   onComplete,
 }: {
@@ -136,7 +138,14 @@ function GuessBoard({
   const audio = useAudio();
   const gt = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
   const mt = (k: string) => memText(lang, k);
-  const playerName = (i: number) => mt("mem.player").replace("{n}", String(i + 1));
+  // Choice 0: the child (seat 0) against the computer (seat 1).
+  const vsComputer = choice === 0;
+  const players = vsComputer ? 2 : choice;
+  const isComputer = (i: number) => vsComputer && i === 1;
+  const playerName = (i: number) =>
+    vsComputer
+      ? gt(i === 0 ? "dom.you" : "dom.computer")
+      : mt("mem.player").replace("{n}", String(i + 1));
 
   const newGame = () => ({
     boards: dealBoards(level, players).map(({ cards, secret }) => ({
@@ -194,19 +203,25 @@ function GuessBoard({
     later(() => {
       const next = (turn + 1) % players;
       setTurn(next);
-      setMessage({ text: mt("mem.turn").replace("{name}", playerName(next)), tone: "plain" });
+      setMessage({
+        text: vsComputer
+          ? gt(isComputer(next) ? "vs.computerTurn" : "vs.yourTurn")
+          : mt("mem.turn").replace("{name}", playerName(next)),
+        tone: "plain",
+      });
       setBusy(false);
     }, delay + 900);
   };
 
-  const ask = (trait: Trait) => {
+  const ask = (trait: Trait, byComputer = false) => {
     if (busy || winner !== null || board.asked.has(trait)) return;
+    if (isComputer(turn) !== byComputer) return;
     setSheet(false);
     const answer = board.secret.traits.has(trait);
     const cost = board.cost + 1;
     update(turn, (b) => ({ ...b, asked: new Map(b.asked).set(trait, answer), cost }));
     setMessage({
-      text: `${gt(`gw.q.${trait}`)} ${answer ? gt("gw.yes") : gt("gw.no")}`,
+      text: `${byComputer ? "🤖 " : ""}${gt(`gw.q.${trait}`)} ${answer ? gt("gw.yes") : gt("gw.no")}`,
       tone: answer ? "yes" : "no",
     });
     if (answer) audio.playCorrect();
@@ -232,8 +247,9 @@ function GuessBoard({
     } else passTurn(done);
   };
 
-  const guess = (c: Character) => {
+  const guess = (c: Character, byComputer = false) => {
     if (busy || winner !== null || board.down.has(c.id)) return;
+    if (isComputer(turn) !== byComputer) return;
     const cost = board.cost + 1;
     if (c === board.secret) {
       update(turn, (b) => ({ ...b, cost }));
@@ -252,6 +268,30 @@ function GuessBoard({
       win(turn, cost);
     } else passTurn(500);
   };
+
+  // The computer's turn: it asks the question that best splits the cards
+  // it still has standing (now and then a less good one), and guesses
+  // when only two are left or no question tells them apart.
+  useEffect(() => {
+    if (!isComputer(turn) || busy || winner !== null) return;
+    const left = standing(board);
+    const pick = <T,>(list: T[]) => list[Math.floor(Math.random() * list.length)];
+    const options = QUESTIONS.filter((q) => !board.asked.has(q.trait))
+      .map((q) => {
+        const yes = left.filter((c) => c.traits.has(q.trait)).length;
+        return { trait: q.trait, split: Math.min(yes, left.length - yes) };
+      })
+      .filter((o) => o.split > 0);
+    const id = window.setTimeout(() => {
+      if (left.length <= 2 || options.length === 0) return guess(pick(left), true);
+      const top = Math.max(...options.map((o) => o.split));
+      const choice =
+        Math.random() < 0.3 ? pick(options) : pick(options.filter((o) => o.split === top));
+      ask(choice.trait, true);
+    }, 1400);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turn, busy, winner, game]);
 
   const replay = () => {
     timers.current.forEach((id) => window.clearTimeout(id));
@@ -284,7 +324,7 @@ function GuessBoard({
               }`}
               style={{ ["--paint-tint" as string]: PLAYER_TINT[TOKEN_ORDER[i]] }}
             >
-              <PlayerDot index={i} />
+              <PlayerDot index={i} robot={isComputer(i)} />
               <span className="min-w-0 flex-1 leading-tight">
                 <span className="block truncate">{playerName(i)}</span>
                 <span className="block truncate text-xs font-normal text-muted-foreground">
@@ -317,7 +357,7 @@ function GuessBoard({
             <button
               key={c.id}
               onClick={() => guess(c)}
-              disabled={isDown || winner !== null}
+              disabled={isDown || winner !== null || isComputer(turn)}
               aria-label={name(c)}
               className="relative aspect-[4/5] w-full [perspective:500px]"
             >
@@ -388,7 +428,7 @@ function GuessBoard({
           audio.playClick();
           setSheet(true);
         }}
-        disabled={busy || winner !== null}
+        disabled={busy || winner !== null || isComputer(turn)}
         className="paint-box paint-wide paint-flat paint-thin mx-auto mt-3 flex w-full max-w-xs items-center justify-center gap-3 px-5 py-3.5 font-display text-xl text-[oklch(0.42_0.11_50)] transition active:scale-95 disabled:opacity-50"
       >
         <img src={hintArt} alt="" aria-hidden draggable={false} className="h-9 w-9 select-none" />
@@ -420,7 +460,10 @@ function GuessBoard({
             )}
           </header>
           <div className="flex min-h-0 flex-1 gap-5">
-            <div ref={setArea} className="grid min-h-0 min-w-0 flex-1 place-items-center overflow-hidden p-2">
+            <div
+              ref={setArea}
+              className="grid min-h-0 min-w-0 flex-1 place-items-center overflow-hidden p-2"
+            >
               {fit.cell > 0 && cardsGrid}
             </div>
             <aside className="flex w-80 shrink-0 flex-col justify-center gap-3 xl:w-96">
@@ -501,11 +544,19 @@ function GuessBoard({
 
       {winner !== null && (
         <ResultCard
-          top={players === 1 ? starText(guessStars(shown.cost, cards.length)) : "🏆"}
+          top={
+            players === 1
+              ? starText(guessStars(shown.cost, cards.length))
+              : isComputer(winner)
+                ? "🤖"
+                : "🏆"
+          }
           title={
             players === 1
               ? gt("gw.found", { name: name(shown.secret) })
-              : mt("mem.wins").replace("{name}", playerName(winner))
+              : vsComputer
+                ? gt(isComputer(winner) ? "dom.computerWins" : "dom.youWin")
+                : mt("mem.wins").replace("{name}", playerName(winner))
           }
           detail={
             <span className="flex flex-col items-center gap-2">

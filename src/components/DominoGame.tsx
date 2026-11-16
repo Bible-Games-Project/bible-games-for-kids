@@ -22,7 +22,7 @@ import { useBackButton } from "@/lib/back-button";
 import { useWideScreen } from "@/lib/use-fit";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
-import { PLAYER_TINT, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
+import { PLAYER_TINT, PlayerChoice, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
 import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 
 import dominoBg from "@/assets/domino-bg.webp";
@@ -38,7 +38,8 @@ export function DominoGame({ onBack }: { onBack: () => void }) {
 
   useBackButton(players !== null, () => setPlayers(null));
 
-  if (players) return <DominoBoard players={players} onExit={() => setPlayers(null)} />;
+  // 0 = one player against the computer
+  if (players !== null) return <DominoBoard players={players} onExit={() => setPlayers(null)} />;
 
   return (
     <MenuScreen
@@ -48,25 +49,17 @@ export function DominoGame({ onBack }: { onBack: () => void }) {
       onBack={onBack}
       backLabel={t("select.back")}
     >
-      <div className="grid gap-3">
-        {[1, 2].map((n) => (
-          <button
-            key={n}
-            onClick={() => {
-              window.scrollTo(0, 0);
-              setPlayers(n);
-            }}
-            className="paint-box paint-square flex items-center gap-4 p-4 text-left transition active:scale-[0.98]"
-          >
-            <span className="shrink-0 whitespace-nowrap text-3xl" aria-hidden>
-              {n === 1 ? "🧒🤖" : "🧒🧒"}
-            </span>
-            <span className="font-display text-xl">
-              {n === 1 ? dt("dom.vsComputer") : mt("mem.playersMany").replace("{n}", "2")}
-            </span>
-          </button>
-        ))}
-      </div>
+      <h2 className="text-center font-display text-2xl">{mt("mem.howManyPlayers")}</h2>
+      <PlayerChoice
+        choices={[0, 2, 3, 4, 5, 6]}
+        onPick={(n) => {
+          window.scrollTo(0, 0);
+          setPlayers(n);
+        }}
+        label={(n) =>
+          n === 0 ? dt("dom.vsComputer") : mt("mem.playersMany").replace("{n}", String(n))
+        }
+      />
       <div className="paint-box paint-long mt-5 flex flex-col items-center gap-3 p-5 text-center">
         <div className="flex gap-2">
           <DominoTile tile={{ id: -1, a: 2, b: 5 }} faces={sample} size={44} />
@@ -165,7 +158,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
   const audio = useAudio();
   const dt = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
   const mt = (k: string) => memText(lang, k);
-  const vsComputer = players === 1;
+  const vsComputer = players === 0;
   const seats = vsComputer ? 2 : players;
   const nameOf = (i: number) =>
     vsComputer
@@ -173,6 +166,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
         ? dt("dom.you")
         : dt("dom.computer")
       : mt("mem.player").replace("{n}", String(i + 1));
+  const pawnOf = (i: number) => (vsComputer && i === 1 ? "robot" : TOKEN_ORDER[i]);
 
   const [g, setG] = useState(() => newGame(seats));
   const gRef = useRef(g);
@@ -366,7 +360,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
                   i === g.turn ? "paint-picked" : ""
                 }`}
               >
-                <PlayerPawn color={TOKEN_ORDER[i]} size={16} />
+                <PlayerPawn color={pawnOf(i)} size={16} />
                 {nameOf(i)}
                 <span className="flex">
                   {h.slice(0, 10).map((x) => (
@@ -426,7 +420,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
             className="flex min-h-[1.25rem] items-center justify-center gap-2 text-center text-sm font-semibold"
             aria-live="polite"
           >
-            {g.winner === null && <PlayerPawn color={TOKEN_ORDER[g.turn]} size={16} />}
+            {g.winner === null && <PlayerPawn color={pawnOf(g.turn)} size={16} />}
             {status}
           </p>
           {note && (

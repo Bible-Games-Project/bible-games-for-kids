@@ -18,7 +18,9 @@ export const ALL_TILES: Tile[] = (() => {
   return tiles;
 })();
 
-export const HAND_SIZE = 7;
+// Fewer tiles each with more players, so the 28 tiles go round and a few
+// stay in the pile.
+export const handSize = (players: number) => (players <= 2 ? 7 : players <= 4 ? 5 : 4);
 
 function shuffle<T>(arr: T[]): T[] {
   const a = arr.slice();
@@ -34,10 +36,9 @@ export const pickFaces = (): Story[] => shuffle(STORIES).slice(0, 7);
 
 export function deal(players: number): { hands: Tile[][]; pile: Tile[] } {
   const tiles = shuffle(ALL_TILES);
-  const hands = Array.from({ length: players }, (_, i) =>
-    tiles.slice(i * HAND_SIZE, (i + 1) * HAND_SIZE),
-  );
-  return { hands, pile: tiles.slice(players * HAND_SIZE) };
+  const n = handSize(players);
+  const hands = Array.from({ length: players }, (_, i) => tiles.slice(i * n, (i + 1) * n));
+  return { hands, pile: tiles.slice(players * n) };
 }
 
 export const dots = (tiles: Tile[]) => tiles.reduce((sum, t) => sum + t.a + t.b, 0);
