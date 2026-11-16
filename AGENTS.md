@@ -102,8 +102,10 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   `src/assets/coloring-marker/<slug>-lines.webp` (896x1152, dark brown lines on
   transparent), with no levels. Each stroke is locked to the closed shape it
   started in until the finger or mouse button is lifted (the maintainer's
-  rule; it used to last until a colour or size change). Only feeding-5000 (old painting, no coloring-art drawing
-  yet) still falls back to paint by numbers. The drawing was made with
+  rule; it used to last until a colour or size change). Every story has one (feeding-5000 since Nov 2026,
+  drawn from its old painting). To add one, also create an empty
+  coloring-marker/<slug>-lines.webp first: story-assets.cjs only rewrites it
+  when it exists. The drawing was made with
   gpt-image-2 (images/edits from the story painting, "children's coloring
   book page, bold closed outlines"), then thickened (blur 1.6 + steep alpha
   levels); scripts/story-assets.cjs rebuilds it from scripts/coloring-art/<slug>.png.
