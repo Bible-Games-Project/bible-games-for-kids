@@ -98,13 +98,23 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
 - The container has no Python, ImageMagick or curl. For image work, install
   `sharp` in a scratch folder outside the repo (`npm i sharp` in /tmp) and use
   `bun` for HTTP calls (it honours the egress proxy; plain `node` fetch doesn't).
-- Coloring has a marker mode on trial (`MarkerBoard.tsx`): free finger
-  painting where each stroke is clipped to the closed shape it started in.
-  It is used on Easy for any page with `src/assets/coloring-marker/<slug>-lines.webp`
-  (896x1152, dark brown lines on transparent); other pages and levels stay
-  paint by numbers. The drawing was made with gpt-image-2 (images/edits from
-  the story painting, "children's coloring book page, bold closed outlines"),
-  then thickened (blur 1.6 + steep alpha levels); scripts/story-assets.cjs rebuilds it from scripts/coloring-art/<slug>.png.
+- Coloring is free finger painting (`MarkerBoard.tsx`) on every page with
+  `src/assets/coloring-marker/<slug>-lines.webp` (896x1152, dark brown lines on
+  transparent), with no levels. The brush is locked to the closed shape the
+  first stroke started in until the child changes colour or size (the
+  maintainer's rule). Only feeding-5000 (old painting, no coloring-art drawing
+  yet) still falls back to paint by numbers. The drawing was made with
+  gpt-image-2 (images/edits from the story painting, "children's coloring
+  book page, bold closed outlines"), then thickened (blur 1.6 + steep alpha
+  levels); scripts/story-assets.cjs rebuilds it from scripts/coloring-art/<slug>.png.
+- Drag & Drop shape levels (trial, Nov 2026: annunciation Easy only): cut-out
+  things dragged onto their black silhouette, from
+  scripts/make-dragdrop-shapes.cjs → src/lib/dragdrop-shapes.ts. Other
+  stories/levels keep round pieces.
+- Player-coloured painted panels: add `paint-tint` plus
+  `--paint-tint: PLAYER_TINT[color]` (SVG duotone filters in Token.tsx).
+- Background music is broken on the Cloudflare site: `src/assets/music/*.asset.json`
+  point to Lovable's `/__l5e/` file host, which only exists on Lovable.
 - All 49 story paintings are in the new gouache storybook style (red-sea is
   the maintainer's own Moses painting, not generated). The maintainer wants a
   flat, grainy, hand-made look like the reference — not Disney/Pixar, not

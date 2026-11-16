@@ -13,6 +13,7 @@ import {
   piecesFor,
   type DragStory,
 } from "@/lib/dragdrop";
+import { DD_SHAPES, type ShapePiece } from "@/lib/dragdrop-shapes";
 import type { DifficultyId } from "@/lib/puzzles";
 import type { Story } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
@@ -42,6 +43,7 @@ export function DragDropGame({ onBack }: { onBack: () => void }) {
       <DragDropBoard
         key={`${level}:${story.slug}`}
         item={{ story, pieces: piecesFor(story, level) }}
+        shapes={DD_SHAPES[story.slug]?.[level]}
         onExit={() => setStory(null)}
         onComplete={() => setDone(markStoryDone(level, story.slug))}
       />
@@ -76,19 +78,35 @@ export function DragDropGame({ onBack }: { onBack: () => void }) {
 }
 
 // ---------- The board: drag the round pieces back into the painting ----------
+// Some levels (DD_SHAPES) use whole cut-out things instead: the painting
+// shows each one as a dark silhouette and the child drops the coloured
+// cut-out onto it.
 function DragDropBoard({
   item,
+  shapes,
   onExit,
   onComplete,
 }: {
   item: DragStory;
+  shapes?: ShapePiece[];
   onExit: () => void;
   onComplete: () => void;
 }) {
   const { lang } = useSettings();
   const { playCorrect, playIncorrect, playWin } = useAudio();
   const dt = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
-  const { story, pieces } = item;
+  const { story } = item;
+  const pieces = shapes ?? item.pieces;
+  // Centre of piece i in % of the painting (x of its width, y of its height)
+  // and its size in % of the width.
+  const centre = (i: number) => {
+    if (shapes) {
+      const p = shapes[i];
+      return { x: p.x + p.w / 2, y: p.y + p.h / 2, size: Math.max(p.w, (p.h / PAINTING_RATIO)) };
+    }
+    const p = item.pieces[i];
+    return { x: p.x, y: p.y, size: 2 * p.r };
+  };
 
   const boardRef = useRef<HTMLDivElement | null>(null);
   const [placed, setPlaced] = useState<Set<number>>(new Set());
@@ -125,14 +143,15 @@ function DragDropBoard({
   const drop = () => {
     if (!drag) return;
     const board = boardRef.current;
-    const p = pieces[drag.i];
+    const p = centre(drag.i);
     if (board) {
       const rect = board.getBoundingClientRect();
       const cx = rect.left + (p.x / 100) * rect.width;
       const cy = rect.top + (p.y / 100) * rect.height;
-      const radius = (p.r / 100) * rect.width;
-      // Generous snap: anywhere over the socket (and a bit around it).
-      if (Math.hypot(drag.x - cx, drag.y - cy) <= radius * 1.4) {
+      const radius = (p.size / 200) * rect.width;
+      // Generous snap: anywhere over the socket (and a bit around it); small
+      // shapes still get a finger-sized target.
+      if (Math.hypot(drag.x - cx, drag.y - cy) <= Math.max(radius * 1.4, shapes ? 36 : 0)) {
         const next = new Set(placed).add(drag.i);
         setPlaced(next);
         setJustPlaced(drag.i);
@@ -202,7 +221,26 @@ function DragDropBoard({
             draggable={false}
             className="absolute inset-0 h-full w-full select-none"
           />
-          {pieces.map((p, i) => {
+          {shapes?.map((p, i) => {
+            const isPlaced = placed.has(i);
+            return (
+              <img
+                key={i}
+                src={p.src}
+                alt=""
+                draggable={false}
+                className={`pointer-events-none absolute select-none transition-[filter,opacity] duration-500 ${
+                  isPlaced
+                    ? justPlaced === i
+                      ? "drop-shadow-[0_0_6px_oklch(0.9_0.13_85)]"
+                      : ""
+                    : "opacity-85 brightness-0"
+                }`}
+                style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, height: `${p.h}%` }}
+              />
+            );
+          })}
+          {!shapes && item.pieces.map((p, i) => {
             const isPlaced = placed.has(i);
             return (
               <span
@@ -233,29 +271,54 @@ function DragDropBoard({
                 onPointerUp={drop}
                 onPointerCancel={drop}
                 onDragStart={(e) => e.preventDefault()}
-                className={`${trayPiece} shrink-0 touch-none wide:h-24 wide:w-24 select-none rounded-full border-4 border-white shadow-[0_8px_16px_oklch(0.35_0.04_60/0.3)] transition ${
-                  drag?.i === i ? "opacity-25" : ""
-                } ${wrong === i ? "piece-shake" : ""}`}
+                className={`${trayPiece} shrink-0 touch-none wide:h-24 wide:w-24 select-none transition ${
+                  shapes
+                    ? "relative rounded-2xl bg-white/70 shadow-[0_6px_14px_oklch(0.35_0.04_60/0.25)]"
+                    : "rounded-full border-4 border-white shadow-[0_8px_16px_oklch(0.35_0.04_60/0.3)]"
+                } ${drag?.i === i ? "opacity-25" : ""} ${wrong === i ? "piece-shake" : ""}`}
                 style={{
-                  ...pieceBackground(story.image, pieces[i]),
+                  ...(shapes ? {} : pieceBackground(story.image, item.pieces[i])),
                   transform: `rotate(${((i * 7 + k * 5) % 13) - 6}deg)`,
                   touchAction: "none",
                 }}
-              />
+              >
+                {shapes && (
+                  <img
+                    src={shapes[i].src}
+                    alt=""
+                    draggable={false}
+                    className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain p-1.5 drop-shadow-[0_3px_3px_oklch(0.3_0.04_60/0.45)]"
+                  />
+                )}
+              </button>
             ))}
         </div>
       </div>
 
       {/* The piece being dragged, at the size of its spot on the painting */}
-      {drag && (
+      {drag && shapes && (
+        <img
+          src={shapes[drag.i].src}
+          alt=""
+          aria-hidden
+          draggable={false}
+          className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 select-none drop-shadow-[0_12px_14px_oklch(0.35_0.04_60/0.45)]"
+          style={{
+            left: drag.x,
+            top: drag.y,
+            width: Math.max(56, (shapes[drag.i].w * boardWidth) / 100),
+          }}
+        />
+      )}
+      {drag && !shapes && (
         <span
           aria-hidden
           className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white shadow-[0_16px_24px_oklch(0.35_0.04_60/0.4)]"
           style={{
-            ...pieceBackground(story.image, pieces[drag.i]),
+            ...pieceBackground(story.image, item.pieces[drag.i]),
             left: drag.x,
             top: drag.y,
-            width: Math.max(56, (2 * pieces[drag.i].r * boardWidth) / 100),
+            width: Math.max(56, (2 * item.pieces[drag.i].r * boardWidth) / 100),
             aspectRatio: "1",
           }}
         />
