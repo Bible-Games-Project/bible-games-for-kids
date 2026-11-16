@@ -129,7 +129,7 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   `--paint-tint: PLAYER_TINT[color]` (SVG duotone filters in Token.tsx).
 - Background music is broken on the Cloudflare site: `src/assets/music/*.asset.json`
   point to Lovable's `/__l5e/` file host, which only exists on Lovable.
-- All 49 story paintings are in the new gouache storybook style (red-sea is
+- All 50 story paintings are in the new gouache storybook style (feeding-5000 since Nov 2026; red-sea is
   the maintainer's own Moses painting, not generated). The maintainer wants a
   flat, grainy, hand-made look like the reference — not Disney/Pixar, not
   glossy AI art; small dot eyes, few gradients. To save money,
