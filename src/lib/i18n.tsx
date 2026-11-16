@@ -8,6 +8,10 @@ const LANG_KEY = "sp.lang";
 const SOUND_KEY = "sp.sound";
 const ONBOARD_KEY = "sp.onboarded";
 const DEV_KEY = "sp.devMode";
+// Developer Mode (unlock everything, reset) is hidden from players on the
+// public site and in the app. It shows on the dev server, or after opening
+// the site once with ?dev=1 (?dev=0 hides it again).
+const DEV_TOOLS_KEY = "sp.devTools";
 const PREMIUM_KEY = "sp.premium";
 
 const SUPPORTED_LANGS = new Set<Lang>(LANGS.map((l) => l.id));
@@ -31,6 +35,7 @@ interface SettingsContextValue {
   onboarded: boolean;
   completeOnboarding: (l: Lang) => void;
   devMode: boolean;
+  devTools: boolean;
   setDevMode: (v: boolean) => void;
   premium: boolean;
   setPremium: (v: boolean) => void;
@@ -45,6 +50,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [sound, setSoundState] = useState<boolean>(true);
   const [onboarded, setOnboarded] = useState<boolean>(true);
   const [devMode, setDevModeState] = useState<boolean>(false);
+  const [devTools, setDevTools] = useState<boolean>(false);
   const [premium, setPremiumState] = useState<boolean>(false);
   const [hydrated, setHydrated] = useState(false);
 
@@ -59,6 +65,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       if (s !== null) setSoundState(s === "1");
       setOnboarded(o === "1");
       setDevModeState(d === "1");
+      const flag = new URLSearchParams(window.location.search).get("dev");
+      if (flag === "1" || flag === "0") localStorage.setItem(DEV_TOOLS_KEY, flag);
+      setDevTools(import.meta.env.DEV || localStorage.getItem(DEV_TOOLS_KEY) === "1");
       setPremiumState(p === "1");
     } catch {}
     setHydrated(true);
@@ -96,6 +105,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (!k) continue;
+        if (k === DEV_TOOLS_KEY) continue;
         if (k.startsWith("sp.") || k.startsWith("jesus-puzzles-")) {
           keysToRemove.push(k);
         }
@@ -121,7 +131,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSound,
     onboarded: hydrated ? onboarded : true,
     completeOnboarding,
-    devMode: hydrated ? devMode : false,
+    devMode: hydrated && devTools ? devMode : false,
+    devTools: hydrated ? devTools : false,
     setDevMode,
     premium: hydrated ? premium : false,
     setPremium,

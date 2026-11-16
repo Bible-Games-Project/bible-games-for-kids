@@ -167,3 +167,8 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   Domino, Goose, Parchís, Memory and Guess Who all have it; the computer
   plays from a `useEffect` on the turn state, and human moves are refused
   while it plays.
+- The maintainer shares https://bgp-bible-games-for-kids.pages.dev with
+  players (it updates with every push to main). Developer Mode is hidden
+  there and in the app; it shows on the dev server or after opening the
+  site once with `?dev=1` (`?dev=0` hides it). Keep dev-only UI behind
+  `devTools` (useSettings). Progress lives in localStorage, per device.
