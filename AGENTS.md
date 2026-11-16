@@ -100,9 +100,9 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   `bun` for HTTP calls (it honours the egress proxy; plain `node` fetch doesn't).
 - Coloring is free finger painting (`MarkerBoard.tsx`) on every page with
   `src/assets/coloring-marker/<slug>-lines.webp` (896x1152, dark brown lines on
-  transparent), with no levels. The brush is locked to the closed shape the
-  first stroke started in until the child changes colour or size (the
-  maintainer's rule). Only feeding-5000 (old painting, no coloring-art drawing
+  transparent), with no levels. Each stroke is locked to the closed shape it
+  started in until the finger or mouse button is lifted (the maintainer's
+  rule; it used to last until a colour or size change). Only feeding-5000 (old painting, no coloring-art drawing
   yet) still falls back to paint by numbers. The drawing was made with
   gpt-image-2 (images/edits from the story painting, "children's coloring
   book page, bold closed outlines"), then thickened (blur 1.6 + steep alpha

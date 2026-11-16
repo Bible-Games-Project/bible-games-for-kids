@@ -16,10 +16,9 @@ import { BackButton, ResultCard, ScreenFade } from "@/components/GameShell";
 import { UndoIcon } from "@/components/Icons";
 
 // Marker coloring: free painting with a finger over a coloring-book drawing.
-// The drawing is split into its closed shapes. After picking a color or a
-// brush size the first stroke may start anywhere; that shape is then kept,
-// and every stroke is clipped to it until another color or size is picked,
-// so the color never runs over the lines. Two fingers zoom and move the page.
+// The drawing is split into its closed shapes. Each stroke stays inside the
+// shape it started in until the finger (or mouse button) is lifted, so the
+// color never runs over the lines; the next stroke picks a shape again. Two fingers zoom and move the page.
 
 const COLORS = [
   "#e63b3b",
@@ -77,10 +76,14 @@ function loadShapes(src: string): Promise<Shapes> {
         while (head < tail) {
           const i = queue[head++];
           const x = i % W;
-          if (x > 0 && !line[i - 1] && !owner[i - 1]) (owner[i - 1] = next), (queue[tail++] = i - 1);
-          if (x < W - 1 && !line[i + 1] && !owner[i + 1]) (owner[i + 1] = next), (queue[tail++] = i + 1);
-          if (i >= W && !line[i - W] && !owner[i - W]) (owner[i - W] = next), (queue[tail++] = i - W);
-          if (i < n - W && !line[i + W] && !owner[i + W]) (owner[i + W] = next), (queue[tail++] = i + W);
+          if (x > 0 && !line[i - 1] && !owner[i - 1])
+            ((owner[i - 1] = next), (queue[tail++] = i - 1));
+          if (x < W - 1 && !line[i + 1] && !owner[i + 1])
+            ((owner[i + 1] = next), (queue[tail++] = i + 1));
+          if (i >= W && !line[i - W] && !owner[i - W])
+            ((owner[i - W] = next), (queue[tail++] = i - W));
+          if (i < n - W && !line[i + W] && !owner[i + W])
+            ((owner[i + W] = next), (queue[tail++] = i + W));
         }
         if (tail < 80) {
           // A speck: treat it as part of the line around it.
@@ -100,10 +103,10 @@ function loadShapes(src: string): Promise<Shapes> {
         const i = queue[head];
         const o = owner[i];
         const x = i % W;
-        if (x > 0 && !owner[i - 1]) (owner[i - 1] = o), (queue[tail++] = i - 1);
-        if (x < W - 1 && !owner[i + 1]) (owner[i + 1] = o), (queue[tail++] = i + 1);
-        if (i >= W && !owner[i - W]) (owner[i - W] = o), (queue[tail++] = i - W);
-        if (i < n - W && !owner[i + W]) (owner[i + W] = o), (queue[tail++] = i + W);
+        if (x > 0 && !owner[i - 1]) ((owner[i - 1] = o), (queue[tail++] = i - 1));
+        if (x < W - 1 && !owner[i + 1]) ((owner[i + 1] = o), (queue[tail++] = i + 1));
+        if (i >= W && !owner[i - W]) ((owner[i - W] = o), (queue[tail++] = i - W));
+        if (i < n - W && !owner[i + W]) ((owner[i + W] = o), (queue[tail++] = i + W));
       }
       const box = new Int32Array(next * 4);
       for (let s = 0; s < next; s++) {
@@ -154,8 +157,6 @@ export function MarkerBoard({
   const masks = useRef(new Map<number, HTMLCanvasElement>());
   const strokes = useRef<MarkerStroke[]>(loadStrokes(slug, level));
   const drawing = useRef<{ stroke: MarkerStroke & { t: "b" }; shape: number } | null>(null);
-  // The shape the current color and size paint in, and a point inside it.
-  const locked = useRef<{ shape: number; at: [number, number] } | null>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const pinch = useRef<{ d: number; mx: number; my: number; view: View } | null>(null);
   const waitAllUp = useRef(false);
@@ -217,7 +218,9 @@ export function MarkerBoard({
   };
 
   const shapeAt = (x: number, y: number) =>
-    shapes ? shapes.owner[Math.min(H - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))] : 0;
+    shapes
+      ? shapes.owner[Math.min(H - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))]
+      : 0;
 
   // Shows what is on the scratch canvas, cut to the shape, on `target`.
   const clipTo = (target: CanvasRenderingContext2D, shape: number) => {
@@ -362,13 +365,9 @@ export function MarkerBoard({
       audio.playClick();
       return;
     }
-    // The first stroke with this color and size picks the shape; the next
-    // ones stay in it, wherever they start.
-    if (!locked.current) locked.current = { shape, at: [x, y] };
-    const own = locked.current.shape === shape;
+    // The stroke stays in the shape it starts in until it is lifted.
     const s: MarkerStroke & { t: "b" } = { t: "b", c: color, s: SIZES[size], p: [x, y] };
-    if (!own) s.a = locked.current.at;
-    drawing.current = { stroke: s, shape: locked.current.shape };
+    drawing.current = { stroke: s, shape };
     const sc = scratchCtx();
     sc.clearRect(0, 0, W, H);
     brush(sc, s, 0);
@@ -382,7 +381,10 @@ export function MarkerBoard({
       const [a, b] = [...pointers.current.values()];
       const { r } = frameSize();
       const p = pinch.current;
-      const s = Math.min(MAX_ZOOM, Math.max(1, (p.view.s * Math.hypot(a.x - b.x, a.y - b.y)) / p.d));
+      const s = Math.min(
+        MAX_ZOOM,
+        Math.max(1, (p.view.s * Math.hypot(a.x - b.x, a.y - b.y)) / p.d),
+      );
       const mx = (a.x + b.x) / 2 - r.left;
       const my = (a.y + b.y) / 2 - r.top;
       // Keep the point that was under the fingers under the fingers.
@@ -423,7 +425,6 @@ export function MarkerBoard({
 
   const clearAll = () => {
     strokes.current = [];
-    locked.current = null;
     setCount(0);
     saveStrokes(slug, level, []);
     redraw();
@@ -441,7 +442,11 @@ export function MarkerBoard({
 
   const toggleZoom = () => {
     const { w, h } = frameSize();
-    setView(view.s > 1 ? { s: 1, tx: 0, ty: 0 } : { s: 2.5, tx: (w - w * 2.5) / 2, ty: (h - h * 2.5) / 2 });
+    setView(
+      view.s > 1
+        ? { s: 1, tx: 0, ty: 0 }
+        : { s: 2.5, tx: (w - w * 2.5) / 2, ty: (h - h * 2.5) / 2 },
+    );
   };
 
   const finish = () => {
@@ -514,8 +519,18 @@ export function MarkerBoard({
               className="absolute inset-0 origin-top-left"
               style={{ transform: `translate(${view.tx}px, ${view.ty}px) scale(${view.s})` }}
             >
-              <canvas ref={paintRef} width={W} height={H} className="absolute inset-0 h-full w-full" />
-              <canvas ref={liveRef} width={W} height={H} className="absolute inset-0 h-full w-full" />
+              <canvas
+                ref={paintRef}
+                width={W}
+                height={H}
+                className="absolute inset-0 h-full w-full"
+              />
+              <canvas
+                ref={liveRef}
+                width={W}
+                height={H}
+                className="absolute inset-0 h-full w-full"
+              />
               <img
                 src={lines}
                 alt=""
@@ -531,7 +546,9 @@ export function MarkerBoard({
                 className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover animate-in fade-in"
               />
             )}
-            {!shapes && <span className="absolute inset-0 grid place-items-center text-3xl">🎨</span>}
+            {!shapes && (
+              <span className="absolute inset-0 grid place-items-center text-3xl">🎨</span>
+            )}
           </div>
         </div>
 
@@ -543,7 +560,6 @@ export function MarkerBoard({
               onClick={() => {
                 setSize(i);
                 setFill(false);
-                locked.current = null;
               }}
               aria-label={`${ct("color.brush")} ${i + 1}`}
               aria-pressed={!fill && size === i}
@@ -560,7 +576,6 @@ export function MarkerBoard({
           <button
             onClick={() => {
               setFill(true);
-              locked.current = null;
             }}
             aria-label={ct("color.fill")}
             aria-pressed={fill}
@@ -585,7 +600,6 @@ export function MarkerBoard({
               key={c}
               onClick={() => {
                 setColor(c);
-                locked.current = null;
               }}
               aria-label={c}
               aria-pressed={color === c}
