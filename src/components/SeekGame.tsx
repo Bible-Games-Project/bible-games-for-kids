@@ -6,7 +6,7 @@ import { localizeSceneTitle } from "@/lib/scenes-i18n";
 import type { DifficultyId } from "@/lib/puzzles";
 import { PAINTING_RATIO } from "@/lib/dragdrop";
 import { SEEK_STORIES, itemsFor, seekCount, seekStars } from "@/lib/seek";
-import { wordEmoji, wordName } from "@/lib/seek-words";
+import { wordName } from "@/lib/seek-words";
 import type { Story } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
 import {
@@ -191,26 +191,37 @@ function SeekBoard({
           {st("seek.instruction")} · {st("seek.found", { n: found.size, total: items.length })}
         </p>
 
-        {/* What to find */}
-        <ul className="flex flex-wrap justify-center gap-2 pb-3 wide:mb-auto">
+        {/* What to find: each thing cut out of the painting itself, so no
+            words are needed (the name stays for screen readers). */}
+        <ul className="flex flex-wrap justify-center gap-2 pb-3 [--s:3.5rem] wide:mb-auto wide:[--s:4.5rem]">
           {items.map((it) => {
             const isFound = found.has(it.word);
+            // The crop shows the item's circle a little enlarged for context.
+            const r = it.r * 1.15;
             return (
               <li
                 key={it.word}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold shadow-sm transition ${
-                  isFound
-                    ? "bg-[oklch(0.86_0.08_150)] text-[oklch(0.3_0.06_150)]"
-                    : "bg-card text-foreground"
+                role="img"
+                aria-label={wordName(it.word, lang)}
+                title={wordName(it.word, lang)}
+                className={`relative h-[var(--s)] w-[var(--s)] shrink-0 rounded-full border-[3px] bg-card shadow-md transition ${
+                  isFound ? "border-[oklch(0.55_0.13_150)] opacity-60" : "border-white"
                 }`}
               >
-                <span aria-hidden className="text-lg leading-none">
-                  {wordEmoji(it.word)}
-                </span>
-                <span className={isFound ? "line-through decoration-2" : ""}>
-                  {wordName(it.word, lang)}
-                </span>
-                {isFound && <CheckIcon />}
+                <span
+                  aria-hidden
+                  className="absolute inset-0 rounded-full bg-no-repeat"
+                  style={{
+                    backgroundImage: `url(${story.image})`,
+                    backgroundSize: `calc(var(--s) * ${(50 / r).toFixed(3)}) auto`,
+                    backgroundPosition: `calc(var(--s) * ${(0.5 - it.x / (2 * r)).toFixed(3)}) calc(var(--s) * ${(0.5 - (it.y * PAINTING_RATIO) / (2 * r)).toFixed(3)})`,
+                  }}
+                />
+                {isFound && (
+                  <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[oklch(0.55_0.13_150)] text-[0.65rem] text-white shadow">
+                    <CheckIcon />
+                  </span>
+                )}
               </li>
             );
           })}
