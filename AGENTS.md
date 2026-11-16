@@ -107,10 +107,22 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   gpt-image-2 (images/edits from the story painting, "children's coloring
   book page, bold closed outlines"), then thickened (blur 1.6 + steep alpha
   levels); scripts/story-assets.cjs rebuilds it from scripts/coloring-art/<slug>.png.
-- Drag & Drop shape levels (trial, Nov 2026: annunciation Easy only): cut-out
-  things dragged onto their black silhouette, from
-  scripts/make-dragdrop-shapes.cjs → src/lib/dragdrop-shapes.ts. Other
-  stories/levels keep round pieces.
+- Cut-out shapes (Nov 2026, the maintainer's choice over round crops): the
+  things marked in story-items.ts are cut out of each painting by
+  scripts/make-shapes.cjs (imgly ISNet on the CPU; setup in its header) into
+  src/assets/shapes/<slug>/, loaded by src/lib/story-shapes.ts. Drag & Drop
+  drops them onto their dark silhouette and the Seek & Find list shows them.
+  A level with too few clean cuts keeps round pieces. Cutting all 50 takes
+  ~2 h (2 things per process: the model leaks memory, the container has
+  1.2 GB); bad cuts (hair-only heads, clouds, scenery) are only caught by eye
+  on a contact sheet, so add them to SKIP. After repainting a story or moving
+  its items, re-run `cut` and `save` for it.
+- Long jobs: the maintainer can't see background work and has stopped the
+  session thinking it was hung (that wipes /tmp and uncommitted work). Say
+  how long it will take, post a short "% done" every ~10 minutes, keep
+  outputs under ~ and commit in chunks.
+- `bun run build` ends with a prerender error here (dist/server/server.js
+  not found); that is local only. The check is three "✓ built in" lines.
 - Player-coloured painted panels: add `paint-tint` plus
   `--paint-tint: PLAYER_TINT[color]` (SVG duotone filters in Token.tsx).
 - Background music is broken on the Cloudflare site: `src/assets/music/*.asset.json`
