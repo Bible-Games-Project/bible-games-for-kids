@@ -73,6 +73,22 @@ const SKIP = new Set([
   "jacobs-ladder/bag",
   "samuel-call/blanket",
   "heals-blind/jesus.face",
+  "joseph-forgives/brother.head",
+  "joseph-forgives/brothers",
+  "joseph-forgives/scroll",
+  "joseph-forgives/jar",
+  "angels-shepherds/shepherd.head",
+  "boy-temple/man.head",
+  "catch-fish/jesus.head",
+  "catch-fish/shell",
+  "sower-seed/bag",
+  "sower-seed/town",
+  "transfiguration/disciple.head",
+  "transfiguration/man.head",
+  "washes-feet/disciples",
+  "emmaus/sun",
+  "mustard-seed/woman.head",
+  "mustard-seed/jar",
 ]);
 
 function items(slug) {
