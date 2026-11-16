@@ -18,7 +18,7 @@ import {
 import memoryBg from "@/assets/memory-bg.webp";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, ScreenFade } from "@/components/GameShell";
-import { PlayerChoice, PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
+import { PAWN_HEX, PlayerChoice, PlayerPawn, TOKEN_HEX, TOKEN_ORDER } from "@/components/Token";
 import { useBackButton } from "@/lib/back-button";
 import { fitGrid, useElementSize, useWideScreen } from "@/lib/use-fit";
 import cardBack from "@/assets/ui/card-back.webp";
@@ -332,6 +332,8 @@ function MemoryBoard({
   const vsComputer = choice === 0;
   const players = vsComputer ? 2 : choice;
   const isComputer = (i: number) => vsComputer && i === 1;
+  // The computer plays in black, like its robot pawn.
+  const colorOf = (i: number) => (isComputer(i) ? PAWN_HEX.robot : PLAYER_COLORS[i]);
 
   const [deck, setDeck] = useState<MemoryCard[]>(() => buildDeck(level.pairs));
   const [flipped, setFlipped] = useState<number[]>([]);
@@ -513,7 +515,7 @@ function MemoryBoard({
             style={
               isMatched
                 ? {
-                    filter: `drop-shadow(0 0 3px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"}) drop-shadow(0 0 7px ${multi ? PLAYER_COLORS[finder] : "var(--color-gold)"})`,
+                    filter: `drop-shadow(0 0 3px ${multi ? colorOf(finder) : "var(--color-gold)"}) drop-shadow(0 0 7px ${multi ? colorOf(finder) : "var(--color-gold)"})`,
                   }
                 : undefined
             }
@@ -569,7 +571,7 @@ function MemoryBoard({
                     className={`flex items-center gap-1.5 rounded-full py-1 pl-1 pr-3 text-sm font-semibold shadow-sm transition ${
                       active ? "scale-105 text-white" : "bg-card text-foreground/70"
                     }`}
-                    style={active ? { backgroundColor: PLAYER_COLORS[i] } : undefined}
+                    style={active ? { backgroundColor: colorOf(i) } : undefined}
                     aria-current={active ? "true" : undefined}
                   >
                     <PlayerDot index={i} robot={isComputer(i)} />
@@ -590,7 +592,7 @@ function MemoryBoard({
               </span>
             )}
             {multi && !done ? (
-              <span className="font-semibold" style={{ color: PLAYER_COLORS[turn] }}>
+              <span className="font-semibold" style={{ color: colorOf(turn) }}>
                 {vsComputer
                   ? gt(isComputer(turn) ? "vs.computerTurn" : "vs.yourTurn")
                   : mt("mem.turn").replace("{name}", playerName(turn))}

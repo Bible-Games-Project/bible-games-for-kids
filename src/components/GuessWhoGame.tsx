@@ -309,7 +309,8 @@ function GuessBoard({
   const asked = QUESTIONS.filter((q) => board.asked.has(q.trait));
   const shown = winner !== null ? boards[winner] : board;
   // The cards are framed in the colour of the player whose board is shown.
-  const tint = PLAYER_TINT[TOKEN_ORDER[winner ?? turn]];
+  const tintOf = (i: number) => PLAYER_TINT[isComputer(i) ? "robot" : TOKEN_ORDER[i]];
+  const tint = tintOf(winner ?? turn);
   const fit = fitGrid(shown.cards.length, area.width, area.height, 5 / 4, 8);
 
   const playersBar = (
@@ -322,7 +323,7 @@ function GuessBoard({
               className={`paint-box paint-long paint-flat paint-thin paint-tint flex items-center gap-2 px-3 py-1.5 text-sm font-semibold transition ${
                 i === turn && winner === null ? "paint-picked scale-[1.03]" : "opacity-70"
               }`}
-              style={{ ["--paint-tint" as string]: PLAYER_TINT[TOKEN_ORDER[i]] }}
+              style={{ ["--paint-tint" as string]: tintOf(i) }}
             >
               <PlayerDot index={i} robot={isComputer(i)} />
               <span className="min-w-0 flex-1 leading-tight">

@@ -31,25 +31,29 @@ export const TOKEN_HEX: Record<TokenColor, string> = {
   orange: "#e07f3a",
 };
 
+// The same, plus the computer's robot pawn, which plays in black.
+export const PAWN_HEX: Record<PawnKind, string> = { ...TOKEN_HEX, robot: "#2f2d2b" };
+
 // Recolouring the brown painted panels (.paint-tint) in a player's colour,
 // keeping the paint texture: an SVG duotone filter per colour (dark paint
 // becomes a deep shade, the light parchment a pale one). CSS hue-rotate gave
 // muddy oranges instead of red. <PaintTintFilters /> is in the root layout.
-export const PLAYER_TINT: Record<TokenColor, string> = {
+export const PLAYER_TINT: Record<PawnKind, string> = {
   blue: "url(#paint-tint-blue)",
   red: "url(#paint-tint-red)",
   yellow: "url(#paint-tint-yellow)",
   green: "url(#paint-tint-green)",
   purple: "url(#paint-tint-purple)",
   orange: "url(#paint-tint-orange)",
+  robot: "url(#paint-tint-robot)",
 };
 
 export function PaintTintFilters() {
   const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
   return (
     <svg width="0" height="0" className="absolute" aria-hidden>
-      {(Object.keys(TOKEN_HEX) as TokenColor[]).map((c) => {
-        const [r, g, b] = rgb(TOKEN_HEX[c]);
+      {(Object.keys(PAWN_HEX) as PawnKind[]).map((c) => {
+        const [r, g, b] = rgb(PAWN_HEX[c]);
         // gray 0 → a deep shade, gray 0.5 → the colour, gray 1 → a pale tint
         const ramp = (v: number) => [v * 0.35, v, v + (1 - v) * 0.82].map((x) => x.toFixed(3)).join(" ");
         return (

@@ -19,7 +19,7 @@ import {
 import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
-import { PlayerChoice, PlayerPawn, TOKEN_HEX } from "@/components/Token";
+import { PAWN_HEX, PlayerChoice, PlayerPawn, TOKEN_HEX } from "@/components/Token";
 import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 import type { Story } from "@/lib/stories";
 
@@ -440,6 +440,7 @@ function ParchisBoard({
   };
 
   const seat = seats[turn];
+  const dieColor = vsComputer && turn === 1 ? PAWN_HEX.robot : TOKEN_HEX[seat.color];
   const human = seat.human && winner === null;
 
   return (
@@ -565,10 +566,10 @@ function ParchisBoard({
             aria-label={pt("goose.roll")}
             className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl wide:mx-auto wide:h-28 wide:w-28 shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90 disabled:opacity-60"
             style={{
-              background: `linear-gradient(to bottom right, color-mix(in oklch, ${TOKEN_HEX[seat.color]} 28%, white), color-mix(in oklch, ${TOKEN_HEX[seat.color]} 50%, white))`,
+              background: `linear-gradient(to bottom right, color-mix(in oklch, ${dieColor} 28%, white), color-mix(in oklch, ${dieColor} 50%, white))`,
             }}
           >
-            <DieFace value={die} spinning={rolling} color={TOKEN_HEX[seat.color]} />
+            <DieFace value={die} spinning={rolling} color={dieColor} />
           </button>
         </div>
       </div>

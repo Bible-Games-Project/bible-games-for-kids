@@ -414,7 +414,7 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
         <div
           className="paint-box paint-long paint-tint mt-3 px-5 pb-4 pt-3"
           // in the colour of the player whose turn it is (or who won)
-          style={{ ["--paint-tint" as string]: PLAYER_TINT[TOKEN_ORDER[g.winner ?? g.turn]] }}
+          style={{ ["--paint-tint" as string]: PLAYER_TINT[pawnOf(g.winner ?? g.turn)] }}
         >
           <p
             className="flex min-h-[1.25rem] items-center justify-center gap-2 text-center text-sm font-semibold"

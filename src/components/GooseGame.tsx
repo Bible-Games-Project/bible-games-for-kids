@@ -23,6 +23,7 @@ import {
   PAWN_RATIO,
   PlayerChoice,
   PlayerPawn,
+  PAWN_HEX,
   TOKEN_HEX,
   TOKEN_ORDER,
   type PawnKind,
@@ -663,6 +664,7 @@ function GooseBoard({ players: choice, onExit }: { players: number; onExit: () =
 
   const solo = players === 1;
   const computerTurn = isComputer(turn);
+  const dieColor = computerTurn ? PAWN_HEX.robot : TOKEN_HEX[TOKEN_ORDER[turn]];
 
   return (
     <div className="theme-bedtime relative flex h-[100dvh] w-full flex-col overflow-hidden wide:grid wide:grid-cols-[20rem_1fr] wide:grid-rows-[auto_1fr] xl:wide:grid-cols-[24rem_1fr]">
@@ -798,10 +800,10 @@ function GooseBoard({ players: choice, onExit }: { players: number; onExit: () =
             aria-label={gt("goose.roll")}
             className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl wide:mx-auto wide:h-28 wide:w-28 shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90 disabled:opacity-60"
             style={{
-              background: `linear-gradient(to bottom right, color-mix(in oklch, ${TOKEN_HEX[TOKEN_ORDER[turn]]} 28%, white), color-mix(in oklch, ${TOKEN_HEX[TOKEN_ORDER[turn]]} 50%, white))`,
+              background: `linear-gradient(to bottom right, color-mix(in oklch, ${dieColor} 28%, white), color-mix(in oklch, ${dieColor} 50%, white))`,
             }}
           >
-            <DieFace value={die} spinning={rolling} color={TOKEN_HEX[TOKEN_ORDER[turn]]} />
+            <DieFace value={die} spinning={rolling} color={dieColor} />
           </button>
         </div>
       </div>
