@@ -6,6 +6,7 @@
 import type { DifficultyId } from "./puzzles";
 import { STORIES, type Story } from "./stories";
 import { DD_PIECES } from "./dragdrop-pieces";
+import { LEVEL_COUNT, separateShapes, type StoryShape } from "./story-shapes";
 
 export interface DragPiece {
   // Centre of the piece: x in % of the painting's width, y in % of its height.
@@ -36,6 +37,14 @@ export const DRAG_STORIES: Story[] = STORIES.filter((s) => DD_PIECES[s.slug]);
 export const piecesFor = (story: Story, level: DifficultyId): DragPiece[] => {
   const i = LEVEL_INDEX[level];
   return (DD_PIECES[story.slug]?.[i] ?? []).map(([x, y]) => ({ x, y, r: PIECE_RADIUS[i] }));
+};
+
+// Whole cut-out things for this level (dropped onto their silhouettes). A
+// painting with too few clean cut-outs for the level (two short at most is
+// fine) keeps the round pieces there.
+export const shapesFor = (story: Story, level: DifficultyId): StoryShape[] | undefined => {
+  const shapes = separateShapes(story.slug).slice(0, LEVEL_COUNT[level]);
+  return shapes.length >= 3 && shapes.length >= LEVEL_COUNT[level] - 2 ? shapes : undefined;
 };
 
 export const pieceCountFor = (level: DifficultyId) => [3, 5, 7, 9, 11][LEVEL_INDEX[level]];

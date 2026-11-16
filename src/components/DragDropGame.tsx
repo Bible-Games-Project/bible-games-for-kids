@@ -11,9 +11,10 @@ import {
   pieceBackground,
   pieceCountFor,
   piecesFor,
+  shapesFor,
   type DragStory,
 } from "@/lib/dragdrop";
-import { DD_SHAPES, type ShapePiece } from "@/lib/dragdrop-shapes";
+import type { StoryShape } from "@/lib/story-shapes";
 import type { DifficultyId } from "@/lib/puzzles";
 import type { Story } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
@@ -43,7 +44,7 @@ export function DragDropGame({ onBack }: { onBack: () => void }) {
       <DragDropBoard
         key={`${level}:${story.slug}`}
         item={{ story, pieces: piecesFor(story, level) }}
-        shapes={DD_SHAPES[story.slug]?.[level]}
+        shapes={shapesFor(story, level)}
         onExit={() => setStory(null)}
         onComplete={() => setDone(markStoryDone(level, story.slug))}
       />
@@ -78,7 +79,7 @@ export function DragDropGame({ onBack }: { onBack: () => void }) {
 }
 
 // ---------- The board: drag the round pieces back into the painting ----------
-// Some levels (DD_SHAPES) use whole cut-out things instead: the painting
+// Paintings with cut-outs (story-shapes.ts) use whole things instead: the painting
 // shows each one as a dark silhouette and the child drops the coloured
 // cut-out onto it.
 function DragDropBoard({
@@ -88,7 +89,7 @@ function DragDropBoard({
   onComplete,
 }: {
   item: DragStory;
-  shapes?: ShapePiece[];
+  shapes?: StoryShape[];
   onExit: () => void;
   onComplete: () => void;
 }) {
@@ -102,7 +103,7 @@ function DragDropBoard({
   const centre = (i: number) => {
     if (shapes) {
       const p = shapes[i];
-      return { x: p.x + p.w / 2, y: p.y + p.h / 2, size: Math.max(p.w, (p.h / PAINTING_RATIO)) };
+      return { x: p.x + p.w / 2, y: p.y + p.h / 2, size: Math.max(p.w, p.h / PAINTING_RATIO) };
     }
     const p = item.pieces[i];
     return { x: p.x, y: p.y, size: 2 * p.r };
@@ -240,22 +241,28 @@ function DragDropBoard({
               />
             );
           })}
-          {!shapes && item.pieces.map((p, i) => {
-            const isPlaced = placed.has(i);
-            return (
-              <span
-                key={i}
-                className={`pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-500 ${
-                  isPlaced
-                    ? justPlaced === i
-                      ? "ring-4 ring-[oklch(0.84_0.115_78)]"
-                      : "ring-2 ring-white/70"
-                    : "border-[3px] border-dashed border-white bg-white/45 shadow-[inset_0_2px_10px_oklch(0.3_0.04_60/0.35)] backdrop-blur-[3px]"
-                }`}
-                style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${2 * p.r}%`, aspectRatio: "1" }}
-              />
-            );
-          })}
+          {!shapes &&
+            item.pieces.map((p, i) => {
+              const isPlaced = placed.has(i);
+              return (
+                <span
+                  key={i}
+                  className={`pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-500 ${
+                    isPlaced
+                      ? justPlaced === i
+                        ? "ring-4 ring-[oklch(0.84_0.115_78)]"
+                        : "ring-2 ring-white/70"
+                      : "border-[3px] border-dashed border-white bg-white/45 shadow-[inset_0_2px_10px_oklch(0.3_0.04_60/0.35)] backdrop-blur-[3px]"
+                  }`}
+                  style={{
+                    left: `${p.x}%`,
+                    top: `${p.y}%`,
+                    width: `${2 * p.r}%`,
+                    aspectRatio: "1",
+                  }}
+                />
+              );
+            })}
         </div>
 
         {/* Tray: the pieces waiting to go back */}

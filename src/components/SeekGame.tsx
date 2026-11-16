@@ -174,58 +174,70 @@ function SeekBoard({
           the screen's height. */}
       <div className="mx-auto flex w-full max-w-lg flex-col px-4 py-4 wide:h-[100dvh] wide:max-w-none wide:flex-row wide:items-center wide:justify-center wide:gap-6">
         <div className="wide:flex wide:w-80 wide:shrink-0 wide:flex-col wide:self-stretch xl:wide:w-96">
-        <header className="flex items-center gap-3 pb-2">
-          <BackButton onClick={onExit} label={st("seek.levels")} />
-          <h1 className="min-w-0 flex-1 truncate font-display text-xl">
-            {localizeSceneTitle(story.slug, lang)}
-          </h1>
-          <button
-            onClick={hint}
-            className="shrink-0 rounded-full bg-[var(--color-gold)] px-3 py-2 text-sm font-semibold text-[oklch(0.3_0.07_45)] shadow-sm transition active:scale-95"
-          >
-            ✨ {st("seek.hint")}
-          </button>
-        </header>
+          <header className="flex items-center gap-3 pb-2">
+            <BackButton onClick={onExit} label={st("seek.levels")} />
+            <h1 className="min-w-0 flex-1 truncate font-display text-xl">
+              {localizeSceneTitle(story.slug, lang)}
+            </h1>
+            <button
+              onClick={hint}
+              className="shrink-0 rounded-full bg-[var(--color-gold)] px-3 py-2 text-sm font-semibold text-[oklch(0.3_0.07_45)] shadow-sm transition active:scale-95"
+            >
+              ✨ {st("seek.hint")}
+            </button>
+          </header>
 
-        <p className="pb-2 text-center text-sm text-muted-foreground wide:mt-auto wide:text-base">
-          {st("seek.instruction")} · {st("seek.found", { n: found.size, total: items.length })}
-        </p>
+          <p className="pb-2 text-center text-sm text-muted-foreground wide:mt-auto wide:text-base">
+            {st("seek.instruction")} · {st("seek.found", { n: found.size, total: items.length })}
+          </p>
 
-        {/* What to find: each thing cut out of the painting itself, so no
-            words are needed (the name stays for screen readers). */}
-        <ul className="flex flex-wrap justify-center gap-2 pb-3 [--s:3.5rem] wide:mb-auto wide:[--s:4.5rem]">
-          {items.map((it) => {
-            const isFound = found.has(it.word);
-            // The crop shows the item's circle a little enlarged for context.
-            const r = it.r * 1.15;
-            return (
-              <li
-                key={it.word}
-                role="img"
-                aria-label={wordName(it.word, lang)}
-                title={wordName(it.word, lang)}
-                className={`relative h-[var(--s)] w-[var(--s)] shrink-0 rounded-full border-[3px] bg-card shadow-md transition ${
-                  isFound ? "border-[oklch(0.55_0.13_150)] opacity-60" : "border-white"
-                }`}
-              >
-                <span
-                  aria-hidden
-                  className="absolute inset-0 rounded-full bg-no-repeat"
-                  style={{
-                    backgroundImage: `url(${story.image})`,
-                    backgroundSize: `calc(var(--s) * ${(50 / r).toFixed(3)}) auto`,
-                    backgroundPosition: `calc(var(--s) * ${(0.5 - it.x / (2 * r)).toFixed(3)}) calc(var(--s) * ${(0.5 - (it.y * PAINTING_RATIO) / (2 * r)).toFixed(3)})`,
-                  }}
-                />
-                {isFound && (
-                  <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[oklch(0.55_0.13_150)] text-[0.65rem] text-white shadow">
-                    <CheckIcon />
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+          {/* What to find: each thing cut out of the painting itself (its
+            shape, or a round crop if it has no cut-out), so no words are
+            needed (the name stays for screen readers). */}
+          <ul className="flex flex-wrap justify-center gap-2 pb-3 [--s:3.5rem] wide:mb-auto wide:[--s:4.5rem]">
+            {items.map((it) => {
+              const isFound = found.has(it.word);
+              // The crop shows the item's circle a little enlarged for context.
+              const r = it.r * 1.15;
+              return (
+                <li
+                  key={it.word}
+                  role="img"
+                  aria-label={wordName(it.word, lang)}
+                  title={wordName(it.word, lang)}
+                  className={`relative h-[var(--s)] w-[var(--s)] shrink-0 transition ${
+                    it.shape
+                      ? "rounded-2xl bg-white/80 shadow-sm"
+                      : "rounded-full border-[3px] bg-card shadow-md"
+                  } ${isFound ? "border-[oklch(0.55_0.13_150)] opacity-50" : "border-white"}`}
+                >
+                  {it.shape ? (
+                    <img
+                      src={it.shape.src}
+                      alt=""
+                      draggable={false}
+                      className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain p-1 drop-shadow-[0_2px_2px_oklch(0.3_0.04_60/0.4)]"
+                    />
+                  ) : (
+                    <span
+                      aria-hidden
+                      className="absolute inset-0 rounded-full bg-no-repeat"
+                      style={{
+                        backgroundImage: `url(${story.image})`,
+                        backgroundSize: `calc(var(--s) * ${(50 / r).toFixed(3)}) auto`,
+                        backgroundPosition: `calc(var(--s) * ${(0.5 - it.x / (2 * r)).toFixed(3)}) calc(var(--s) * ${(0.5 - (it.y * PAINTING_RATIO) / (2 * r)).toFixed(3)})`,
+                      }}
+                    />
+                  )}
+                  {isFound && (
+                    <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[oklch(0.55_0.13_150)] text-[0.65rem] text-white shadow">
+                      <CheckIcon />
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </div>
 
         <div
