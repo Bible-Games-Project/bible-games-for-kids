@@ -22,7 +22,7 @@ import { useBackButton } from "@/lib/back-button";
 import { useWideScreen } from "@/lib/use-fit";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
-import { PlayerPawn, TOKEN_ORDER } from "@/components/Token";
+import { PLAYER_TINT, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
 import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 
 import dominoBg from "@/assets/domino-bg.webp";
@@ -417,7 +417,11 @@ function DominoBoard({ players, onExit }: { players: number; onExit: () => void 
           </div>
         </div>
 
-        <div className="paint-box paint-long mt-3 px-5 pb-4 pt-3">
+        <div
+          className="paint-box paint-long paint-tint mt-3 px-5 pb-4 pt-3"
+          // in the colour of the player whose turn it is (or who won)
+          style={{ ["--paint-tint" as string]: PLAYER_TINT[TOKEN_ORDER[g.winner ?? g.turn]] }}
+        >
           <p
             className="flex min-h-[1.25rem] items-center justify-center gap-2 text-center text-sm font-semibold"
             aria-live="polite"
