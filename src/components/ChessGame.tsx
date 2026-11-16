@@ -20,6 +20,7 @@ import {
 } from "@/lib/chess";
 import type { Story } from "@/lib/stories";
 import { useBackButton } from "@/lib/back-button";
+import { PLAYER_TINT } from "@/components/Token";
 import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import {
@@ -686,9 +687,13 @@ function ChessBoard({
 
         {tray("nt")}
 
-        <div className="paint-box paint-long paint-thin mt-2 px-4 py-2.5 wide:col-start-1 wide:row-start-3 wide:my-4 wide:self-center wide:py-5">
+        <div
+          className="paint-box paint-long paint-thin paint-tint mt-2 px-4 py-2.5 wide:col-start-1 wide:row-start-3 wide:my-4 wide:self-center wide:py-5"
+          // in the colour of the team whose turn it is: blue Old, red New Testament
+          style={{ ["--paint-tint" as string]: PLAYER_TINT[pos.turn === "ot" ? "blue" : "red"] }}
+        >
           <p
-            className={`text-center text-sm font-semibold ${check ? "text-[oklch(0.55_0.2_25)]" : ""}`}
+            className={`text-center text-sm ${check ? "font-bold" : "font-semibold"}`}
             aria-live="polite"
           >
             {status}

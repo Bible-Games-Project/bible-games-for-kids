@@ -19,7 +19,7 @@ import {
 import { useBackButton } from "@/lib/back-button";
 import { BedtimeBackdrop } from "@/components/BedtimeBackdrop";
 import { BackButton, MenuScreen, ResultCard, ScreenFade } from "@/components/GameShell";
-import { PlayerPawn } from "@/components/Token";
+import { PlayerPawn, TOKEN_HEX } from "@/components/Token";
 import { StoryQuiz, randomStory } from "@/components/StoryQuiz";
 import type { Story } from "@/lib/stories";
 
@@ -562,9 +562,12 @@ function ParchisBoard({
             onClick={roll}
             disabled={!human || phase !== "roll"}
             aria-label={pt("goose.roll")}
-            className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl wide:mx-auto wide:h-28 wide:w-28 bg-gradient-to-br from-[var(--color-gold)] to-[oklch(0.82_0.1_62)] shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90 disabled:opacity-60"
+            className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl wide:mx-auto wide:h-28 wide:w-28 shadow-md ring-1 ring-[oklch(1_0_0/0.6)] transition active:scale-90 disabled:opacity-60"
+            style={{
+              background: `linear-gradient(to bottom right, color-mix(in oklch, ${TOKEN_HEX[seat.color]} 28%, white), color-mix(in oklch, ${TOKEN_HEX[seat.color]} 50%, white))`,
+            }}
           >
-            <DieFace value={die} spinning={rolling} />
+            <DieFace value={die} spinning={rolling} color={TOKEN_HEX[seat.color]} />
           </button>
         </div>
       </div>
@@ -625,7 +628,10 @@ const PIPS: Record<number, [number, number][]> = {
   ],
 };
 
-function DieFace({ value, spinning }: { value: number; spinning: boolean }) {
+// The die is painted in the colour of the player whose turn it is.
+function DieFace({ value, spinning, color }: { value: number; spinning: boolean; color: string }) {
+  // dark pips on yellow, white ones on the darker colours
+  const pip = color === TOKEN_HEX.yellow ? "oklch(0.3 0.07 45)" : "white";
   return (
     <svg
       width="54"
@@ -640,12 +646,12 @@ function DieFace({ value, spinning }: { value: number; spinning: boolean }) {
         width="21"
         height="21"
         rx="5"
-        fill="oklch(0.99 0.012 85)"
+        fill={color}
         stroke="oklch(0.3 0.07 45)"
         strokeWidth="1.2"
       />
       {PIPS[value].map(([cx, cy]) => (
-        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="2" fill="oklch(0.3 0.07 45)" />
+        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="2" fill={pip} />
       ))}
     </svg>
   );

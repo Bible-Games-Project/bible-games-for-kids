@@ -91,29 +91,8 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
       onBack={onBack}
       backLabel={t("select.back")}
     >
-      <div className="paint-box paint-long paint-thin mb-5 px-4 py-3">
-        <p className="text-center text-sm font-semibold text-foreground/80">
-          🗺️ {ot("order.journey", { n: journey.found.size, total: JOURNEY.length })}
-        </p>
-        {journey.level && journey.found.size > 0 && (
-          <p className="text-center text-xs text-muted-foreground">
-            {ot("order.mapLevel", { level: t(`diff.${journey.level}`) })}
-          </p>
-        )}
-        <div className="relative mx-auto mt-2 h-[56dvh] max-h-[36rem] min-h-[18rem]">
-          <JourneyMap found={journey.found} />
-        </div>
-        {journey.found.size > 0 && (
-          <button
-            onClick={() => setAsking("reset")}
-            className="mx-auto mt-3 flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-semibold text-foreground/80 shadow-sm transition active:scale-95"
-          >
-            <RestartIcon />
-            {ot("order.resetMap")}
-          </button>
-        )}
-      </div>
       <LevelList
+        compact
         describe={(id) => ot("order.optionsCount", { n: ORDER_OPTIONS[id] })}
         picture={(id) => {
           // A little fan of as many paintings as the level shows.
@@ -138,6 +117,28 @@ export function OrderGame({ onBack }: { onBack: () => void }) {
         best={(id) => best[id] ?? 0}
         onPick={pick}
       />
+      <div className="paint-box paint-long paint-thin mt-5 px-4 py-3">
+        <p className="text-center text-sm font-semibold text-foreground/80">
+          🗺️ {ot("order.journey", { n: journey.found.size, total: JOURNEY.length })}
+        </p>
+        {journey.level && journey.found.size > 0 && (
+          <p className="text-center text-xs text-muted-foreground">
+            {ot("order.mapLevel", { level: t(`diff.${journey.level}`) })}
+          </p>
+        )}
+        <div className="relative mx-auto mt-2 h-[56dvh] max-h-[36rem] min-h-[18rem]">
+          <JourneyMap found={journey.found} />
+        </div>
+        {journey.found.size > 0 && (
+          <button
+            onClick={() => setAsking("reset")}
+            className="mx-auto mt-3 flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-semibold text-foreground/80 shadow-sm transition active:scale-95"
+          >
+            <RestartIcon />
+            {ot("order.resetMap")}
+          </button>
+        )}
+      </div>
       {asking && (
         <ConfirmCard
           icon="🗺️"

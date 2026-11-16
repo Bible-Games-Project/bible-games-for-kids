@@ -16,9 +16,10 @@ import { BackButton, ResultCard, ScreenFade } from "@/components/GameShell";
 import { UndoIcon } from "@/components/Icons";
 
 // Marker coloring: free painting with a finger over a coloring-book drawing.
-// The drawing is split into its closed shapes, and every stroke is clipped to
-// the shape where it started, so even on a small phone screen the color never
-// runs over the lines. Two fingers zoom and move the page.
+// The drawing is split into its closed shapes. After picking a color or a
+// brush size the first stroke may start anywhere; that shape is then kept,
+// and every stroke is clipped to it until another color or size is picked,
+// so the color never runs over the lines. Two fingers zoom and move the page.
 
 const COLORS = [
   "#e63b3b",
@@ -153,6 +154,8 @@ export function MarkerBoard({
   const masks = useRef(new Map<number, HTMLCanvasElement>());
   const strokes = useRef<MarkerStroke[]>(loadStrokes(slug, level));
   const drawing = useRef<{ stroke: MarkerStroke & { t: "b" }; shape: number } | null>(null);
+  // The shape the current color and size paint in, and a point inside it.
+  const locked = useRef<{ shape: number; at: [number, number] } | null>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const pinch = useRef<{ d: number; mx: number; my: number; view: View } | null>(null);
   const waitAllUp = useRef(false);
@@ -264,7 +267,8 @@ export function MarkerBoard({
   const apply = (s: MarkerStroke) => {
     const paint = paintRef.current?.getContext("2d");
     if (!paint || !shapes) return;
-    const shape = s.t === "b" ? shapeAt(s.p[0], s.p[1]) : shapeAt(s.x, s.y);
+    const at = s.t === "b" ? (s.a ?? [s.p[0], s.p[1]]) : [s.x, s.y];
+    const shape = shapeAt(at[0], at[1]);
     if (!shape) return;
     const sc = scratchCtx();
     sc.clearRect(0, 0, W, H);
@@ -358,8 +362,13 @@ export function MarkerBoard({
       audio.playClick();
       return;
     }
-    const s = { t: "b" as const, c: color, s: SIZES[size], p: [x, y] };
-    drawing.current = { stroke: s, shape };
+    // The first stroke with this color and size picks the shape; the next
+    // ones stay in it, wherever they start.
+    if (!locked.current) locked.current = { shape, at: [x, y] };
+    const own = locked.current.shape === shape;
+    const s: MarkerStroke & { t: "b" } = { t: "b", c: color, s: SIZES[size], p: [x, y] };
+    if (!own) s.a = locked.current.at;
+    drawing.current = { stroke: s, shape: locked.current.shape };
     const sc = scratchCtx();
     sc.clearRect(0, 0, W, H);
     brush(sc, s, 0);
@@ -414,6 +423,7 @@ export function MarkerBoard({
 
   const clearAll = () => {
     strokes.current = [];
+    locked.current = null;
     setCount(0);
     saveStrokes(slug, level, []);
     redraw();
@@ -533,6 +543,7 @@ export function MarkerBoard({
               onClick={() => {
                 setSize(i);
                 setFill(false);
+                locked.current = null;
               }}
               aria-label={`${ct("color.brush")} ${i + 1}`}
               aria-pressed={!fill && size === i}
@@ -547,7 +558,10 @@ export function MarkerBoard({
             </button>
           ))}
           <button
-            onClick={() => setFill(true)}
+            onClick={() => {
+              setFill(true);
+              locked.current = null;
+            }}
             aria-label={ct("color.fill")}
             aria-pressed={fill}
             className={`grid h-11 w-11 place-items-center rounded-full bg-card text-xl shadow-sm transition active:scale-90 ${
@@ -569,7 +583,10 @@ export function MarkerBoard({
           {COLORS.map((c) => (
             <button
               key={c}
-              onClick={() => setColor(c)}
+              onClick={() => {
+                setColor(c);
+                locked.current = null;
+              }}
               aria-label={c}
               aria-pressed={color === c}
               className={`aspect-square w-full rounded-full border-2 border-white shadow-sm transition active:scale-90 ${

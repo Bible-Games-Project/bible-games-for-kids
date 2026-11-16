@@ -86,15 +86,15 @@ const MARKER_LINES = import.meta.glob("../assets/coloring-marker/*-lines.webp", 
 export const MARKER_W = 896;
 export const MARKER_H = 1152;
 
-export function markerLines(slug: string, level: DifficultyId): string | undefined {
-  if (level !== "easy") return undefined;
+export function markerLines(slug: string): string | undefined {
   return MARKER_LINES[`../assets/coloring-marker/${slug}-lines.webp`];
 }
 
 // A brush stroke (points as x,y pairs in drawing pixels, size s) or a bucket
-// fill at x,y; either stays inside the shape under its first point.
+// fill at x,y; either stays inside the shape under its first point, or for a
+// stroke with an anchor `a`, the shape under that point.
 export type MarkerStroke =
-  | { t: "b"; c: string; s: number; p: number[] }
+  | { t: "b"; c: string; s: number; p: number[]; a?: [number, number] }
   | { t: "f"; c: string; x: number; y: number };
 
 const markerKey = (slug: string, level: DifficultyId) => `coloring-marker:${level}:${slug}`;
@@ -118,4 +118,4 @@ export function saveStrokes(slug: string, level: DifficultyId, strokes: MarkerSt
 }
 
 export const hasPainting = (slug: string, level: DifficultyId) =>
-  markerLines(slug, level) ? loadStrokes(slug, level).length > 0 : hasFills(slug, level);
+  markerLines(slug) ? loadStrokes(slug, level).length > 0 : hasFills(slug, level);

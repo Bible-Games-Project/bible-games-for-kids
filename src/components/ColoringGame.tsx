@@ -32,16 +32,17 @@ import { MarkerBoard } from "@/components/MarkerBoard";
 export function ColoringGame({ onBack }: { onBack: () => void }) {
   useSoundTheme("coloring");
   const { lang, t } = useSettings();
-  const [level, setLevel] = useState<DifficultyId>("easy");
+  // Coloring has no levels; pages are kept under the old Easy level's key.
+  const level: DifficultyId = "easy";
   const [page, setPage] = useState<ColoringPage | null>(null);
   const ct = (k: string, v?: Record<string, string | number>) => gameText(lang, k, v);
 
   useBackButton(page !== null, () => setPage(null));
 
   if (page) {
-    // Pages with a coloring-book drawing are painted freely with a marker
-    // (on trial on Easy); the rest stay paint by numbers.
-    const marker = markerLines(page.story.slug, level);
+    // Pages with a coloring-book drawing are painted freely with a marker;
+    // any page without one falls back to paint by numbers.
+    const marker = markerLines(page.story.slug);
     if (marker) {
       return (
         <MarkerBoard
@@ -74,12 +75,10 @@ export function ColoringGame({ onBack }: { onBack: () => void }) {
     >
       <StoryPicker
         level={level}
-        onLevel={setLevel}
-        describe={(id) => ct("color.colorsCount", { n: COLOR_COUNTS[id] })}
         stories={COLORING_PAGES.map((p) => p.story)}
         picture={(story) => {
           const p = COLORING_PAGES.find((x) => x.story === story)!;
-          const marker = markerLines(story.slug, level);
+          const marker = markerLines(story.slug);
           if (marker) {
             return (
               <span className="absolute inset-0 bg-white">

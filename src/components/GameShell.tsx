@@ -138,15 +138,18 @@ export function LevelList({
   picture,
   best,
   onPick,
+  compact = false,
 }: {
   describe: (id: DifficultyId, index: number) => string;
   picture: (id: DifficultyId, index: number) => ReactNode;
   best: (id: DifficultyId) => number;
   onPick: (id: DifficultyId) => void;
+  // Smaller cards, so all five levels fit on a phone screen at once.
+  compact?: boolean;
 }) {
   const { t } = useSettings();
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className={`grid lg:grid-cols-2 ${compact ? "gap-2" : "gap-4"}`}>
       {LEVEL_IDS.map((id, i) => (
         <button
           key={id}
@@ -154,18 +157,34 @@ export function LevelList({
             window.scrollTo(0, 0);
             onPick(id);
           }}
-          className="paint-box paint-wide flex w-full items-center gap-4 overflow-hidden p-4 text-left transition active:scale-[0.99]"
+          className={`paint-box paint-wide flex w-full items-center overflow-hidden text-left transition active:scale-[0.99] ${
+            compact ? "gap-3 px-3 py-2" : "gap-4 p-4"
+          }`}
         >
-          <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl" aria-hidden>
+          <span
+            className={`relative shrink-0 overflow-hidden rounded-xl ${compact ? "h-16 w-16" : "h-24 w-24"}`}
+            aria-hidden
+          >
             {picture(id, i)}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block font-display text-xl leading-snug">{t(`diff.${id}`)}</span>
+            <span className={`block font-display leading-snug ${compact ? "text-lg" : "text-xl"}`}>
+              {t(`diff.${id}`)}
+            </span>
             <span className="block text-[11px] font-semibold text-muted-foreground/90">
               {t(`diff.${id}.age`)}
             </span>
-            <span className="mt-0.5 block text-sm text-muted-foreground">{describe(id, i)}</span>
-            <Stars value={best(id)} className="mt-1.5 block text-base" />
+            {compact ? (
+              <span className="flex items-center justify-between gap-2">
+                <span className="truncate text-xs text-muted-foreground">{describe(id, i)}</span>
+                <Stars value={best(id)} className="shrink-0 text-sm" />
+              </span>
+            ) : (
+              <>
+                <span className="mt-0.5 block text-sm text-muted-foreground">{describe(id, i)}</span>
+                <Stars value={best(id)} className="mt-1.5 block text-base" />
+              </>
+            )}
           </span>
         </button>
       ))}
@@ -221,8 +240,9 @@ export function StoryPicker({
   onPick,
 }: {
   level: DifficultyId;
-  onLevel: (id: DifficultyId) => void;
-  describe: (id: DifficultyId) => string;
+  // Without onLevel the game has no levels and no tabs are shown.
+  onLevel?: (id: DifficultyId) => void;
+  describe?: (id: DifficultyId) => string;
   stories: Story[];
   badge: (story: Story) => ReactNode;
   // Thumbnail contents; the painting itself by default.
@@ -233,8 +253,10 @@ export function StoryPicker({
   const ordered = useMemo(() => storiesForLevel(stories, level), [stories, level]);
   return (
     <>
-      <LevelTabs level={level} onLevel={onLevel} />
-      <p className="mt-2 text-center text-xs italic text-muted-foreground">{describe(level)}</p>
+      {onLevel && <LevelTabs level={level} onLevel={onLevel} />}
+      {describe && (
+        <p className="mt-2 text-center text-xs italic text-muted-foreground">{describe(level)}</p>
+      )}
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {ordered.map((s) => (
           <button

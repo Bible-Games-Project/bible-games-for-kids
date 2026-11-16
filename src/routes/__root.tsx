@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SettingsProvider } from "../lib/i18n";
 import { AudioProvider } from "../lib/audio";
 import { RotateHint } from "../components/RotateHint";
+import { PaintTintFilters } from "../components/Token";
 
 function NotFoundComponent() {
   return (
@@ -132,6 +133,7 @@ function RootComponent() {
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <RotateHint />
+          <PaintTintFilters />
         </AudioProvider>
       </SettingsProvider>
     </QueryClientProvider>

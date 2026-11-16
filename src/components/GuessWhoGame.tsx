@@ -30,7 +30,7 @@ import {
   Stars,
 } from "@/components/GameShell";
 
-import { PlayerPawn, TOKEN_ORDER } from "@/components/Token";
+import { PLAYER_TINT, PlayerPawn, TOKEN_ORDER } from "@/components/Token";
 
 import guessBg from "@/assets/guesswho-bg.webp";
 import hintArt from "@/assets/ui/hint.webp";
@@ -268,6 +268,8 @@ function GuessBoard({
   const [setArea, area] = useElementSize();
   const asked = QUESTIONS.filter((q) => board.asked.has(q.trait));
   const shown = winner !== null ? boards[winner] : board;
+  // The cards are framed in the colour of the player whose board is shown.
+  const tint = PLAYER_TINT[TOKEN_ORDER[winner ?? turn]];
   const fit = fitGrid(shown.cards.length, area.width, area.height, 5 / 4, 8);
 
   const playersBar = (
@@ -277,9 +279,10 @@ function GuessBoard({
           {boards.map((b, i) => (
             <div
               key={i}
-              className={`paint-box paint-long paint-flat paint-thin flex items-center gap-2 px-3 py-1.5 text-sm font-semibold transition ${
+              className={`paint-box paint-long paint-flat paint-thin paint-tint flex items-center gap-2 px-3 py-1.5 text-sm font-semibold transition ${
                 i === turn && winner === null ? "paint-picked scale-[1.03]" : "opacity-70"
               }`}
+              style={{ ["--paint-tint" as string]: PLAYER_TINT[TOKEN_ORDER[i]] }}
             >
               <PlayerDot index={i} />
               <span className="min-w-0 flex-1 leading-tight">
@@ -321,10 +324,11 @@ function GuessBoard({
               {/* where the card stood */}
               <span className="absolute inset-x-[8%] bottom-0 h-[14%] rounded-[50%] bg-[oklch(0.3_0.05_50/0.22)] blur-[2px]" />
               <span
-                className={`paint-box paint-tall paint-flat paint-tiny absolute inset-0 flex origin-bottom flex-col p-[9%] transition-[transform,opacity] duration-700 ${
+                className={`paint-box paint-tall paint-flat paint-tiny paint-tint absolute inset-0 flex origin-bottom flex-col p-[9%] transition-[transform,opacity] duration-700 ${
                   isSecret ? "paint-picked" : ""
                 }`}
                 style={{
+                  ["--paint-tint" as string]: tint,
                   transform: isDown ? "rotateX(84deg)" : "none",
                   opacity: isDown ? 0.55 : 1,
                   transitionTimingFunction: isDown

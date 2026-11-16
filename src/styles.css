@@ -548,6 +548,12 @@
     --paint-w: 10px;
   }
 
+  /* A painted panel recoloured, e.g. in a player's colour: set --paint-tint
+     to a CSS filter (see PLAYER_TINT in Token.tsx). */
+  .paint-tint::after {
+    filter: var(--paint-tint);
+  }
+
   /* Opaque, without the blur: for panels that move in 3D, like cards. */
   .paint-flat::before {
     display: none;
@@ -569,9 +575,11 @@
     opacity: 1;
   }
 
-  /* The chosen painted panel glows gold around its edge. */
+  /* The chosen painted panel gets a teal edge, the colour of the main
+     buttons (a bright yellow glow clashed with the warm paintings). */
   .paint-picked {
-    filter: drop-shadow(0 0 3px oklch(0.85 0.17 80)) drop-shadow(0 0 9px oklch(0.88 0.16 85));
+    filter: drop-shadow(0 0 1.5px oklch(0.47 0.085 215)) drop-shadow(0 0 1.5px oklch(0.47 0.085 215))
+      drop-shadow(0 0 6px oklch(0.55 0.09 215 / 0.55));
   }
 }
 

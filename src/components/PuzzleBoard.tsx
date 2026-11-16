@@ -269,6 +269,8 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
   const initialElapsedRef = useRef(initialSession?.elapsedSec ?? 0);
   const [startTime] = useState(() => Date.now() - initialElapsedRef.current * 1000);
   const [done, setDone] = useState(false);
+  // The finished picture stays in view a moment before the result covers it.
+  const [showResult, setShowResult] = useState(false);
   const [stars, setStars] = useState(0);
   const [elapsed, setElapsed] = useState(initialElapsedRef.current);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -447,6 +449,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
         audio.playWin();
         onComplete(s, t);
       }, 300);
+      setTimeout(() => setShowResult(true), 2200);
     }
   }, [placedCount, total, hintsUsed, startTime, done, onComplete]);
 
@@ -627,7 +630,7 @@ export function PuzzleBoard({ puzzle, seed, initialSession, onComplete, onExit }
                   </div>
                 ))}
 
-            {done && (
+            {showResult && (
               <div className="absolute inset-0 flex animate-fade-in flex-col items-center justify-center bg-[oklch(0.97_0.015_80/0.9)] p-6 text-center">
                 <StarRow value={stars} className="mb-2 text-5xl" empty="text-[var(--color-gold)]/30" />
                 <h3 className="font-display text-2xl">{t("puzzle.done")}</h3>
