@@ -160,14 +160,22 @@ const CARD_TOP = 8; // the shelf's top padding, above the middle card
 // screens it grows around the centre as much as it needs to cover them.
 const HOME_BG = { ratio: 1080 / 1920, x: 0.5, y: 0.5 };
 
-function homeBackground() {
+// Where the parents' foreheads are in the painting (fraction of its height):
+// on wide screens, where the painting is zoomed in, it slides down when
+// needed so the title never covers their faces.
+const HOME_BG_FACES = 0.36;
+const TITLE_RATIO = 333 / 1000; // the title picture's height / width
+
+function homeBackground(titleBottom: number) {
   const W = window.innerWidth;
   const H = window.innerHeight;
   const { ratio, x, y } = HOME_BG;
   const h = Math.max(W / (2 * Math.min(x, 1 - x)) / ratio, H / (2 * Math.min(y, 1 - y)));
+  const centred = H / 2 - y * h;
+  const top = Math.min(0, Math.max(centred, titleBottom + 12 - HOME_BG_FACES * h));
   return {
     size: `auto ${h}px`,
-    position: `${W / 2 - x * h * ratio}px ${H / 2 - y * h}px`,
+    position: `${W / 2 - x * h * ratio}px ${top}px`,
   };
 }
 
@@ -640,20 +648,20 @@ function Home() {
   useEffect(() => {
     if (screen === "home") preloadGameArt();
   }, [screen]);
-  const [bg, setBg] = useState<ReturnType<typeof homeBackground> | null>(null);
-  useEffect(() => {
-    const place = () => setBg(homeBackground());
-    place();
-    window.addEventListener("resize", place);
-    return () => {
-      window.removeEventListener("resize", place);
-    };
-  }, []);
   // The games' pack and the title grow with the screen's width, until the
   // big middle card reaches the middle of the screen's height.
   const pack = useRef<HTMLDivElement>(null);
   const [uiScale, setUiScale] = useState(1);
   const [titleW, setTitleW] = useState(TITLE_W);
+  const [bg, setBg] = useState<ReturnType<typeof homeBackground> | null>(null);
+  useEffect(() => {
+    const place = () => setBg(homeBackground(HOME_EDGE + titleW * TITLE_RATIO));
+    place();
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("resize", place);
+    };
+  }, [titleW]);
   useEffect(() => {
     const el = pack.current;
     if (!el) return;
@@ -841,10 +849,20 @@ function Home() {
           fadeEnd={0}
         />
         {/* A warm shadow rising from the bottom so the game cards and
-            buttons stand out from the painting. */}
+            buttons stand out from the painting. On a computer or a tablet
+            held sideways (the maintainer's call) only a light band at the
+            very bottom, under the favourites. */}
         <div
           aria-hidden
-          className="pointer-events-none fixed inset-0 z-0"
+          className="pointer-events-none fixed inset-0 z-0 hidden wide:block"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 72%, oklch(0.24 0.055 42 / 0.32) 100%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 z-0 wide:hidden"
           style={{
             background:
               "linear-gradient(to bottom, transparent 38%, oklch(0.3 0.06 45 / 0.28) 58%, oklch(0.24 0.055 42 / 0.62) 82%, oklch(0.2 0.05 40 / 0.75) 100%)",
