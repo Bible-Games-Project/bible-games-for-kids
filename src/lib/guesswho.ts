@@ -129,6 +129,7 @@ const NAMES: Record<string, string[]> = {
     "이집트 총리 요셉",
     "يوسف حاكم مصر",
     "Mısır valisi Yusuf",
+    "埃及宰相约瑟",
   ],
   "baby-moses": [
     "Baby Moses",
@@ -143,6 +144,7 @@ const NAMES: Record<string, string[]> = {
     "아기 모세",
     "موسى الرضيع",
     "Bebek Musa",
+    "婴儿摩西",
   ],
   "baby-jesus": [
     "Baby Jesus",
@@ -157,6 +159,7 @@ const NAMES: Record<string, string[]> = {
     "아기 예수님",
     "الطفل يسوع",
     "Bebek İsa",
+    "婴儿耶稣",
   ],
   "boy-jesus": [
     "Jesus as a boy",
@@ -171,6 +174,7 @@ const NAMES: Record<string, string[]> = {
     "소년 예수님",
     "يسوع الصبي",
     "Çocuk İsa",
+    "少年耶稣",
   ],
   gabriel: [
     "Angel Gabriel",
@@ -185,6 +189,7 @@ const NAMES: Record<string, string[]> = {
     "가브리엘 천사",
     "الملاك جبرائيل",
     "Cebrail Melek",
+    "天使加百列",
   ],
   john: [
     "John the Baptist",
@@ -199,6 +204,7 @@ const NAMES: Record<string, string[]> = {
     "세례 요한",
     "يوحنا المعمدان",
     "Vaftizci Yahya",
+    "施洗约翰",
   ],
   "mary-bethany": [
     "Mary of Bethany",
@@ -213,6 +219,7 @@ const NAMES: Record<string, string[]> = {
     "베다니의 마리아",
     "مريم أخت مرثا",
     "Beytanyalı Meryem",
+    "伯大尼的马利亚",
   ],
   samaritan: [
     "The Good Samaritan",
@@ -227,6 +234,7 @@ const NAMES: Record<string, string[]> = {
     "선한 사마리아인",
     "السامري الصالح",
     "İyi Samiriyeli",
+    "好撒玛利亚人",
   ],
   father: [
     "The prodigal son's father",
@@ -241,6 +249,7 @@ const NAMES: Record<string, string[]> = {
     "탕자의 아버지",
     "أبو الابن الضال",
     "Müsrif oğulun babası",
+    "浪子的父亲",
   ],
   cleopas: [
     "Cleopas",
@@ -255,6 +264,7 @@ const NAMES: Record<string, string[]> = {
     "글로바",
     "كليوباس",
     "Kleopas",
+    "革流巴",
   ],
   sower: [
     "The sower",
@@ -269,6 +279,7 @@ const NAMES: Record<string, string[]> = {
     "씨 뿌리는 사람",
     "الزارع",
     "Ekinci",
+    "撒种的人",
   ],
   "temple-teacher": [
     "Temple teacher",
@@ -283,6 +294,7 @@ const NAMES: Record<string, string[]> = {
     "성전의 선생님",
     "معلّم الهيكل",
     "Tapınaktaki öğretmen",
+    "圣殿里的老师",
   ],
   "young-joseph": [
     "Joseph, son of Jacob",
@@ -297,6 +309,7 @@ const NAMES: Record<string, string[]> = {
     "야곱의 아들 요셉",
     "يوسف بن يعقوب",
     "Yakup'un oğlu Yusuf",
+    "雅各的儿子约瑟",
   ],
 };
 

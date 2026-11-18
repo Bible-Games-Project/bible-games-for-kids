@@ -1,4 +1,4 @@
-// Localized story titles + verse book names for all 50 scenes across 12 languages.
+// Localized story titles + verse book names for all 50 scenes across 13 languages.
 // Keys match SCENES[].slug in src/lib/puzzles.ts.
 import type { Lang } from "./translations";
 
@@ -641,8 +641,61 @@ const tr: SlugMap = {
   "mustard-seed": "Hardal Tohumu",
 };
 
+const zh: SlugMap = {
+  "blessing-children": "耶稣为小孩子祝福",
+  "walking-water": "耶稣在水面上行走",
+  "feeding-5000": "耶稣喂饱五千人",
+  "calming-storm": "耶稣平静风浪",
+  "good-samaritan": "好撒玛利亚人",
+  "noahs-ark": "挪亚方舟",
+  "creation": "神创造天地",
+  "moses-basket": "篮子里的婴孩摩西",
+  "david-shepherd": "牧童大卫",
+  "nativity": "耶稣降生",
+  "red-sea": "摩西分开红海",
+  "david-goliath": "大卫和歌利亚",
+  "burning-bush": "摩西和燃烧的荆棘",
+  "rainbow-promise": "神的彩虹应许",
+  "tower-babel": "巴别塔",
+  "passover-supper": "逾越节的晚餐",
+  "wedding-cana": "迦拿的婚宴",
+  "prodigal-son": "浪子回头",
+  "zacchaeus": "树上的撒该",
+  "jonah-fish": "约拿和大鱼",
+  "daniel-lions": "但以理在狮子坑中",
+  "joseph-coat": "约瑟的彩衣",
+  "sermon-mount": "登山宝训",
+  "baptism-jesus": "耶稣受洗",
+  "palm-sunday": "耶稣荣耀进城",
+  "adam-animals": "亚当给动物起名",
+  "ruth-fields": "路得、拿俄米和俄珥巴",
+  "abraham-stars": "亚伯拉罕数星星",
+  "annunciation": "天使报喜",
+  "wise-men": "博士来拜耶稣",
+  "lost-sheep": "迷失的羊",
+  "jacobs-ladder": "雅各的梯子",
+  "samuel-call": "撒母耳听见神的声音",
+  "elijah-ravens": "乌鸦喂养以利亚",
+  "good-shepherd": "耶稣是好牧人",
+  "heals-blind": "耶稣医治盲人",
+  "resurrection-morning": "复活的早晨",
+  "queen-esther": "以斯帖王后",
+  "joseph-forgives": "约瑟饶恕哥哥们",
+  "gideon-fleece": "基甸的羊毛",
+  "angels-shepherds": "天使向牧羊人显现",
+  "boy-temple": "少年耶稣在圣殿里",
+  "catch-fish": "神奇的捕鱼",
+  "bethlehem-journey": "前往伯利恒",
+  "sower-seed": "撒种的比喻",
+  "transfiguration": "耶稣登山变像",
+  "washes-feet": "耶稣为门徒洗脚",
+  "mary-martha": "马利亚和马大",
+  "emmaus": "以马忤斯的路上",
+  "mustard-seed": "芥菜种",
+};
+
 export const SCENE_TITLES: Record<Lang, SlugMap> = {
-  en, es, de, fr, it, pt, pl, ru, ja, ko, ar, tr,
+  en, es, de, fr, it, pt, pl, ru, ja, ko, ar, tr, zh,
 };
 
 // Book-name localization. Keys are canonical English book names as used in
@@ -721,9 +774,15 @@ const bTr: BookMap = {
   Daniel: "Daniel", Matthew: "Matta", Mark: "Markos", Luke: "Luka", John: "Yuhanna",
 };
 
+const bZh: BookMap = {
+  Genesis: "创世记", Exodus: "出埃及记", Ruth: "路得记", "1 Samuel": "撒母耳记上",
+  "1 Kings": "列王纪上", Esther: "以斯帖记", Judges: "士师记", Jonah: "约拿书",
+  Daniel: "但以理书", Matthew: "马太福音", Mark: "马可福音", Luke: "路加福音", John: "约翰福音",
+};
+
 const BOOKS: Record<Lang, BookMap> = {
   en: bEn, es: bEs, de: bDe, fr: bFr, it: bIt, pt: bPt,
-  pl: bPl, ru: bRu, ja: bJa, ko: bKo, ar: bAr, tr: bTr,
+  pl: bPl, ru: bRu, ja: bJa, ko: bKo, ar: bAr, tr: bTr, zh: bZh,
 };
 
 export function localizeSceneTitle(slug: string, lang: Lang): string {

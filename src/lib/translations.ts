@@ -1,5 +1,5 @@
 // Preloaded, offline localization dictionary for Bibledoo.
-// All 12 supported languages are bundled at build time — no runtime translation.
+// All 13 supported languages are bundled at build time — no runtime translation.
 
 export type Lang =
   | "en"
@@ -13,7 +13,8 @@ export type Lang =
   | "ja"
   | "ko"
   | "ar"
-  | "tr";
+  | "tr"
+  | "zh";
 
 export const LANGS: { id: Lang; label: string; flag: string }[] = [
   { id: "en", label: "English", flag: "🇺🇸" },
@@ -28,6 +29,8 @@ export const LANGS: { id: Lang; label: string; flag: string }[] = [
   { id: "ko", label: "한국어", flag: "🇰🇷" },
   { id: "ar", label: "العربية", flag: "🇸🇦" },
   { id: "tr", label: "Türkçe", flag: "🇹🇷" },
+  // Simplified Chinese. Kept last: seek-words.ts and guesswho.ts index names by LANGS order.
+  { id: "zh", label: "简体中文", flag: "🇨🇳" },
 ];
 
 export const RTL_LANGS: ReadonlySet<Lang> = new Set<Lang>(["ar"]);
@@ -1294,8 +1297,113 @@ const tr: Dict = {
   "rotate.title": "Oynamak için cihazını dik çevir",
 };
 
+const zh: Dict = {
+  "app.title": "儿童圣经游戏",
+  "home.prevGames": "上一组游戏",
+  "home.nextGames": "更多游戏",
+  "home.randomGame": "随机游戏",
+  "home.favorites": "我的最爱",
+  "home.favoritesHint": "把你最喜欢的游戏拖到这里",
+  "app.tagline": "故事书拼图",
+  "app.subtitle": "把新约故事里温馨的图画一块块拼起来。",
+  "tutorial.title": "太棒了！",
+  "tutorial.body": "每个拼图至少得到 ⭐，就能解锁这个难度的下一个故事。",
+  "tutorial.ok": "知道了",
+  "home.play": "开始",
+  "home.premium": "高级版",
+  "home.moreGames": "更多游戏",
+  "game.comingSoon": "即将推出",
+  "game.puzzles": "拼图",
+  "game.coloring": "涂色",
+  "game.dragdrop": "拖一拖",
+  "game.memory": "记忆翻牌",
+  "game.spot": "找不同",
+  "game.wordsearch": "找字游戏",
+  "game.quiz": "问答",
+  "game.guesswho": "猜猜我是谁",
+  "game.goose": "鹅棋",
+  "game.domino": "多米诺",
+  "game.parchis": "飞行棋",
+  "game.chess": "国际象棋",
+  "game.seek": "找一找",
+  "game.order": "谁先发生？",
+  "home.pieces": "块",
+  "home.resume": "继续",
+  "home.welcome": "欢迎来到这个安静的游戏天地。",
+  "select.title": "选择一个故事",
+  "select.back": "首页",
+  "puzzle.label": "拼图",
+  "settings.title": "设置",
+  "settings.sound": "声音",
+  "settings.on": "开",
+  "settings.off": "关",
+  "settings.language": "语言",
+  "settings.close": "关闭",
+  "onboard.welcome": "欢迎",
+  "onboard.choose": "请选择语言",
+  "onboard.continue": "继续",
+  "more.title": "更多游戏",
+  "more.subtitle": "圣经游戏计划的其他故事",
+  "more.back": "返回",
+  "more.play": "开始",
+  "premium.title": "完整版",
+  "premium.subtitle": "畅玩所有圣经故事",
+  "premium.body": "你正在玩 Bibledoo 的免费版。升级高级版，就能畅玩所有难度的每一个拼图，以及我们以后添加的所有新故事。",
+  "premium.feature1": "所有难度的全部拼图",
+  "premium.feature2": "现有和以后的所有故事",
+  "premium.feature3": "进度不受限制",
+  "premium.cta": "获取高级版",
+  "premium.thanks": "谢谢你！高级版已开通，尽情享受每一个故事吧。",
+  "premium.unlocked": "高级版已开通：畅玩所有圣经故事",
+  "premium.back": "返回",
+  "lock.title": "高级版故事",
+  "lock.body": "你已经完成了这一级的免费故事。升级高级版，就能畅玩每一个拼图。",
+  "lock.cta": "获取高级版",
+  "lock.later": "以后再说",
+  "lock.badge": "完整版",
+  "diff.easy": "简单",
+  "diff.easy-medium": "普通",
+  "diff.medium": "困难",
+  "diff.medium-hard": "专家",
+  "diff.hard": "大师",
+  "diff.easy.short": "简单",
+  "diff.easy-medium.short": "普通",
+  "diff.medium.short": "困难",
+  "diff.medium-hard.short": "专家",
+  "diff.hard.short": "大师",
+  "diff.easy.age": "3–4 岁",
+  "diff.easy-medium.age": "5–6 岁",
+  "diff.medium.age": "7–8 岁",
+  "diff.medium-hard.age": "9–10 岁",
+  "diff.hard.age": "11–12 岁",
+  "diff.easy.desc": "轻松的入门拼图",
+  "diff.easy-medium.desc": "多拼几块试试看",
+  "diff.medium.desc": "给好奇的小小建造者",
+  "diff.medium-hard.desc": "有成就感的挑战",
+  "diff.hard.desc": "给有耐心的心和手",
+  "settings.dev": "游戏开发者模式",
+  "settings.devHint": "为测试开放所有拼图。你的真实进度会安全保留。",
+  "settings.reset": "重置游戏数据",
+  "settings.resetConfirm": "这会永久删除所有进度、保存的拼图和初次设置。要继续吗？",
+  "settings.resetDone": "游戏数据已重置。",
+  "puzzle.menu": "菜单",
+  "puzzle.hint": "提示",
+  "puzzle.allPlaced": "所有拼块都放好了！",
+  "puzzle.done": "拼得真漂亮！",
+  "puzzle.continue": "继续",
+  "more.game.didactic-jesus.name": "Didactic Jesus Game",
+  "more.game.didactic-jesus.desc": "在第一人称角色扮演冒险中体验耶稣的一生。",
+  "more.game.lost-sheep.name": "迷失的羊",
+  "more.game.lost-sheep.desc": "在充满希望与成长的温暖旅程中，认识耶稣的比喻。",
+  "more.game.bible-unlocked.name": "Bible Explorer",
+  "more.game.bible-unlocked.desc": "探索圣经中最伟大的故事，选择你自己的道路。",
+  "more.game.true-christ.name": "True Christ",
+  "more.game.true-christ.desc": "在独一无二的 3D 体验中，活出耶稣的一生。",
+  "rotate.title": "把设备竖过来就能玩啦",
+};
+
 export const STRINGS: Record<Lang, Dict> = {
-  en, es, de, fr, it, pt, pl, ru, ja, ko, ar, tr,
+  en, es, de, fr, it, pt, pl, ru, ja, ko, ar, tr, zh,
 };
 
 // Shorter game names for the home cards, where a name fits in at most 11

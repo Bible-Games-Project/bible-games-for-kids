@@ -23,7 +23,8 @@ function isLang(v: unknown): v is Lang {
 function applyHtmlLangDir(lang: Lang) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  root.lang = lang;
+  // "zh-Hans" makes browsers pick Simplified Chinese glyphs (not Japanese ones).
+  root.lang = lang === "zh" ? "zh-Hans" : lang;
   root.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
 }
 

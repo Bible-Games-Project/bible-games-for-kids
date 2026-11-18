@@ -1,4 +1,4 @@
-// Localization for the Memory game across all 12 supported languages.
+// Localization for the Memory game across all 13 supported languages.
 // Kept self-contained so it never touches the existing Puzzle localization.
 import type { Lang, Dict } from "./translations";
 import { STRINGS as CORE } from "./translations";
@@ -267,8 +267,30 @@ const tr: Dict = {
   "mem.pairOne": "1 çift",
 };
 
+const zh: Dict = {
+  "mem.chooseLevel": "选择关卡",
+  "mem.pairsCount": "{n} 对",
+  "mem.instruction": "翻开两张牌，找出一样的图画",
+  "mem.moves": "步数",
+  "mem.time": "时间",
+  "mem.complete": "你找到了所有的牌对！",
+  "mem.replay": "再玩一次",
+  "mem.levels": "关卡",
+  "mem.hidden": "背面朝上的牌",
+  "mem.scrollDown": "显示更多牌",
+  "mem.scrollUp": "回到顶部",
+  "mem.howManyPlayers": "几个人玩？",
+  "mem.playersOne": "1 人",
+  "mem.playersMany": "{n} 人",
+  "mem.player": "玩家 {n}",
+  "mem.turn": "轮到{name}了",
+  "mem.wins": "{name}赢了！",
+  "mem.tie": "平局！",
+  "mem.pairOne": "1 对",
+};
+
 export const MEM_STRINGS: Record<Lang, Dict> = {
-  en, es, de, fr, it, pt, pl, ru, ja, ko, ar, tr,
+  en, es, de, fr, it, pt, pl, ru, ja, ko, ar, tr, zh,
 };
 
 // Look up a mem.* key, falling back to English, then to the core dictionary
