@@ -1,18 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useSettings } from "@/lib/i18n";
 
-import s1 from "@/assets/music/Song_1.mp3.asset.json";
-import s2 from "@/assets/music/Song_2.mp3.asset.json";
-import s3 from "@/assets/music/Song_3.mp3.asset.json";
-import s4 from "@/assets/music/Song_4.mp3.asset.json";
-import s6 from "@/assets/music/Song_6.mp3.asset.json";
-import s7 from "@/assets/music/Song_7.mp3.asset.json";
-import s8 from "@/assets/music/Song_8.mp3.asset.json";
-import s9 from "@/assets/music/Song_9.mp3.asset.json";
-import s10 from "@/assets/music/Song_10.mp3.asset.json";
-
-// Scalable: add more entries here and the system picks them up automatically.
-const TRACKS: string[] = [s1, s2, s3, s4, s6, s7, s8, s9, s10].map((a) => a.url);
+// Background music: every Song_*.mp3 in src/assets/music is bundled with the
+// game (so it plays on the public site and in the app, offline too). To add a
+// song, drop the file in that folder; nothing else to change.
+const TRACKS: string[] = Object.values(
+  import.meta.glob<string>("../assets/music/*.mp3", {
+    eager: true,
+    query: "?url",
+    import: "default",
+  }),
+);
 
 export type MusicScope = "menu" | "puzzle";
 
@@ -162,12 +160,25 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         el.volume = Math.min(1, v);
       }
     };
+    // A song that can't load is skipped (but never loop forever if none can).
+    let failures = 0;
+    const onError = () => {
+      if (++failures >= playlistRef.current.length) return;
+      onEnded();
+    };
+    const onPlaying = () => {
+      failures = 0;
+    };
     el.addEventListener("ended", onEnded);
+    el.addEventListener("error", onError);
+    el.addEventListener("playing", onPlaying);
     el.addEventListener("timeupdate", onTimeUpdate);
     el.src = playlistRef.current[0];
 
     return () => {
       el.removeEventListener("ended", onEnded);
+      el.removeEventListener("error", onError);
+      el.removeEventListener("playing", onPlaying);
       el.removeEventListener("timeupdate", onTimeUpdate);
       el.pause();
       audioRef.current = null;
