@@ -183,7 +183,7 @@ function homeBackground(titleBottom: number) {
 // corner, level with it, both at the games' scale; the title gives way
 // rather than touch the gear.
 const HOME_EDGE = 12; // the gear's and the title's distance from the top
-const GEAR = 40;
+const GEAR = 46;
 
 function GameTile({
   game,
@@ -947,7 +947,7 @@ function Home() {
       <ScreenFade />
       <BedtimeBackdrop image={puzzlesBg} position="center 40%" fadeEnd={30} />
       <div className="relative z-10 w-full">
-        {gearButton(48, 16)}
+        {gearButton(54, 14)}
 
         <header className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-6 pb-2 lg:max-w-6xl 2xl:max-w-7xl">
           <BackButton onClick={() => setScreen("home")} label={t("select.back")} />
