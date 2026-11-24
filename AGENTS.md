@@ -137,7 +137,8 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
 - Music: every mp3 in `src/assets/music/` is bundled and played in a new
   random order each launch. Never use Lovable-hosted `*.asset.json` files:
   they 404 outside Lovable.
-- /privacy (src/routes/privacy.tsx, English/Spanish/Catalan, linked from
+- /privacy (src/routes/privacy.tsx, text in src/lib/privacy-i18n.ts: every
+  game language plus Catalan, opens in the game's language; linked from
   Settings) is the privacy URL for the store listings. It promises no data
   collection, no ads, no analytics, no purchases, no network use: update it
   before shipping anything that changes that. store/ holds store listing
