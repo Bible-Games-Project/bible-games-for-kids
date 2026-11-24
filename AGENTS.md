@@ -50,12 +50,6 @@ Everything you write into the repository MUST be in English:
 Only end-user-facing content may be localized: UI strings in i18n files, store
 listings, and marketing copy.
 
-The game ships in 13 languages (`LANGS` in src/lib/translations.ts). A new
-language needs an entry in every dictionary: translations.ts, games-i18n.ts,
-memory-i18n.ts, scenes-i18n.ts (titles and books), and a name appended to the
-positional arrays in seek-words.ts and guesswho.ts (they follow LANGS order,
-so new languages go at the END of LANGS). Every new UI key needs all 13.
-
 The maintainer communicates in Spanish. You may reply in Spanish in
 conversation, but anything committed to the repository stays in English.
 
