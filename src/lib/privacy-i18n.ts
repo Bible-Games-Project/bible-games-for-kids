@@ -8,6 +8,10 @@ export type PolicyLang = Lang | "ca";
 
 export const UPDATED = "2026-11-24";
 
+// Shown in the Contact section of every language, as plain text (no mailto
+// link: Kids-category apps must not open other apps without a parental gate).
+export const CONTACT_EMAIL = "biblegamesproject@gmail.com";
+
 type Policy = {
   name: string;
   title: string;
@@ -57,7 +61,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "Contact",
-        "If you have any question about this policy, write to us using the developer contact shown on the game's page in the App Store or Google Play.",
+        "If you have any question about this policy, write to us at biblegamesproject@gmail.com.",
       ],
     ],
   },
@@ -101,7 +105,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "Contacto",
-        "Si tienes cualquier pregunta sobre esta política, escríbenos al contacto del desarrollador que aparece en la página del juego en el App Store o en Google Play.",
+        "Si tienes cualquier pregunta sobre esta política, escríbenos a biblegamesproject@gmail.com.",
       ],
     ],
   },
@@ -145,7 +149,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "Contacte",
-        "Si tens qualsevol pregunta sobre aquesta política, escriu-nos al contacte del desenvolupador que apareix a la pàgina del joc a l'App Store o a Google Play.",
+        "Si tens qualsevol pregunta sobre aquesta política, escriu-nos a biblegamesproject@gmail.com.",
       ],
     ],
   },
@@ -189,7 +193,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "Kontakt",
-        "Wenn du Fragen zu dieser Erklärung hast, schreib uns über den Entwicklerkontakt auf der Seite des Spiels im App Store oder bei Google Play.",
+        "Wenn du Fragen zu dieser Erklärung hast, schreib uns an biblegamesproject@gmail.com.",
       ],
     ],
   },
@@ -233,7 +237,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "Contact",
-        "Pour toute question sur cette politique, écris-nous via le contact du développeur indiqué sur la page du jeu dans l'App Store ou sur Google Play.",
+        "Pour toute question sur cette politique, écris-nous à biblegamesproject@gmail.com.",
       ],
     ],
   },
@@ -275,10 +279,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
         "Modifiche",
         "Se una versione futura del gioco cambierà qualcosa di tutto ciò (per esempio aggiungendo acquisti facoltativi), aggiorneremo questa pagina prima dell'uscita di quella versione e cambieremo la data in alto.",
       ],
-      [
-        "Contatti",
-        "Se hai domande su questa informativa, scrivici tramite il contatto dello sviluppatore indicato nella pagina del gioco nell'App Store o su Google Play.",
-      ],
+      ["Contatti", "Se hai domande su questa informativa, scrivici a biblegamesproject@gmail.com."],
     ],
   },
   pt: {
@@ -321,7 +322,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "Contato",
-        "Se tiver qualquer dúvida sobre esta política, escreva para o contato do desenvolvedor que aparece na página do jogo na App Store ou no Google Play.",
+        "Se tiver qualquer dúvida sobre esta política, escreva para biblegamesproject@gmail.com.",
       ],
     ],
   },
@@ -365,7 +366,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "Kontakt",
-        "Jeśli masz pytania dotyczące tej polityki, napisz do nas przez kontakt dewelopera podany na stronie gry w App Store lub Google Play.",
+        "Jeśli masz pytania dotyczące tej polityki, napisz do nas na adres biblegamesproject@gmail.com.",
       ],
     ],
   },
@@ -409,7 +410,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "Контакты",
-        "Если у вас есть вопросы об этой политике, напишите нам через контакт разработчика, указанный на странице игры в App Store или Google Play.",
+        "Если у вас есть вопросы об этой политике, напишите нам на biblegamesproject@gmail.com.",
       ],
     ],
   },
@@ -453,7 +454,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "お問い合わせ",
-        "このポリシーについてご質問があれば、App Store または Google Play のゲームのページに記載されている開発者の連絡先までご連絡ください。",
+        "このポリシーについてご質問があれば、biblegamesproject@gmail.com までご連絡ください。",
       ],
     ],
   },
@@ -495,10 +496,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
         "변경 사항",
         "앞으로 게임의 새 버전에서 이 내용이 바뀌면(예: 선택형 구매 추가) 그 버전을 출시하기 전에 이 페이지를 업데이트하고 위의 날짜를 바꾸겠습니다.",
       ],
-      [
-        "문의",
-        "이 방침에 대해 궁금한 점이 있으면 App Store 또는 Google Play의 게임 페이지에 나와 있는 개발자 연락처로 문의해 주세요.",
-      ],
+      ["문의", "이 방침에 대해 궁금한 점이 있으면 biblegamesproject@gmail.com 으로 문의해 주세요."],
     ],
   },
   ar: {
@@ -539,10 +537,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
         "التغييرات",
         "إذا غيّر إصدار مستقبلي من اللعبة أيّاً من ذلك (مثل إضافة مشتريات اختيارية)، فسنحدّث هذه الصفحة قبل صدور ذلك الإصدار ونغيّر التاريخ في الأعلى.",
       ],
-      [
-        "التواصل",
-        "إذا كان لديك أي سؤال عن هذه السياسة، فراسلنا عبر بيانات التواصل مع المطوّر الظاهرة في صفحة اللعبة على App Store أو Google Play.",
-      ],
+      ["التواصل", "إذا كان لديك أي سؤال عن هذه السياسة، فراسلنا على biblegamesproject@gmail.com."],
     ],
   },
   tr: {
@@ -585,7 +580,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "İletişim",
-        "Bu politika hakkında bir sorun varsa, App Store veya Google Play'deki oyun sayfasında yer alan geliştirici iletişim bilgileri üzerinden bize yaz.",
+        "Bu politika hakkında bir sorun varsa bize biblegamesproject@gmail.com adresinden yaz.",
       ],
     ],
   },
@@ -626,7 +621,7 @@ export const POLICY: Record<PolicyLang, Policy> = {
       ],
       [
         "联系我们",
-        "如果你对本政策有任何疑问,请通过 App Store 或 Google Play 游戏页面上显示的开发者联系方式与我们联系。",
+        "如果你对本政策有任何疑问,请发送邮件至 biblegamesproject@gmail.com 与我们联系。",
       ],
     ],
   },

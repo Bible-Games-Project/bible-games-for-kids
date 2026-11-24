@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSettings, LANGS } from "@/lib/i18n";
-import { POLICY, UPDATED, type PolicyLang } from "@/lib/privacy-i18n";
+import { CONTACT_EMAIL, POLICY, UPDATED, type PolicyLang } from "@/lib/privacy-i18n";
 
 // Privacy policy, linked from Settings and used as the privacy URL in the
 // App Store and Google Play listings (https://<site>/privacy). The text is in
@@ -77,7 +77,18 @@ function PrivacyPage() {
           {p.sections.map(([heading, body]) => (
             <section key={heading} className="mt-6">
               <h2 className="font-display text-xl">{heading}</h2>
-              <p className="mt-1 leading-relaxed">{body}</p>
+              <p className="mt-1 leading-relaxed">
+                {body.split(CONTACT_EMAIL).map((part, i) => (
+                  <span key={i}>
+                    {i > 0 && (
+                      <bdi dir="ltr" className="select-all font-bold">
+                        {CONTACT_EMAIL}
+                      </bdi>
+                    )}
+                    {part}
+                  </span>
+                ))}
+              </p>
             </section>
           ))}
         </article>
