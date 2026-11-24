@@ -98,7 +98,8 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   seen from above. The palette lives in `.theme-bedtime` / `:root` in
   `src/styles.css` (deep brown text, parchment boxes, teal main buttons, gold
   highlights); avoid hard-coding other colours in components. Fonts: Baloo 2
-  for headings, Nunito for body (Google Fonts link in `__root.tsx`).
+  for headings, Nunito for body (bundled with @fontsource in styles.css, so
+  the app works offline).
 - Home game cards use 4:5 crops (512x640) of each game's painting, so the
   card and the game's background match.
 - The container has no Python, ImageMagick or curl. For image work, install
@@ -133,8 +134,14 @@ bgp-admin at `templates/agent-docs/`, so ask before adding it.
   not found); that is local only. The check is three "✓ built in" lines.
 - Player-coloured painted panels: add `paint-tint` plus
   `--paint-tint: PLAYER_TINT[color]` (SVG duotone filters in Token.tsx).
-- Background music is broken on the Cloudflare site: `src/assets/music/*.asset.json`
-  point to Lovable's `/__l5e/` file host, which only exists on Lovable.
+- Music: every mp3 in `src/assets/music/` is bundled and played in a new
+  random order each launch. Never use Lovable-hosted `*.asset.json` files:
+  they 404 outside Lovable.
+- /privacy (src/routes/privacy.tsx, English/Spanish/Catalan, linked from
+  Settings) is the privacy URL for the store listings. It promises no data
+  collection, no ads, no analytics, no purchases, no network use: update it
+  before shipping anything that changes that. store/ holds store listing
+  images (not part of the build).
 - All 50 story paintings are in the new gouache storybook style (feeding-5000 since Nov 2026; red-sea is
   the maintainer's own Moses painting, not generated). The maintainer wants a
   flat, grainy, hand-made look like the reference — not Disney/Pixar, not

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useSettings, LANGS } from "@/lib/i18n";
 import { CheckIcon, CrossIcon } from "@/components/Icons";
 
@@ -80,6 +81,15 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             })}
           </div>
         </div>
+
+        {/* Privacy policy: the stores require it to be reachable inside the app.
+            An in-app page, so no parental gate is needed (Kids category). */}
+        <Link
+          to="/privacy"
+          className="mt-4 block text-center text-sm font-semibold text-foreground/70 underline underline-offset-4"
+        >
+          {t("settings.privacy")}
+        </Link>
 
         {/* Developer Mode: only for the maintainer (see devTools) */}
         {devTools && (
